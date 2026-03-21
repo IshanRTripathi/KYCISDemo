@@ -1,0 +1,45 @@
+{
+  "validationRules": {
+    "email": {
+      "required": true,
+      "pattern": "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$"
+    },
+    "phone": {
+      "required": true,
+      "minLength": 10,
+      "maxLength": 10,
+      "pattern": "^\\d{10}$"
+    },
+    "pan": {
+      "required": true,
+      "pattern": "^[A-Z]{5}\\d{4}[A-Z]$"
+    },
+    "aadhaar": {
+      "required": true,
+      "length": 12,
+      "pattern": "^\\d{12}$"
+    },
+    "dateOfBirth": {
+      "required": true,
+      "minAge": 18,
+      "maxAge": 100
+    }
+  },
+  "mockScenarios": {
+    "responseDelays": {
+      "default": {
+        "min": 1000,
+        "max": 3000
+      }
+    },
+    "successConditions": {},
+    "validOtpCodes": ["123456", "000000"]
+  },
+  "errorSimulations": {
+    "scenarios": []
+  },
+  "featureFlags": {
+    "persistenceEnabled": true,
+    "errorSimulationEnabled": true
+  }
+}

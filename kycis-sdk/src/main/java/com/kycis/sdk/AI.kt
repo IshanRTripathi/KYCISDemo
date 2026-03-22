@@ -17,6 +17,7 @@ object AI {
     private val runtime = SdkRuntime()
     private var lifecycleTracker: LifecycleTracker? = null
     private var statusListener: ((SdkStatus) -> Unit)? = null
+    private var voiceSessionListener: ((VoiceSessionResult) -> Unit)? = null
 
     fun init(apiKey: String, userId: String, policy: RuntimePolicy = RuntimePolicy()) {
         require(apiKey.isNotBlank()) { "apiKey cannot be blank" }
@@ -33,6 +34,8 @@ object AI {
             policy = policy,
         )
         statusListener?.let { runtime.setStatusListener(it) }
+        voiceSessionListener?.let { runtime.setVoiceSessionListener(it) }
+        // TODO: bind lifecycle/navigation observers and passive behavior tracking.
     }
 
     fun setUser(id: String, phone: String? = null) {
@@ -77,9 +80,41 @@ object AI {
         if (initialized) runtime.setStatusListener(listener)
     }
 
+    /**
+     * Set a listener to receive voice session credentials when the assistant session starts.
+     * Use the result to connect to the LiveKit room (token, livekitUrl, livekitRoom).
+     */
+    fun setVoiceSessionListener(listener: ((VoiceSessionResult) -> Unit)?) {
+        voiceSessionListener = listener
+        if (initialized) runtime.setVoiceSessionListener(listener)
+    }
+
     internal fun startAssistantInternal() {
         requireInitialized()
         runtime.startAssistantSession()
+    }
+
+    /**
+     * Manually start the voice assistant session. Use with [setVoiceSessionListener] to receive
+     * credentials and connect to the LiveKit room.
+     */
+    fun startAssistant() {
+        startAssistantInternal()
+    }
+
+    /**
+     * Forward permission results from your Activity. Required for voice session RECORD_AUDIO request.
+     * Add to your Activity:
+     * ```
+     * override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+     *     if (AI.onRequestPermissionsResult(requestCode, permissions, grantResults)) return
+     *     super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+     * }
+     * ```
+     * @return true if the SDK consumed the result (for voice permission)
+     */
+    fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray): Boolean {
+        return runtime.handlePermissionResult(requestCode, permissions, grantResults)
     }
 
     internal fun stopAssistantInternal() {

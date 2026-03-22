@@ -1,6 +1,12 @@
 package com.kycis.sdk.core
 
-import java.time.Instant
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Handler
+import android.os.Looper
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.fragment.app.FragmentActivity
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
@@ -24,6 +30,8 @@ data class TriggerDecision(
     val action: String,
 )
 
+private const val ACTION_START_VOICE_AGENT = "start_voice_agent"
+
 internal class SdkRuntime {
     private var context: RuntimeContext? = null
     private var kycStep: String? = null
@@ -38,6 +46,9 @@ internal class SdkRuntime {
     private val scheduler = Executors.newSingleThreadScheduledExecutor()
     private var passiveEvalTask: ScheduledFuture<*>? = null
     private var statusListener: ((SdkStatus) -> Unit)? = null
+    private var voiceSessionListener: ((com.kycis.sdk.VoiceSessionResult) -> Unit)? = null
+    private var pendingVoiceProceed: (() -> Unit)? = null
+    private val mainHandler = Handler(Looper.getMainLooper())
 
     fun initialize(context: RuntimeContext, policy: RuntimePolicy) {
         this.context = context
@@ -51,8 +62,13 @@ internal class SdkRuntime {
         statusListener = listener
     }
 
+    fun setVoiceSessionListener(listener: ((com.kycis.sdk.VoiceSessionResult) -> Unit)?) {
+        voiceSessionListener = listener
+    }
+
     fun setUser(id: String, phone: String?) {
         if (!started) return
+        context = context?.copy(userId = id)
         backendClient.setUser(id = id, phone = phone)
     }
 
@@ -85,47 +101,28 @@ internal class SdkRuntime {
             code = code,
         )
         if (!policy.triggerSettings.autoTriggerEnabled) return
-        val errorSignals = if (policy.triggerSettings.includeErrorSignals) listOf(code) else emptyList()
-        val screenSignal = if (policy.triggerSettings.includeStepHints) {
-            kycStep ?: passiveSnapshot.currentScreen
-        } else {
-            null
-        }
-        val timeSpentSignal = if (policy.triggerSettings.includeTimeSpentSignals) {
-            passiveSnapshot.timeSpentSeconds
-        } else {
-            null
-        }
-        val idleSignal = if (policy.triggerSettings.includeIdleSignals) {
-            passiveSnapshot.idleSeconds
-        } else {
-            null
-        }
+        val signals = buildTriggerSignals(
+            passiveSnapshot = passiveSnapshot,
+            errors = listOf(code),
+            includeErrors = policy.triggerSettings.includeErrorSignals,
+        )
         backendClient.evaluateTrigger(
             userId = userContext.userId,
             sessionId = userContext.sessionId,
-            signals = TriggerSignals(
-                screen = screenSignal,
-                timeSpent = timeSpentSignal,
-                errors = errorSignals,
-                idleSeconds = idleSignal,
-            ),
+            signals = signals,
             onResult = { decision ->
-                if (decision.trigger && decision.action == "start_voice_agent") {
-                    onTriggerDecision(decision)
+                if (decision.trigger && decision.action == ACTION_START_VOICE_AGENT) {
+                    mainHandler.post { onTriggerDecision(decision) }
                 }
-            }
+            },
         )
-        if (properties.isNotEmpty()) {
-            // Placeholder for richer signal mapping.
-        }
     }
 
     private fun onTriggerDecision(decision: TriggerDecision) {
         when (policy.triggerStartMode) {
             TriggerStartMode.IMMEDIATE -> startAssistantSession()
             TriggerStartMode.COOLDOWN -> {
-                val now = Instant.now().epochSecond
+                val now = System.currentTimeMillis() / 1000
                 if (now - lastTriggerAtEpochSeconds >= policy.minTriggerIntervalSeconds) {
                     lastTriggerAtEpochSeconds = now
                     startAssistantSession()
@@ -148,11 +145,88 @@ internal class SdkRuntime {
     fun startAssistantSession() {
         if (!started) return
         val userContext = context ?: return
-        backendClient.startAssistant(
-            userId = userContext.userId,
-            sessionId = userContext.sessionId,
-            screen = kycStep,
-        )
+        val activity = uiBridge.getCurrentActivity()
+        val hasPermission = activity != null &&
+            ContextCompat.checkSelfPermission(activity, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
+
+        fun proceedWithBackend() {
+            backendClient.startAssistant(
+                userId = userContext.userId,
+                sessionId = userContext.sessionId,
+                screen = kycStep,
+            ) { result ->
+                mainHandler.post {
+                    if (result != null && result.isValid) {
+                        voiceSessionListener?.invoke(result)
+                    }
+                }
+            }
+        }
+
+        when {
+            hasPermission -> proceedWithBackend()
+            activity is FragmentActivity -> {
+                val fragmentActivity = activity
+                if (fragmentActivity.supportFragmentManager.findFragmentByTag(PermissionRequestFragment.TAG) != null) {
+                    statusListener?.invoke(SdkStatus(code = SdkStatusCode.ERROR, message = "Permission request already in progress."))
+                    return
+                }
+                VoicePermissionCallbackHolder.callback = { granted ->
+                    if (granted) proceedWithBackend()
+                    else {
+                        statusListener?.invoke(
+                            SdkStatus(
+                                code = SdkStatusCode.ERROR,
+                                message = "RECORD_AUDIO permission denied. Voice session requires microphone access.",
+                            ),
+                        )
+                    }
+                }
+                fragmentActivity.runOnUiThread {
+                    fragmentActivity.supportFragmentManager.beginTransaction()
+                        .add(PermissionRequestFragment(), PermissionRequestFragment.TAG)
+                        .commit()
+                }
+            }
+            activity != null -> {
+                pendingVoiceProceed = { proceedWithBackend() }
+                activity.runOnUiThread {
+                    ActivityCompat.requestPermissions(
+                        activity,
+                        arrayOf(Manifest.permission.RECORD_AUDIO),
+                        REQUEST_CODE_RECORD_AUDIO,
+                    )
+                }
+            }
+            else -> {
+                statusListener?.invoke(
+                    SdkStatus(
+                        code = SdkStatusCode.ERROR,
+                        message = "No Activity for RECORD_AUDIO permission. Call AI.attach(application) and ensure an Activity is visible.",
+                    ),
+                )
+            }
+        }
+    }
+
+    fun handlePermissionResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray): Boolean {
+        if (requestCode != REQUEST_CODE_RECORD_AUDIO) return false
+        pendingVoiceProceed?.let { proceed ->
+            pendingVoiceProceed = null
+            val idx = permissions.indexOf(Manifest.permission.RECORD_AUDIO)
+            val granted = idx >= 0 && grantResults.getOrElse(idx) { PackageManager.PERMISSION_DENIED } == PackageManager.PERMISSION_GRANTED
+            if (granted) proceed()
+            else {
+                statusListener?.invoke(
+                    SdkStatus(
+                        code = SdkStatusCode.ERROR,
+                        message = "RECORD_AUDIO permission denied. Voice session requires microphone access.",
+                    ),
+                )
+            }
+            return true
+        }
+        return false
     }
 
     fun stopAssistantSession() {
@@ -198,29 +272,41 @@ internal class SdkRuntime {
         if (!policy.triggerSettings.includeTimeSpentSignals && !policy.triggerSettings.includeIdleSignals) return
         val userContext = context ?: return
         val snapshot = passiveTracker.snapshot()
-        val screenSignal = if (policy.triggerSettings.includeStepHints) {
-            kycStep ?: snapshot.currentScreen
-        } else {
-            null
-        }
-        val timeSpentSignal = if (policy.triggerSettings.includeTimeSpentSignals) snapshot.timeSpentSeconds else null
-        val idleSignal = if (policy.triggerSettings.includeIdleSignals) snapshot.idleSeconds else null
-        if (screenSignal == null && timeSpentSignal == null && idleSignal == null) return
+        val signals = buildTriggerSignals(
+            passiveSnapshot = snapshot,
+            errors = emptyList(),
+            includeErrors = false,
+        )
+        if (signals.screen == null && signals.timeSpent == null && signals.idleSeconds == null) return
 
         backendClient.evaluateTrigger(
             userId = userContext.userId,
             sessionId = userContext.sessionId,
-            signals = TriggerSignals(
-                screen = screenSignal,
-                timeSpent = timeSpentSignal,
-                errors = emptyList(),
-                idleSeconds = idleSignal,
-            ),
+            signals = signals,
             onResult = { decision ->
-                if (decision.trigger && decision.action == "start_voice_agent") {
-                    onTriggerDecision(decision)
+                if (decision.trigger && decision.action == ACTION_START_VOICE_AGENT) {
+                    mainHandler.post { onTriggerDecision(decision) }
                 }
             },
+        )
+    }
+
+    private fun buildTriggerSignals(
+        passiveSnapshot: PassiveSnapshot,
+        errors: List<String>,
+        includeErrors: Boolean,
+    ): TriggerSignals {
+        val errorSignals = if (includeErrors) errors else emptyList()
+        val screenSignal = if (policy.triggerSettings.includeStepHints) {
+            kycStep ?: passiveSnapshot.currentScreen
+        } else null
+        val timeSpentSignal = if (policy.triggerSettings.includeTimeSpentSignals) passiveSnapshot.timeSpentSeconds else null
+        val idleSignal = if (policy.triggerSettings.includeIdleSignals) passiveSnapshot.idleSeconds else null
+        return TriggerSignals(
+            screen = screenSignal,
+            timeSpent = timeSpentSignal,
+            errors = errorSignals,
+            idleSeconds = idleSignal,
         )
     }
 

@@ -17,6 +17,7 @@ import com.kycis.sdk.AI
 // Route constants
 object Routes {
     const val HOME = "home"
+    const val SDK_DEBUG = "sdk_debug"
     const val LOGIN = "login"
     const val PERSONAL_DETAILS = "personal_details"
     const val PAN_ENTRY = "pan_entry"
@@ -46,6 +47,7 @@ fun KycNavGraph(
             HomeScreen(
                 onActivityClick = { activity ->
                     when (activity.id) {
+                        "sdk_debug" -> navController.navigate(Routes.SDK_DEBUG)
                         "kyc" -> navController.navigate(Routes.PERSONAL_DETAILS)
                         "pan" -> navController.navigate(Routes.PAN_ENTRY)
                         "aadhaar" -> navController.navigate(Routes.AADHAAR_ENTRY)
@@ -56,6 +58,10 @@ fun KycNavGraph(
                     }
                 }
             )
+        }
+
+        composable(Routes.SDK_DEBUG) {
+            SdkDebugScreen(onBack = { navController.popBackStack() })
         }
 
         // Login Screen

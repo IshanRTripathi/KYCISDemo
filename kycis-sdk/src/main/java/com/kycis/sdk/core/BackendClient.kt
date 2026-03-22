@@ -14,7 +14,12 @@ internal interface BackendClient {
         signals: TriggerSignals,
         onResult: (TriggerDecision) -> Unit,
     )
-    fun startAssistant(userId: String, sessionId: String, screen: String?)
+    fun startAssistant(
+        userId: String,
+        sessionId: String,
+        screen: String?,
+        onResult: (com.kycis.sdk.VoiceSessionResult?) -> Unit,
+    )
     fun stopAssistant(userId: String, sessionId: String)
 }
 
@@ -37,7 +42,14 @@ internal class NoOpBackendClient : BackendClient {
         onResult(TriggerDecision(trigger = false, reason = "not_wired", action = "none"))
     }
 
-    override fun startAssistant(userId: String, sessionId: String, screen: String?) = Unit
+    override fun startAssistant(
+        userId: String,
+        sessionId: String,
+        screen: String?,
+        onResult: (com.kycis.sdk.VoiceSessionResult?) -> Unit,
+    ) {
+        onResult(null)
+    }
 
     override fun stopAssistant(userId: String, sessionId: String) = Unit
 }

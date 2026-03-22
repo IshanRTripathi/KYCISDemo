@@ -23,6 +23,13 @@ data class ActivityItem(
 
 val kycActivities = listOf(
     ActivityItem(
+        id = "sdk_debug",
+        title = "SDK Debug",
+        description = "View SDK logs & backend connection status",
+        icon = Icons.Default.BugReport,
+        route = "sdk_debug"
+    ),
+    ActivityItem(
         id = "kyc",
         title = "Full KYC Flow",
         description = "Complete identity verification with PAN, Aadhaar & selfie",

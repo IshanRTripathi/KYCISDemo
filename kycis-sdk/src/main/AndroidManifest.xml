@@ -1,3 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Required for voice: microphone capture -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <!-- Helps audio routing (speaker/earpiece/Bluetooth) for agent playback -->
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
 </manifest>

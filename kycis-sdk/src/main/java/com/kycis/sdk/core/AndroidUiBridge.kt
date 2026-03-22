@@ -14,6 +14,8 @@ internal class AndroidUiBridge {
         currentActivityRef = WeakReference(activity)
     }
 
+    fun getCurrentActivity(): Activity? = currentActivityRef?.get()
+
     fun confirm(text: ConfirmUiText): Boolean {
         val activity = currentActivityRef?.get() ?: return false
         if (activity.isFinishing) return false

@@ -16,8 +16,10 @@ data class RuntimePolicy(
     val kycStepStrategy: KycStepStrategy = KycStepStrategy.HINT_THEN_INFER,
     val minTriggerIntervalSeconds: Long = 60,
     val triggerSettings: TriggerSettings = TriggerSettings(),
-    val backendBaseUrl: String = "http://localhost:8000/v1",
+    val backendBaseUrl: String = "http://10.0.2.2:8000/v1",
     val confirmUiText: ConfirmUiText = ConfirmUiText(),
+    val passiveEvalEnabled: Boolean = true,
+    val passiveEvalIntervalSeconds: Long = 10,
 )
 
 data class TriggerSettings(

@@ -2,6 +2,7 @@ package com.kycis.demo.navigation
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
@@ -11,6 +12,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.kycis.demo.presentation.screens.*
 import com.kycis.demo.presentation.viewmodel.KycViewModel
+import com.kycis.sdk.AI
 
 // Route constants
 object Routes {
@@ -67,6 +69,7 @@ fun KycNavGraph(
 
         // Personal Details Screen
         composable(Routes.PERSONAL_DETAILS) {
+            LaunchedEffect(Unit) { AI.setKycStep("personal_details") }
             PersonalDetailsScreen(
                 state = state.personalDetails,
                 isLoading = state.isLoading,
@@ -86,6 +89,7 @@ fun KycNavGraph(
 
         // PAN Entry Screen
         composable(Routes.PAN_ENTRY) {
+            LaunchedEffect(Unit) { AI.setKycStep("pan_entry") }
             PanEntryScreen(
                 state = state.panState,
                 onPanChanged = viewModel::onPanChanged,
@@ -101,6 +105,7 @@ fun KycNavGraph(
 
         // PAN Upload Screen
         composable(Routes.PAN_UPLOAD) {
+            LaunchedEffect(Unit) { AI.setKycStep("pan_upload") }
             PanUploadScreen(
                 state = state.panUploadState,
                 onImageCaptured = viewModel::onPanImageCaptured,
@@ -117,6 +122,7 @@ fun KycNavGraph(
 
         // Aadhaar Entry Screen
         composable(Routes.AADHAAR_ENTRY) {
+            LaunchedEffect(Unit) { AI.setKycStep("aadhaar_upload") }
             AadhaarEntryScreen(
                 state = state.aadhaarState,
                 isLoading = state.isLoading,
@@ -132,6 +138,7 @@ fun KycNavGraph(
 
         // OTP Verification Screen
         composable(Routes.OTP_VERIFICATION) {
+            LaunchedEffect(Unit) { AI.setKycStep("otp_verify") }
             OtpVerificationScreen(
                 state = state.otpState,
                 onDigitChange = viewModel::onOtpDigitChanged,
@@ -147,6 +154,7 @@ fun KycNavGraph(
 
         // Selfie Capture Screen
         composable(Routes.SELFIE_CAPTURE) {
+            LaunchedEffect(Unit) { AI.setKycStep("selfie_capture") }
             SelfieCaptureScreen(
                 state = state.selfieState,
                 onImageCaptured = viewModel::onSelfieCaptured,

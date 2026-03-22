@@ -1,8 +1,11 @@
 package com.kycis.sdk
 
+import android.app.Application
+import com.kycis.sdk.core.SdkStatus
 import com.kycis.sdk.core.RuntimeContext
 import com.kycis.sdk.core.RuntimePolicy
 import com.kycis.sdk.core.SdkRuntime
+import com.kycis.sdk.core.LifecycleTracker
 import java.util.UUID
 
 object AI {
@@ -12,6 +15,8 @@ object AI {
     private var phone: String? = null
     private var currentKycStep: String? = null
     private val runtime = SdkRuntime()
+    private var lifecycleTracker: LifecycleTracker? = null
+    private var statusListener: ((SdkStatus) -> Unit)? = null
 
     fun init(apiKey: String, userId: String, policy: RuntimePolicy = RuntimePolicy()) {
         require(apiKey.isNotBlank()) { "apiKey cannot be blank" }
@@ -27,7 +32,7 @@ object AI {
             ),
             policy = policy,
         )
-        // TODO: bind lifecycle/navigation observers and passive behavior tracking.
+        statusListener?.let { runtime.setStatusListener(it) }
     }
 
     fun setUser(id: String, phone: String? = null) {
@@ -58,6 +63,18 @@ object AI {
     internal fun onScreenObservedInternal(screen: String) {
         requireInitialized()
         runtime.onScreenObserved(screen)
+    }
+
+    fun attach(application: Application) {
+        requireInitialized()
+        if (lifecycleTracker != null) return
+        lifecycleTracker = LifecycleTracker(runtime = runtime)
+        lifecycleTracker?.register(application)
+    }
+
+    fun setStatusListener(listener: (SdkStatus) -> Unit) {
+        statusListener = listener
+        if (initialized) runtime.setStatusListener(listener)
     }
 
     internal fun startAssistantInternal() {

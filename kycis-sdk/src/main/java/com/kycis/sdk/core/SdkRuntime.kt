@@ -1,6 +1,9 @@
 package com.kycis.sdk.core
 
 import java.time.Instant
+import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledFuture
+import java.util.concurrent.TimeUnit
 
 data class RuntimeContext(
     val apiKey: String,
@@ -29,12 +32,23 @@ internal class SdkRuntime {
     private var lastTriggerAtEpochSeconds: Long = 0
     private val passiveTracker = PassiveTracker()
     private var backendClient: BackendClient = NoOpBackendClient()
+    private val uiBridge = AndroidUiBridge()
+    private var lifecycleAttached = false
+    private var reducedModeReported = false
+    private val scheduler = Executors.newSingleThreadScheduledExecutor()
+    private var passiveEvalTask: ScheduledFuture<*>? = null
+    private var statusListener: ((SdkStatus) -> Unit)? = null
 
     fun initialize(context: RuntimeContext, policy: RuntimePolicy) {
         this.context = context
         this.policy = policy
         this.backendClient = HttpBackendClient(baseUrl = policy.backendBaseUrl)
         this.started = true
+        startPassiveEvaluationLoop()
+    }
+
+    fun setStatusListener(listener: (SdkStatus) -> Unit) {
+        statusListener = listener
     }
 
     fun setUser(id: String, phone: String?) {
@@ -62,6 +76,7 @@ internal class SdkRuntime {
     fun trackError(code: String, properties: Map<String, Any?>) {
         if (!started) return
         val userContext = context ?: return
+        reportReducedTrackingModeIfNeeded()
         val passiveSnapshot = passiveTracker.snapshot()
         backendClient.trackErrorEvent(
             userId = userContext.userId,
@@ -127,11 +142,7 @@ internal class SdkRuntime {
         if (reason.isNotEmpty()) {
             // Keep reason available for upcoming SDK overlay copy.
         }
-        if (policy.confirmUiText.title.isNotEmpty()) {
-            // Keep configurable copy available for SDK-owned overlay implementation.
-        }
-        // TODO: render SDK-owned overlay prompt and return user confirmation.
-        return false
+        return uiBridge.confirm(policy.confirmUiText)
     }
 
     fun startAssistantSession() {
@@ -150,6 +161,77 @@ internal class SdkRuntime {
         backendClient.stopAssistant(
             userId = userContext.userId,
             sessionId = userContext.sessionId,
+        )
+    }
+
+    fun bindCurrentActivity(activity: android.app.Activity) {
+        if (!started) return
+        uiBridge.updateCurrentActivity(activity)
+        if (!lifecycleAttached) {
+            lifecycleAttached = true
+            statusListener?.invoke(
+                SdkStatus(
+                    code = SdkStatusCode.LIFECYCLE_ATTACHED,
+                    message = "Lifecycle tracking attached successfully.",
+                )
+            )
+        }
+    }
+
+    private fun startPassiveEvaluationLoop() {
+        passiveEvalTask?.cancel(false)
+        if (!policy.passiveEvalEnabled) return
+        if (policy.passiveEvalIntervalSeconds <= 0) return
+        passiveEvalTask = scheduler.scheduleAtFixedRate(
+            {
+                evaluatePassiveSignals()
+            },
+            policy.passiveEvalIntervalSeconds,
+            policy.passiveEvalIntervalSeconds,
+            TimeUnit.SECONDS,
+        )
+    }
+
+    private fun evaluatePassiveSignals() {
+        if (!started) return
+        if (!policy.triggerSettings.autoTriggerEnabled) return
+        if (!policy.triggerSettings.includeTimeSpentSignals && !policy.triggerSettings.includeIdleSignals) return
+        val userContext = context ?: return
+        val snapshot = passiveTracker.snapshot()
+        val screenSignal = if (policy.triggerSettings.includeStepHints) {
+            kycStep ?: snapshot.currentScreen
+        } else {
+            null
+        }
+        val timeSpentSignal = if (policy.triggerSettings.includeTimeSpentSignals) snapshot.timeSpentSeconds else null
+        val idleSignal = if (policy.triggerSettings.includeIdleSignals) snapshot.idleSeconds else null
+        if (screenSignal == null && timeSpentSignal == null && idleSignal == null) return
+
+        backendClient.evaluateTrigger(
+            userId = userContext.userId,
+            sessionId = userContext.sessionId,
+            signals = TriggerSignals(
+                screen = screenSignal,
+                timeSpent = timeSpentSignal,
+                errors = emptyList(),
+                idleSeconds = idleSignal,
+            ),
+            onResult = { decision ->
+                if (decision.trigger && decision.action == "start_voice_agent") {
+                    onTriggerDecision(decision)
+                }
+            },
+        )
+    }
+
+    private fun reportReducedTrackingModeIfNeeded() {
+        if (lifecycleAttached || reducedModeReported) return
+        reducedModeReported = true
+        statusListener?.invoke(
+            SdkStatus(
+                code = SdkStatusCode.REDUCED_TRACKING_MODE,
+                message = "AI.attach(application) not called. Running in reduced auto-tracking mode.",
+            )
         )
     }
 }

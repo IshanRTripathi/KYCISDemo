@@ -9,6 +9,7 @@ import com.kycis.demo.domain.models.*
 import com.kycis.demo.domain.repository.ConfigurationRepository
 import com.kycis.demo.domain.usecase.*
 import com.kycis.demo.presentation.state.*
+import com.kycis.sdk.AI
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -257,6 +258,7 @@ class KycViewModel @Inject constructor(
                     onSuccess()
                 }
                 .onFailure { error ->
+                    AI.trackError("personal_details_submit_failed")
                     _uiState.update { it.copy(isLoading = false, error = error.message) }
                 }
         }
@@ -302,6 +304,7 @@ class KycViewModel @Inject constructor(
         return if (_uiState.value.panState.isValid) {
             true
         } else {
+            AI.trackError("pan_invalid")
             false
         }
     }
@@ -380,6 +383,7 @@ class KycViewModel @Inject constructor(
                     onSuccess()
                 }
                 .onFailure { error ->
+                    AI.trackError("pan_upload_failed")
                     _uiState.update { state ->
                         state.copy(
                             panUploadState = state.panUploadState.copy(
@@ -430,6 +434,7 @@ class KycViewModel @Inject constructor(
                 }
             }
             is ValidationResult.Invalid -> {
+                AI.trackError("aadhaar_invalid")
                 _uiState.update { state ->
                     state.copy(
                         aadhaarState = state.aadhaarState.copy(
@@ -525,6 +530,7 @@ class KycViewModel @Inject constructor(
                     if (response.isValid) {
                         onSuccess()
                     } else {
+                        AI.trackError("otp_invalid")
                         _uiState.update { state ->
                             state.copy(
                                 otpState = state.otpState.copy(
@@ -625,6 +631,7 @@ class KycViewModel @Inject constructor(
                     onSuccess()
                 }
                 .onFailure { error ->
+                    AI.trackError("selfie_upload_failed")
                     _uiState.update { state ->
                         state.copy(
                             selfieState = state.selfieState.copy(

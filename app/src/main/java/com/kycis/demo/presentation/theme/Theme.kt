@@ -11,6 +11,9 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
+// Import colors
+import com.kycis.demo.presentation.theme.*
+
 private val LightColorScheme = lightColorScheme(
     primary = Blue700,
     onPrimary = White,

@@ -3,6 +3,7 @@ package com.kycis.demo.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kycis.demo.data.camera.CameraManager
+import com.kycis.demo.data.camera.CameraManagerImpl
 import com.kycis.demo.data.persistence.KycProgress
 import com.kycis.demo.domain.models.*
 import com.kycis.demo.domain.repository.ConfigurationRepository
@@ -33,6 +34,10 @@ class KycViewModel @Inject constructor(
     private val cameraManager: CameraManager,
     private val configurationRepository: ConfigurationRepository
 ) : ViewModel() {
+
+    // Expose cameraManager for UI layer
+    val cameraManagerImpl: CameraManagerImpl?
+        get() = cameraManager as? CameraManagerImpl
 
     private val _uiState = MutableStateFlow(KycUiState())
     val uiState: StateFlow<KycUiState> = _uiState.asStateFlow()

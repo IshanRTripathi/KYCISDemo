@@ -6,9 +6,7 @@ import com.kycis.demo.data.camera.CameraManagerImpl
 import com.kycis.demo.data.camera.ImageProcessor
 import com.kycis.demo.data.camera.ImageProcessorImpl
 import com.kycis.demo.data.config.ConfigurationParser
-import com.kycis.demo.data.config.ErrorSimulations
 import com.kycis.demo.data.config.JsonConfigurationParser
-import com.kycis.demo.data.config.MockScenarios
 import com.kycis.demo.data.mock.ErrorSimulator
 import com.kycis.demo.data.mock.ErrorSimulatorImpl
 import com.kycis.demo.data.mock.MockBackendService
@@ -98,9 +96,9 @@ object ConfigModule {
 
     @Provides
     @Singleton
-    fun provideMockScenarios(): MockScenarios = MockScenarios()
+    fun provideMockScenarios(): com.kycis.demo.data.config.MockScenarios = com.kycis.demo.data.config.MockScenarios()
 
     @Provides
     @Singleton
-    fun provideErrorSimulations(): ErrorSimulations = ErrorSimulations()
+    fun provideErrorSimulations(): com.kycis.demo.data.config.ErrorSimulations = com.kycis.demo.data.config.ErrorSimulations()
 }

@@ -30,6 +30,13 @@ val kycActivities = listOf(
         route = "kyc_flow"
     ),
     ActivityItem(
+        id = "mutual_fund",
+        title = "Mutual Fund KYC",
+        description = "Complete KYC for mutual fund investment",
+        icon = Icons.Default.TrendingUp,
+        route = "mutual_fund_kyc"
+    ),
+    ActivityItem(
         id = "pan",
         title = "PAN Verification",
         description = "Verify PAN card details and upload document",

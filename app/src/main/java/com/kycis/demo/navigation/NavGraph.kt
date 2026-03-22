@@ -24,6 +24,7 @@ object Routes {
     const val OTP_VERIFICATION = "otp_verification"
     const val SELFIE_CAPTURE = "selfie_capture"
     const val SUCCESS = "success"
+    const val MUTUAL_FUND_KYC = "mutual_fund_kyc"
 }
 
 @Composable
@@ -31,6 +32,7 @@ fun KycNavGraph(
     navController: NavHostController,
     modifier: Modifier = Modifier
 ) {
+    // Create ViewModel lazily to avoid crash on startup
     val viewModel: KycViewModel = hiltViewModel()
     val state by viewModel.uiState.collectAsState()
     
@@ -39,7 +41,7 @@ fun KycNavGraph(
         startDestination = Routes.HOME,
         modifier = modifier.fillMaxSize()
     ) {
-        // Home Screen - Activity List
+        // Home Screen - Activity List (no ViewModel needed)
         composable(Routes.HOME) {
             HomeScreen(
                 onActivityClick = { activity ->
@@ -49,7 +51,8 @@ fun KycNavGraph(
                         "aadhaar" -> navController.navigate(Routes.AADHAAR_ENTRY)
                         "selfie" -> navController.navigate(Routes.SELFIE_CAPTURE)
                         "document" -> navController.navigate(Routes.PAN_UPLOAD)
-                        "video" -> navController.navigate(Routes.SELFIE_CAPTURE) // Reuse selfie for demo
+                        "video" -> navController.navigate(Routes.SELFIE_CAPTURE)
+                        "mutual_fund" -> navController.navigate(Routes.MUTUAL_FUND_KYC)
                     }
                 }
             )
@@ -175,6 +178,16 @@ fun KycNavGraph(
                     navController.navigate(Routes.HOME) {
                         popUpTo(0) { inclusive = true }
                     }
+                }
+            )
+        }
+
+        // Mutual Fund KYC Screen
+        composable(Routes.MUTUAL_FUND_KYC) {
+            MutualFundKycScreen(
+                onBack = { navController.popBackStack() },
+                onSubmit = { 
+                    navController.navigate(Routes.SUCCESS)
                 }
             )
         }

@@ -9,7 +9,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.kycis.demo.domain.models.KycScreen
 import com.kycis.demo.presentation.screens.*
 import com.kycis.demo.presentation.viewmodel.KycViewModel
 
@@ -32,7 +31,6 @@ fun KycNavGraph(
     navController: NavHostController,
     modifier: Modifier = Modifier
 ) {
-    // Create ViewModel lazily to avoid crash on startup
     val viewModel: KycViewModel = hiltViewModel()
     val state by viewModel.uiState.collectAsState()
     
@@ -41,7 +39,7 @@ fun KycNavGraph(
         startDestination = Routes.HOME,
         modifier = modifier.fillMaxSize()
     ) {
-        // Home Screen - Activity List (no ViewModel needed)
+        // Home Screen - Activity List
         composable(Routes.HOME) {
             HomeScreen(
                 onActivityClick = { activity ->
@@ -167,7 +165,6 @@ fun KycNavGraph(
         composable(Routes.SUCCESS) {
             SuccessScreen(
                 onDone = { 
-                    // Restart the journey
                     viewModel.restartJourney()
                     navController.navigate(Routes.HOME) {
                         popUpTo(0) { inclusive = true }

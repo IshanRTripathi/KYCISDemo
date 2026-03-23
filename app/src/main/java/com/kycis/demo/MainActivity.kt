@@ -6,10 +6,6 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ContactSupport
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -28,8 +24,11 @@ import androidx.navigation.compose.rememberNavController
 import com.kycis.demo.navigation.KycNavGraph
 import com.kycis.demo.presentation.theme.KycDemoTheme
 import com.kycis.sdk.AI
-import com.kycis.sdk.voice.VoiceCallPillOverlay
+import com.kycis.sdk.voice.VoiceFabConfig
+import com.kycis.sdk.voice.VoiceFabHost
+import com.kycis.sdk.voice.VoiceFabType
 import com.kycis.sdk.voice.VoiceRoomConnector
+import com.kycis.sdk.voice.TranscriptBackground
 import dagger.hilt.android.AndroidEntryPoint
 import io.livekit.android.room.Room
 import kotlinx.coroutines.launch
@@ -96,38 +95,30 @@ private fun VoiceAssistantContent() {
         val navController = rememberNavController()
         KycNavGraph(navController = navController)
 
-        if (voiceRoom == null) {
-            FloatingActionButton(
-                onClick = { AI.startAssistant() },
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(24.dp),
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-            ) {
-                Icon(
-                    imageVector = Icons.Default.ContactSupport,
-                    contentDescription = "Get AI help",
-                )
-            }
-        }
-
-        voiceRoom?.let { room ->
-            VoiceCallPillOverlay(
-                room = room,
-                isMuted = isMuted,
-                onMuteToggle = { muted ->
-                    isMuted = muted
+        VoiceFabHost(
+            room = voiceRoom,
+            isMuted = isMuted,
+            onMuteToggle = { muted ->
+                isMuted = muted
+                voiceRoom?.let { room ->
                     scope.launch {
                         room.localParticipant.setMicrophoneEnabled(!muted)
                     }
-                },
-                onEndCall = {
-                    voiceConnector.disconnect()
-                    voiceRoom = null
-                },
-                modifier = Modifier.align(Alignment.BottomEnd),
-            )
-        }
+                }
+            },
+            onEndCall = {
+                voiceConnector.disconnect()
+                voiceRoom = null
+            },
+            onStartClick = { AI.startAssistant() },
+            fabType = VoiceFabType.PREMIUM,
+            config = VoiceFabConfig(
+                assistantName = "Sophie",
+                transcriptBackground = TranscriptBackground.DotGrid,
+            ),
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(24.dp),
+        )
     }
 }

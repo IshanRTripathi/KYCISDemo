@@ -16,6 +16,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
@@ -42,6 +43,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.kycis.sdk.AI
+import com.kycis.sdk.voice.VoiceDebugState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.net.HttpURLConnection
@@ -119,7 +121,7 @@ fun SdkDebugScreen(
                 title = { Text("SDK Debug") },
                 navigationIcon = {
                     androidx.compose.material3.IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBackIosNew, contentDescription = "Back")
                     }
                 },
             )
@@ -199,7 +201,10 @@ fun SdkDebugScreen(
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("Refresh")
                 }
-                OutlinedButton(onClick = { refresh() }) {
+                OutlinedButton(onClick = {
+                    VoiceDebugState.clear()
+                    refresh()
+                }) {
                     Text("Clear Log")
                 }
             }
@@ -258,6 +263,95 @@ fun SdkDebugScreen(
             }
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
+            Text(
+                text = "Voice / LiveKit (during call)",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+
+            run {
+                val voice = VoiceDebugState.getState()
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = when (voice.connectionState) {
+                            "connected" -> Color(0xFF166534).copy(alpha = 0.15f)
+                            "connecting" -> Color(0xFFCA8A04).copy(alpha = 0.15f)
+                            "error" -> Color(0xFF991B1B).copy(alpha = 0.15f)
+                            else -> MaterialTheme.colorScheme.surfaceVariant
+                        },
+                    ),
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                        ) {
+                            Text("Connection:", style = MaterialTheme.typography.labelMedium)
+                            Text(voice.connectionState, style = MaterialTheme.typography.bodyMedium)
+                        }
+                        if (voice.roomName != null) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                            ) {
+                                Text("Room:", style = MaterialTheme.typography.labelMedium)
+                                Text(voice.roomName!!, style = MaterialTheme.typography.bodySmall, fontFamily = FontFamily.Monospace)
+                            }
+                        }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                        ) {
+                            Text("Mic enabled:", style = MaterialTheme.typography.labelMedium)
+                            Text(if (voice.micEnabled) "Yes" else "No", style = MaterialTheme.typography.bodyMedium)
+                        }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                        ) {
+                            Text("Track published:", style = MaterialTheme.typography.labelMedium)
+                            Text(if (voice.localAudioTrackPublished) "Yes" else "No", style = MaterialTheme.typography.bodyMedium)
+                        }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text("Active speakers:", style = MaterialTheme.typography.labelMedium)
+                            Text(
+                                voice.lastActiveSpeakers,
+                                style = MaterialTheme.typography.bodySmall,
+                                fontFamily = FontFamily.Monospace,
+                                modifier = Modifier.weight(1f).padding(start = 8.dp),
+                                maxLines = 2,
+                            )
+                        }
+                        if (voice.lastUserTranscript != "-") {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text("Last user:", style = MaterialTheme.typography.labelSmall)
+                            Text(voice.lastUserTranscript, style = MaterialTheme.typography.bodySmall, fontFamily = FontFamily.Monospace)
+                        }
+                        if (voice.lastAgentTranscript != "-") {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text("Last agent:", style = MaterialTheme.typography.labelSmall)
+                            Text(voice.lastAgentTranscript, style = MaterialTheme.typography.bodySmall, fontFamily = FontFamily.Monospace)
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text("Recent events:", style = MaterialTheme.typography.labelSmall)
+                        voice.events.takeLast(8).forEach { ev ->
+                            Text(
+                                text = "${ev.timeFormatted} [${ev.kind}] ${ev.message}",
+                                style = MaterialTheme.typography.bodySmall,
+                                fontFamily = FontFamily.Monospace,
+                                modifier = Modifier.padding(vertical = 2.dp),
+                            )
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = "SDK Debug Log",
                 style = MaterialTheme.typography.titleMedium,

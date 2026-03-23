@@ -58,27 +58,31 @@ class KycViewModel @Inject constructor(
 
     private fun loadSavedProgress() {
         viewModelScope.launch {
-            loadProgressUseCase().onSuccess { progress ->
-                progress?.let {
-                    val screen = KycScreen.valueOf(it.currentScreen)
-                    _uiState.update { state ->
-                        state.copy(
-                            currentScreen = screen,
-                            personalDetails = state.personalDetails.copy(
-                                fullName = it.personalDetails?.fullName ?: "",
-                                dateOfBirth = it.personalDetails?.dateOfBirth ?: "",
-                                phoneNumber = it.personalDetails?.phoneNumber ?: "",
-                                email = it.personalDetails?.email ?: ""
-                            ),
-                            panState = state.panState.copy(
-                                panNumber = it.panNumber ?: ""
-                            ),
-                            aadhaarState = state.aadhaarState.copy(
-                                aadhaarNumber = it.aadhaarNumber ?: ""
+            try {
+                loadProgressUseCase().onSuccess { progress ->
+                    progress?.let {
+                        val screen = KycScreen.entries.find { e -> e.name == it.currentScreen } ?: KycScreen.LOGIN
+                        _uiState.update { state ->
+                            state.copy(
+                                currentScreen = screen,
+                                personalDetails = state.personalDetails.copy(
+                                    fullName = it.personalDetails?.fullName ?: "",
+                                    dateOfBirth = it.personalDetails?.dateOfBirth ?: "",
+                                    phoneNumber = it.personalDetails?.phoneNumber ?: "",
+                                    email = it.personalDetails?.email ?: ""
+                                ),
+                                panState = state.panState.copy(
+                                    panNumber = it.panNumber ?: ""
+                                ),
+                                aadhaarState = state.aadhaarState.copy(
+                                    aadhaarNumber = it.aadhaarNumber ?: ""
+                                )
                             )
-                        )
+                        }
                     }
                 }
+            } catch (e: Exception) {
+                // Ignore corrupted progress; keep default state
             }
         }
     }

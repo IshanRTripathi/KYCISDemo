@@ -17,9 +17,12 @@ out/
 # Gradle
 .gradle/
 build/
-intermediates/
-.transforms/
-outputs/
+**/intermediates/
+**/.transforms/
+**/outputs/
+
+# Orphan SDK copy (canonical SDK is in KYCIS repo, consumed via includeBuild)
+kycis-sdk/
 
 # Local configuration (SDK path, machine-specific)
 local.properties

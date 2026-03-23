@@ -51,8 +51,8 @@ android {
 }
 
 dependencies {
-    // KYCIS SDK
-    implementation(project(":kycis-sdk"))
+    // KYCIS SDK (from ../KYCIS/android-sdk via includeBuild, always latest)
+    implementation("com.kycis:kycis-sdk:1.0.0")
 
     // LiveKit (for Room type used in voice UI)
     implementation("io.livekit:livekit-android:2.23.5")

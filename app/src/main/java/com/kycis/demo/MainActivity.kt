@@ -1,6 +1,8 @@
 package com.kycis.demo
 
 import android.os.Bundle
+import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Box
@@ -76,7 +78,18 @@ private fun VoiceAssistantContent() {
         AI.setVoiceSessionListener { result ->
             if (result.isValid) {
                 try {
-                    voiceConnector.connect(result, activity = currentActivity) { room ->
+                    voiceConnector.connect(
+                        result,
+                        activity = currentActivity,
+                        onConnectionFailed = { msg ->
+                            Log.e("KYCIS", "Voice LiveKit connect failed: $msg")
+                            Toast.makeText(
+                                context,
+                                "Voice connection failed. Use a reachable LiveKit URL (emulator: host IP, not localhost). $msg",
+                                Toast.LENGTH_LONG,
+                            ).show()
+                        },
+                    ) { room ->
                         voiceRoom = room
                         isMuted = false
                     }

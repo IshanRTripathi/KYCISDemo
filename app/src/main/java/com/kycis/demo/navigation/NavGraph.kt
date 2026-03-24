@@ -16,6 +16,7 @@ import com.kycis.sdk.AI
 
 // Route constants
 object Routes {
+    const val ONBOARDING = "onboarding"
     const val HOME = "home"
     const val SDK_DEBUG = "sdk_debug"
     const val LOGIN = "login"
@@ -36,9 +37,16 @@ fun KycNavGraph(
 ) {
     NavHost(
         navController = navController,
-        startDestination = Routes.HOME,
+        startDestination = Routes.ONBOARDING,
         modifier = modifier.fillMaxSize()
     ) {
+        composable(Routes.ONBOARDING) {
+            OnboardingScreen(
+                onStartKyc = { navController.navigate(Routes.PERSONAL_DETAILS) },
+                onExploreAllDemos = { navController.navigate(Routes.HOME) },
+            )
+        }
+
         // Home Screen - Activity List (no shared ViewModel needed)
         composable(Routes.HOME) {
             HomeScreen(

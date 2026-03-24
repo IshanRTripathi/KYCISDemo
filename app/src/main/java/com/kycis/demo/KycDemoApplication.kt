@@ -2,7 +2,9 @@ package com.kycis.demo
 
 import android.app.Application
 import android.util.Log
+import android.widget.Toast
 import com.kycis.sdk.AI
+import com.kycis.sdk.core.SdkStatusCode
 import com.kycis.sdk.core.ConfirmUiText
 import com.kycis.sdk.core.KycStepStrategy
 import com.kycis.sdk.core.RuntimePolicy
@@ -20,6 +22,9 @@ class KycDemoApplication : Application() {
     private fun initKycSdk() {
         AI.setStatusListener { status ->
             Log.d("KYCIS", "SDK status: ${status.code} - ${status.message}")
+            if (status.code == SdkStatusCode.ERROR) {
+                Toast.makeText(this, status.message, Toast.LENGTH_LONG).show()
+            }
         }
         AI.init(
             apiKey = "demo-api-key",

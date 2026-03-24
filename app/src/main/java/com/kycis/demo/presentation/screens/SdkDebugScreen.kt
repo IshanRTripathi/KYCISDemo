@@ -43,6 +43,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.kycis.sdk.AI
+import com.kycis.sdk.InvokeSources
 import com.kycis.sdk.voice.VoiceDebugState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -53,6 +54,18 @@ import java.net.URL
 private data class DebugEventStub(val kind: String, val message: String, val timeFormatted: String, val details: Map<String, Any>)
 
 private const val BACKEND_BASE = "http://10.0.2.2:8000"
+
+private fun HttpURLConnection.applyKycisTraceHeaders(invokeSource: String) {
+    try {
+        AI.traceHeadersForRequest(invokeSource).forEach { (key, value) ->
+            setRequestProperty(key, value)
+        }
+    } catch (_: IllegalStateException) {
+        // AI.init not called — skip tracing
+    } catch (_: IllegalArgumentException) {
+        // blank invokeSource
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -74,6 +87,7 @@ fun SdkDebugScreen(
         withContext(Dispatchers.IO) {
             try {
                 val conn = URL("$BACKEND_BASE/health").openConnection() as HttpURLConnection
+                conn.applyKycisTraceHeaders(InvokeSources.HOST_DEBUG_HEALTH)
                 conn.connectTimeout = 3000
                 conn.readTimeout = 3000
                 val code = conn.responseCode
@@ -89,6 +103,7 @@ fun SdkDebugScreen(
         withContext(Dispatchers.IO) {
             try {
                 val conn = URL("$BACKEND_BASE/api/activity").openConnection() as HttpURLConnection
+                conn.applyKycisTraceHeaders(InvokeSources.HOST_DEBUG_ACTIVITY)
                 conn.connectTimeout = 3000
                 conn.readTimeout = 5000
                 val text = if (conn.responseCode in 200..299) conn.inputStream.bufferedReader().readText() else "[]"

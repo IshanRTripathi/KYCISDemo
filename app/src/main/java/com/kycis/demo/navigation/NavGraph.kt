@@ -2,6 +2,7 @@ package com.kycis.demo.navigation
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
@@ -11,10 +12,13 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.kycis.demo.presentation.screens.*
 import com.kycis.demo.presentation.viewmodel.KycViewModel
+import com.kycis.sdk.AI
 
 // Route constants
 object Routes {
+    const val ONBOARDING = "onboarding"
     const val HOME = "home"
+    const val SDK_DEBUG = "sdk_debug"
     const val LOGIN = "login"
     const val PERSONAL_DETAILS = "personal_details"
     const val PAN_ENTRY = "pan_entry"
@@ -31,19 +35,24 @@ fun KycNavGraph(
     navController: NavHostController,
     modifier: Modifier = Modifier
 ) {
-    val viewModel: KycViewModel = hiltViewModel()
-    val state by viewModel.uiState.collectAsState()
-    
     NavHost(
         navController = navController,
-        startDestination = Routes.HOME,
+        startDestination = Routes.ONBOARDING,
         modifier = modifier.fillMaxSize()
     ) {
-        // Home Screen - Activity List
+        composable(Routes.ONBOARDING) {
+            OnboardingScreen(
+                onStartKyc = { navController.navigate(Routes.PERSONAL_DETAILS) },
+                onExploreAllDemos = { navController.navigate(Routes.HOME) },
+            )
+        }
+
+        // Home Screen - Activity List (no shared ViewModel needed)
         composable(Routes.HOME) {
             HomeScreen(
                 onActivityClick = { activity ->
                     when (activity.id) {
+                        "sdk_debug" -> navController.navigate(Routes.SDK_DEBUG)
                         "kyc" -> navController.navigate(Routes.PERSONAL_DETAILS)
                         "pan" -> navController.navigate(Routes.PAN_ENTRY)
                         "aadhaar" -> navController.navigate(Routes.AADHAAR_ENTRY)
@@ -54,6 +63,10 @@ fun KycNavGraph(
                     }
                 }
             )
+        }
+
+        composable(Routes.SDK_DEBUG) {
+            SdkDebugScreen(onBack = { navController.popBackStack() })
         }
 
         // Login Screen
@@ -67,6 +80,9 @@ fun KycNavGraph(
 
         // Personal Details Screen
         composable(Routes.PERSONAL_DETAILS) {
+            val viewModel: KycViewModel = hiltViewModel(navController.getBackStackEntry(Routes.HOME))
+            val state by viewModel.uiState.collectAsState()
+            LaunchedEffect(Unit) { AI.setKycStep("personal_details") }
             PersonalDetailsScreen(
                 state = state.personalDetails,
                 isLoading = state.isLoading,
@@ -86,6 +102,9 @@ fun KycNavGraph(
 
         // PAN Entry Screen
         composable(Routes.PAN_ENTRY) {
+            val viewModel: KycViewModel = hiltViewModel(navController.getBackStackEntry(Routes.HOME))
+            val state by viewModel.uiState.collectAsState()
+            LaunchedEffect(Unit) { AI.setKycStep("pan_entry") }
             PanEntryScreen(
                 state = state.panState,
                 onPanChanged = viewModel::onPanChanged,
@@ -101,6 +120,9 @@ fun KycNavGraph(
 
         // PAN Upload Screen
         composable(Routes.PAN_UPLOAD) {
+            val viewModel: KycViewModel = hiltViewModel(navController.getBackStackEntry(Routes.HOME))
+            val state by viewModel.uiState.collectAsState()
+            LaunchedEffect(Unit) { AI.setKycStep("pan_upload") }
             PanUploadScreen(
                 state = state.panUploadState,
                 onImageCaptured = viewModel::onPanImageCaptured,
@@ -117,6 +139,9 @@ fun KycNavGraph(
 
         // Aadhaar Entry Screen
         composable(Routes.AADHAAR_ENTRY) {
+            val viewModel: KycViewModel = hiltViewModel(navController.getBackStackEntry(Routes.HOME))
+            val state by viewModel.uiState.collectAsState()
+            LaunchedEffect(Unit) { AI.setKycStep("aadhaar_entry") }
             AadhaarEntryScreen(
                 state = state.aadhaarState,
                 isLoading = state.isLoading,
@@ -132,6 +157,9 @@ fun KycNavGraph(
 
         // OTP Verification Screen
         composable(Routes.OTP_VERIFICATION) {
+            val viewModel: KycViewModel = hiltViewModel(navController.getBackStackEntry(Routes.HOME))
+            val state by viewModel.uiState.collectAsState()
+            LaunchedEffect(Unit) { AI.setKycStep("otp_verify") }
             OtpVerificationScreen(
                 state = state.otpState,
                 onDigitChange = viewModel::onOtpDigitChanged,
@@ -147,6 +175,9 @@ fun KycNavGraph(
 
         // Selfie Capture Screen
         composable(Routes.SELFIE_CAPTURE) {
+            val viewModel: KycViewModel = hiltViewModel(navController.getBackStackEntry(Routes.HOME))
+            val state by viewModel.uiState.collectAsState()
+            LaunchedEffect(Unit) { AI.setKycStep("selfie_capture") }
             SelfieCaptureScreen(
                 state = state.selfieState,
                 onImageCaptured = viewModel::onSelfieCaptured,
@@ -163,6 +194,7 @@ fun KycNavGraph(
 
         // Success Screen
         composable(Routes.SUCCESS) {
+            val viewModel: KycViewModel = hiltViewModel(navController.getBackStackEntry(Routes.HOME))
             SuccessScreen(
                 onDone = { 
                     viewModel.restartJourney()
@@ -179,7 +211,7 @@ fun KycNavGraph(
             )
         }
 
-        // Mutual Fund KYC Screen
+        // Mutual Fund KYC Screen (no shared ViewModel)
         composable(Routes.MUTUAL_FUND_KYC) {
             MutualFundKycScreen(
                 onBack = { navController.popBackStack() },

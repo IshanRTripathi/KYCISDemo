@@ -16,5 +16,12 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "KycDemoApp"
+
+// Use KYCIS android-sdk as SDK source; builds from source on every run
+includeBuild("../KYCIS/android-sdk") {
+    dependencySubstitution {
+        substitute(module("com.kycis:kycis-sdk")).using(project(":sdk"))
+    }
+}
+
 include(":app")
-include(":kycis-sdk")

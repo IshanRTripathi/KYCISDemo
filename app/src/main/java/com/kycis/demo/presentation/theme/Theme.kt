@@ -15,15 +15,15 @@ import androidx.core.view.WindowCompat
 import com.kycis.demo.presentation.theme.*
 
 private val LightColorScheme = lightColorScheme(
-    primary = Blue700,
+    primary = ThemePrimary,
     onPrimary = White,
-    primaryContainer = Blue200,
+    primaryContainer = ThemePrimaryLight,
     onPrimaryContainer = Gray900,
-    secondary = Green700,
+    secondary = Blue500,
     onSecondary = White,
-    secondaryContainer = Green200,
+    secondaryContainer = BlueLight,
     onSecondaryContainer = Gray900,
-    tertiary = Blue500,
+    tertiary = ThemePrimaryVariant,
     onTertiary = White,
     error = Red500,
     onError = White,
@@ -39,16 +39,16 @@ private val LightColorScheme = lightColorScheme(
 )
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Blue200,
+    primary = ThemePrimary,
     onPrimary = Gray900,
-    primaryContainer = Blue700,
+    primaryContainer = ThemePrimaryVariant,
     onPrimaryContainer = White,
-    secondary = Green200,
+    secondary = Blue200,
     onSecondary = Gray900,
-    secondaryContainer = Green700,
+    secondaryContainer = Blue700,
     onSecondaryContainer = White,
-    tertiary = Blue500,
-    onTertiary = White,
+    tertiary = ThemePrimaryLight,
+    onTertiary = Gray900,
     error = Red200,
     onError = Gray900,
     errorContainer = Red700,

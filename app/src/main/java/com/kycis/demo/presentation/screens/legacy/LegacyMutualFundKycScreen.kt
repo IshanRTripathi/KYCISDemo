@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalMaterial3Api::class)
 
-package com.kycis.demo.presentation.screens
+package com.kycis.demo.presentation.screens.legacy
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -88,7 +88,7 @@ fun validatePincode(pincode: String): String? {
 }
 
 @Composable
-fun MutualFundKycScreen(
+fun LegacyMutualFundKycScreen(
     onBack: () -> Unit,
     onSubmit: () -> Unit,
     modifier: Modifier = Modifier
@@ -638,3 +638,4 @@ fun ReviewRow(label: String, value: String) {
         )
     }
 }
+

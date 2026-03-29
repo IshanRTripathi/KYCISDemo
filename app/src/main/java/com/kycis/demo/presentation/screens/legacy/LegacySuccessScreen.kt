@@ -1,4 +1,4 @@
-package com.kycis.demo.presentation.screens
+package com.kycis.demo.presentation.screens.legacy
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -12,7 +12,7 @@ import androidx.compose.ui.unit.dp
 import com.kycis.demo.presentation.components.KycButton
 
 @Composable
-fun SuccessScreen(
+fun LegacySuccessScreen(
     onDone: () -> Unit,
     onRestart: () -> Unit,
     modifier: Modifier = Modifier
@@ -66,3 +66,4 @@ fun SuccessScreen(
         }
     }
 }
+

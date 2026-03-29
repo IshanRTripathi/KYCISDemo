@@ -1,4 +1,4 @@
-package com.kycis.demo.presentation.screens
+package com.kycis.demo.presentation.screens.legacy
 
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.foundation.layout.Arrangement
@@ -69,7 +69,7 @@ private fun HttpURLConnection.applyKycisTraceHeaders(invokeSource: String) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SdkDebugScreen(
+fun LegacySdkDebugScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -376,7 +376,7 @@ fun SdkDebugScreen(
 
             if (sdkLog.isEmpty()) {
                 Text(
-                    text = "No SDK events yet. SDK logs init, setKycStep, trackError, trigger eval, session start.",
+                    text = "No SDK events yet. SDK logs init, setKycStep, trackError/trackValidationFailure, trigger eval, session start.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -435,3 +435,5 @@ private data class BackendActivityItem(
     val timestamp: Long,
     val payload: String,
 )
+
+

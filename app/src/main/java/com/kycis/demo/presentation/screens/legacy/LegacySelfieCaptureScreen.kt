@@ -1,4 +1,4 @@
-package com.kycis.demo.presentation.screens
+package com.kycis.demo.presentation.screens.legacy
 
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -6,6 +6,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -18,7 +19,7 @@ import com.kycis.demo.presentation.state.UploadState
 import java.io.File
 
 @Composable
-fun PanUploadScreen(
+fun LegacySelfieCaptureScreen(
     state: UploadState,
     onImageCaptured: (ImageData) -> Unit,
     onRetryClick: () -> Unit,
@@ -51,21 +52,20 @@ fun PanUploadScreen(
             }
         }
     }
-
     Column(
         modifier = modifier
             .fillMaxSize()
             .padding(24.dp)
     ) {
         Text(
-            text = "Upload PAN Card",
+            text = "Selfie Verification",
             style = MaterialTheme.typography.headlineSmall
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = "Take a photo or select from gallery",
+            text = "Take a selfie for biometric verification",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -78,7 +78,7 @@ fun PanUploadScreen(
             error = state.uploadError,
             onCaptureClick = {
                 // Create temp file for camera
-                val photoFile = File(context.cacheDir, "pan_${System.currentTimeMillis()}.jpg")
+                val photoFile = File(context.cacheDir, "selfie_${System.currentTimeMillis()}.jpg")
                 val uri = FileProvider.getUriForFile(
                     context,
                     "${context.packageName}.fileprovider",
@@ -105,3 +105,4 @@ fun PanUploadScreen(
         }
     }
 }
+

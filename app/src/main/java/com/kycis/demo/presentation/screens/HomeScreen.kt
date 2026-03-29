@@ -1,178 +1,203 @@
 package com.kycis.demo.presentation.screens
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.FlashOn
+import androidx.compose.material.icons.filled.Hexagon
+import androidx.compose.material.icons.outlined.Circle
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.kycis.demo.presentation.theme.KycDemoTheme
+import com.kycis.demo.presentation.theme.ThemePrimaryLight
+import com.kycis.demo.presentation.theme.ThemePrimary
 
-data class ActivityItem(
-    val id: String,
-    val title: String,
-    val description: String,
-    val icon: ImageVector,
-    val route: String
-)
-
-val kycActivities = listOf(
-    ActivityItem(
-        id = "sdk_debug",
-        title = "SDK Debug",
-        description = "View SDK logs & backend connection status",
-        icon = Icons.Default.BugReport,
-        route = "sdk_debug"
-    ),
-    ActivityItem(
-        id = "kyc",
-        title = "Full KYC Flow",
-        description = "Complete identity verification with PAN, Aadhaar & selfie",
-        icon = Icons.Default.VerifiedUser,
-        route = "kyc_flow"
-    ),
-    ActivityItem(
-        id = "mutual_fund",
-        title = "Mutual Fund KYC",
-        description = "Complete KYC for mutual fund investment",
-        icon = Icons.Default.TrendingUp,
-        route = "mutual_fund_kyc"
-    ),
-    ActivityItem(
-        id = "pan",
-        title = "PAN Verification",
-        description = "Verify PAN card details and upload document",
-        icon = Icons.Default.Badge,
-        route = "pan_verification"
-    ),
-    ActivityItem(
-        id = "aadhaar",
-        title = "Aadhaar Verification",
-        description = "Aadhaar number verification with OTP",
-        icon = Icons.Default.AssignmentInd,
-        route = "aadhaar_verification"
-    ),
-    ActivityItem(
-        id = "selfie",
-        title = "Selfie Capture",
-        description = "Capture selfie for biometric verification",
-        icon = Icons.Default.Face,
-        route = "selfie_capture"
-    ),
-    ActivityItem(
-        id = "document",
-        title = "Document Upload",
-        description = "Upload any document for verification",
-        icon = Icons.Default.Description,
-        route = "document_upload"
-    ),
-    ActivityItem(
-        id = "video",
-        title = "Video KYC",
-        description = "Video-based identity verification",
-        icon = Icons.Default.Videocam,
-        route = "video_kyc"
-    )
-)
-
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    onActivityClick: (ActivityItem) -> Unit,
+    onStartFlow: () -> Unit,
+    onLegacyScreensClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var selectedFlow by remember { mutableStateOf("kyc") }
+
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .background(MaterialTheme.colorScheme.background)
+            .padding(24.dp)
     ) {
+        Spacer(modifier = Modifier.height(32.dp))
+
         Text(
-            text = "KYCis Demo",
-            style = MaterialTheme.typography.headlineMedium
+            text = "Zynnex Demo",
+            style = MaterialTheme.typography.headlineMedium.copy(
+                fontWeight = FontWeight.Bold,
+                fontSize = 28.sp
+            ),
+            color = MaterialTheme.colorScheme.onBackground
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = "Select an activity to get started",
-            style = MaterialTheme.typography.bodyMedium
+            text = "Welcome to Zynnex demo",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(32.dp))
 
-        LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            items(kycActivities) { activity ->
-                ActivityCard(
-                    activity = activity,
-                    onClick = { onActivityClick(activity) }
+        // KYC Flow Card
+        FlowSelectionCard(
+            title = "KYC Flow",
+            subtitle = "Help increase KYC Conversion",
+            icon = {
+                Icon(
+                    imageVector = Icons.Default.Hexagon,
+                    contentDescription = null,
+                    tint = if (selectedFlow == "kyc") ThemePrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(24.dp)
                 )
-            }
+            },
+            isSelected = selectedFlow == "kyc",
+            onClick = { selectedFlow = "kyc" }
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // MFD Support Card
+        FlowSelectionCard(
+            title = "MFD Support",
+            subtitle = "Helping MFD to create orders through call",
+            icon = {
+                Icon(
+                    imageVector = Icons.Default.FlashOn,
+                    contentDescription = null,
+                    tint = if (selectedFlow == "mfd") ThemePrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(24.dp)
+                )
+            },
+            isSelected = selectedFlow == "mfd",
+            onClick = { selectedFlow = "mfd" }
+        )
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        // Legacy Button requested by user
+        TextButton(
+            onClick = onLegacyScreensClick,
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        ) {
+            Text("Legacy Screens", color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Start Button
+        Button(
+            onClick = onStartFlow,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
+            shape = RoundedCornerShape(12.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00308F)) // Matched to design screenshot
+        ) {
+            Text(
+                text = "Start",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium
+            )
+        }
+        
+        Spacer(modifier = Modifier.height(16.dp))
     }
 }
 
 @Composable
-fun ActivityCard(
-    activity: ActivityItem,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
+private fun FlowSelectionCard(
+    title: String,
+    subtitle: String,
+    icon: @Composable () -> Unit,
+    isSelected: Boolean,
+    onClick: () -> Unit
 ) {
-    Card(
-        modifier = modifier
+    val backgroundColor = if (isSelected) ThemePrimaryLight else MaterialTheme.colorScheme.surface
+    val borderColor = if (isSelected) ThemePrimary else MaterialTheme.colorScheme.outlineVariant
+
+    OutlinedCard(
+        modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        )
+            .clickable { onClick() },
+        colors = CardDefaults.outlinedCardColors(containerColor = backgroundColor),
+        border = BorderStroke(1.dp, borderColor),
+        shape = RoundedCornerShape(12.dp)
     ) {
         Row(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
+                .padding(16.dp)
+                .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Surface(
-                shape = MaterialTheme.shapes.medium,
-                color = MaterialTheme.colorScheme.primaryContainer,
-                modifier = Modifier.size(48.dp)
+            // Icon space
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .background(Color.White, RoundedCornerShape(8.dp)),
+                contentAlignment = Alignment.Center
             ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(
-                        imageVector = activity.icon,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
-                }
+                icon()
             }
 
             Spacer(modifier = Modifier.width(16.dp))
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = activity.title,
-                    style = MaterialTheme.typography.titleMedium,
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
                     color = MaterialTheme.colorScheme.onSurface
                 )
-                Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = activity.description,
+                    text = subtitle,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
-            Icon(
-                imageVector = Icons.Default.ChevronRight,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            Spacer(modifier = Modifier.width(16.dp))
+
+            if (isSelected) {
+                Icon(
+                    imageVector = Icons.Default.CheckCircle,
+                    contentDescription = "Selected",
+                    tint = ThemePrimary
+                )
+            } else {
+                Icon(
+                    imageVector = Icons.Outlined.Circle,
+                    contentDescription = "Unselected",
+                    tint = MaterialTheme.colorScheme.outline
+                )
+            }
         }
     }
 }
+
+@Preview(showBackground = true)
+@Composable
+fun HomeScreenPreview() {
+    KycDemoTheme {
+        HomeScreen(onStartFlow = {}, onLegacyScreensClick = {})
+    }
+}
+

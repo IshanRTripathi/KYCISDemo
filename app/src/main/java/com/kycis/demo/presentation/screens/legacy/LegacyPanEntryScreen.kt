@@ -1,4 +1,4 @@
-package com.kycis.demo.presentation.screens
+package com.kycis.demo.presentation.screens.legacy
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -12,7 +12,7 @@ import com.kycis.demo.presentation.components.KycTextField
 import com.kycis.demo.presentation.state.PanState
 
 @Composable
-fun PanEntryScreen(
+fun LegacyPanEntryScreen(
     state: PanState,
     onPanChanged: (String) -> Unit,
     onContinue: () -> Unit,
@@ -76,3 +76,4 @@ fun PanEntryScreen(
         }
     }
 }
+

@@ -11,6 +11,18 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.kycis.demo.presentation.screens.*
+import com.kycis.demo.presentation.screens.legacy.LegacyAadhaarEntryScreen
+import com.kycis.demo.presentation.screens.legacy.LegacyHomeScreen
+import com.kycis.demo.presentation.screens.legacy.LegacyLoginScreen
+import com.kycis.demo.presentation.screens.legacy.LegacyMutualFundKycScreen
+import com.kycis.demo.presentation.screens.legacy.LegacyOnboardingScreen
+import com.kycis.demo.presentation.screens.legacy.LegacyOtpVerificationScreen
+import com.kycis.demo.presentation.screens.legacy.LegacyPanEntryScreen
+import com.kycis.demo.presentation.screens.legacy.LegacyPanUploadScreen
+import com.kycis.demo.presentation.screens.legacy.LegacyPersonalDetailsScreen
+import com.kycis.demo.presentation.screens.legacy.LegacySdkDebugScreen
+import com.kycis.demo.presentation.screens.legacy.LegacySelfieCaptureScreen
+import com.kycis.demo.presentation.screens.legacy.LegacySuccessScreen
 import com.kycis.demo.presentation.viewmodel.KycViewModel
 import com.kycis.sdk.AI
 
@@ -30,6 +42,21 @@ object Routes {
     const val MUTUAL_FUND_KYC = "mutual_fund_kyc"
 }
 
+object NewRoutes {
+    const val HOME = "new_home"
+    const val PHONE_ENTRY = "new_phone_entry"
+    const val PHONE_OTP = "new_phone_otp/{phone}"
+    const val EMAIL_ENTRY = "new_email_entry"
+    const val EMAIL_OTP = "new_email_otp/{email}"
+    const val PAN_DETAILS = "new_pan_details"
+    const val PERSONAL_DETAILS = "new_personal_details"
+    const val VERIFY_DOCUMENTS = "new_verify_documents"
+    const val UPLOAD_AADHAAR_FRONT = "new_upload_aadhaar_front"
+    const val UPLOAD_AADHAAR_BACK = "new_upload_aadhaar_back"
+    const val SELFIE_CAPTURE = "new_selfie_capture"
+    const val SIGNATURE = "new_signature"
+}
+
 @Composable
 fun KycNavGraph(
     navController: NavHostController,
@@ -37,11 +64,127 @@ fun KycNavGraph(
 ) {
     NavHost(
         navController = navController,
-        startDestination = Routes.ONBOARDING,
+        startDestination = NewRoutes.HOME,
         modifier = modifier.fillMaxSize()
     ) {
+        composable(NewRoutes.HOME) {
+            LaunchedEffect(Unit) { AI.setKycStep("new_home") }
+            HomeScreen(
+                onStartFlow = { navController.navigate(NewRoutes.PHONE_ENTRY) },
+                onLegacyScreensClick = { navController.navigate(Routes.ONBOARDING) }
+            )
+        }
+        
+        composable(NewRoutes.PHONE_ENTRY) {
+            LaunchedEffect(Unit) { AI.setKycStep("phone_entry") }
+            PhoneEntryScreen(
+                onBack = { navController.popBackStack() },
+                onGetOtp = { phone -> 
+                     val encodedPhone = java.net.URLEncoder.encode(phone, "UTF-8")
+                     navController.navigate(NewRoutes.PHONE_OTP.replace("{phone}", encodedPhone))
+                }
+            )
+        }
+        
+        composable(NewRoutes.PHONE_OTP) { backStackEntry -> 
+            val phone = backStackEntry.arguments?.getString("phone") ?: ""
+            val decodedPhone = java.net.URLDecoder.decode(phone, "UTF-8")
+            LaunchedEffect(Unit) { AI.setKycStep("phone_otp") }
+            PhoneOtpScreen(
+                phoneNumber = decodedPhone,
+                onBack = { navController.popBackStack() },
+                onVerify = { 
+                    navController.navigate(NewRoutes.EMAIL_ENTRY) 
+                },
+                onResendProvider = {}
+            )
+        }
+        
+        composable(NewRoutes.EMAIL_ENTRY) {
+            LaunchedEffect(Unit) { AI.setKycStep("email_entry") }
+            EmailEntryScreen(
+                onBack = { navController.popBackStack() },
+                onGetOtp = { email ->
+                    val encodedEmail = java.net.URLEncoder.encode(email, "UTF-8")
+                    navController.navigate(NewRoutes.EMAIL_OTP.replace("{email}", encodedEmail))
+                }
+            )
+        }
+        
+        composable(NewRoutes.EMAIL_OTP) { backStackEntry ->
+            val email = backStackEntry.arguments?.getString("email") ?: ""
+            val decodedEmail = java.net.URLDecoder.decode(email, "UTF-8")
+            LaunchedEffect(Unit) { AI.setKycStep("email_otp") }
+            EmailOtpScreen(
+                email = decodedEmail,
+                onBack = { navController.popBackStack() },
+                onVerify = {
+                    navController.navigate("new_pan_details")
+                },
+                onResendProvider = {}
+            )
+        }
+        composable(NewRoutes.PAN_DETAILS) {
+            LaunchedEffect(Unit) { AI.setKycStep("pan_details") }
+            PanDetailsScreen(
+                onBack = { navController.popBackStack() },
+                onNext = { navController.navigate(NewRoutes.PERSONAL_DETAILS) }
+            )
+        }
+
+        composable(NewRoutes.PERSONAL_DETAILS) {
+            LaunchedEffect(Unit) { AI.setKycStep("personal_details") }
+            PersonalDetailsScreen(
+                onBack = { navController.popBackStack() },
+                onProceed = { navController.navigate(NewRoutes.VERIFY_DOCUMENTS) }
+            )
+        }
+        
+        composable(NewRoutes.VERIFY_DOCUMENTS) {
+            LaunchedEffect(Unit) { AI.setKycStep("verify_documents") }
+            VerifyDocumentsScreen(
+                onBack = { navController.popBackStack() },
+                onProceedWithAadhaar = { navController.navigate(NewRoutes.UPLOAD_AADHAAR_FRONT) }, // Will lead to digilocker or direct upload
+                onOfflineProcess = { navController.navigate(NewRoutes.UPLOAD_AADHAAR_FRONT) }
+            )
+        }
+        
+        composable(NewRoutes.UPLOAD_AADHAAR_FRONT) {
+            LaunchedEffect(Unit) { AI.setKycStep("upload_aadhaar_front") }
+            UploadAadhaarScreen(
+                isFront = true,
+                onBack = { navController.popBackStack() },
+                onNext = { navController.navigate(NewRoutes.UPLOAD_AADHAAR_BACK) }
+            )
+        }
+
+        composable(NewRoutes.UPLOAD_AADHAAR_BACK) {
+            LaunchedEffect(Unit) { AI.setKycStep("upload_aadhaar_back") }
+            UploadAadhaarScreen(
+                isFront = false,
+                onBack = { navController.popBackStack() },
+                onNext = { navController.navigate(NewRoutes.SELFIE_CAPTURE) }
+            )
+        }
+        
+        composable(NewRoutes.SELFIE_CAPTURE) {
+            LaunchedEffect(Unit) { AI.setKycStep("new_selfie_capture") }
+            SelfieCaptureScreen(
+                onCaptured = { navController.navigate(NewRoutes.SIGNATURE) }
+            )
+        }
+        
+        composable(NewRoutes.SIGNATURE) {
+            LaunchedEffect(Unit) { AI.setKycStep("new_signature") }
+            SignatureScreen(
+                onBack = { navController.popBackStack() },
+                onSubmit = { navController.navigate(NewRoutes.HOME) { popUpTo(NewRoutes.HOME) { inclusive = true } } }
+            )
+        }
+        
         composable(Routes.ONBOARDING) {
-            OnboardingScreen(
+            LaunchedEffect(Unit) { AI.setKycStep("onboarding") }
+            LegacyOnboardingScreen(
                 onStartKyc = { navController.navigate(Routes.PERSONAL_DETAILS) },
                 onExploreAllDemos = { navController.navigate(Routes.HOME) },
             )
@@ -49,7 +192,8 @@ fun KycNavGraph(
 
         // Home Screen - Activity List (no shared ViewModel needed)
         composable(Routes.HOME) {
-            HomeScreen(
+            LaunchedEffect(Unit) { AI.setKycStep("home") }
+            LegacyHomeScreen(
                 onActivityClick = { activity ->
                     when (activity.id) {
                         "sdk_debug" -> navController.navigate(Routes.SDK_DEBUG)
@@ -66,12 +210,14 @@ fun KycNavGraph(
         }
 
         composable(Routes.SDK_DEBUG) {
-            SdkDebugScreen(onBack = { navController.popBackStack() })
+            LaunchedEffect(Unit) { AI.setKycStep("sdk_debug") }
+            LegacySdkDebugScreen(onBack = { navController.popBackStack() })
         }
 
         // Login Screen
         composable(Routes.LOGIN) {
-            LoginScreen(
+            LaunchedEffect(Unit) { AI.setKycStep("login") }
+            LegacyLoginScreen(
                 onStartJourney = { 
                     navController.navigate(Routes.PERSONAL_DETAILS)
                 }
@@ -83,7 +229,7 @@ fun KycNavGraph(
             val viewModel: KycViewModel = hiltViewModel(navController.getBackStackEntry(Routes.HOME))
             val state by viewModel.uiState.collectAsState()
             LaunchedEffect(Unit) { AI.setKycStep("personal_details") }
-            PersonalDetailsScreen(
+            LegacyPersonalDetailsScreen(
                 state = state.personalDetails,
                 isLoading = state.isLoading,
                 error = state.error,
@@ -105,7 +251,7 @@ fun KycNavGraph(
             val viewModel: KycViewModel = hiltViewModel(navController.getBackStackEntry(Routes.HOME))
             val state by viewModel.uiState.collectAsState()
             LaunchedEffect(Unit) { AI.setKycStep("pan_entry") }
-            PanEntryScreen(
+            LegacyPanEntryScreen(
                 state = state.panState,
                 onPanChanged = viewModel::onPanChanged,
                 onContinue = { 
@@ -123,7 +269,7 @@ fun KycNavGraph(
             val viewModel: KycViewModel = hiltViewModel(navController.getBackStackEntry(Routes.HOME))
             val state by viewModel.uiState.collectAsState()
             LaunchedEffect(Unit) { AI.setKycStep("pan_upload") }
-            PanUploadScreen(
+            LegacyPanUploadScreen(
                 state = state.panUploadState,
                 onImageCaptured = viewModel::onPanImageCaptured,
                 onRetryClick = viewModel::retryPanUpload,
@@ -142,7 +288,7 @@ fun KycNavGraph(
             val viewModel: KycViewModel = hiltViewModel(navController.getBackStackEntry(Routes.HOME))
             val state by viewModel.uiState.collectAsState()
             LaunchedEffect(Unit) { AI.setKycStep("aadhaar_entry") }
-            AadhaarEntryScreen(
+            LegacyAadhaarEntryScreen(
                 state = state.aadhaarState,
                 isLoading = state.isLoading,
                 onAadhaarChanged = viewModel::onAadhaarChanged,
@@ -160,7 +306,7 @@ fun KycNavGraph(
             val viewModel: KycViewModel = hiltViewModel(navController.getBackStackEntry(Routes.HOME))
             val state by viewModel.uiState.collectAsState()
             LaunchedEffect(Unit) { AI.setKycStep("otp_verify") }
-            OtpVerificationScreen(
+            LegacyOtpVerificationScreen(
                 state = state.otpState,
                 onDigitChange = viewModel::onOtpDigitChanged,
                 onVerify = { 
@@ -178,7 +324,7 @@ fun KycNavGraph(
             val viewModel: KycViewModel = hiltViewModel(navController.getBackStackEntry(Routes.HOME))
             val state by viewModel.uiState.collectAsState()
             LaunchedEffect(Unit) { AI.setKycStep("selfie_capture") }
-            SelfieCaptureScreen(
+            LegacySelfieCaptureScreen(
                 state = state.selfieState,
                 onImageCaptured = viewModel::onSelfieCaptured,
                 onRetryClick = viewModel::retrySelfie,
@@ -194,8 +340,9 @@ fun KycNavGraph(
 
         // Success Screen
         composable(Routes.SUCCESS) {
+            LaunchedEffect(Unit) { AI.setKycStep("success") }
             val viewModel: KycViewModel = hiltViewModel(navController.getBackStackEntry(Routes.HOME))
-            SuccessScreen(
+            LegacySuccessScreen(
                 onDone = { 
                     viewModel.restartJourney()
                     navController.navigate(Routes.HOME) {
@@ -213,7 +360,8 @@ fun KycNavGraph(
 
         // Mutual Fund KYC Screen (no shared ViewModel)
         composable(Routes.MUTUAL_FUND_KYC) {
-            MutualFundKycScreen(
+            LaunchedEffect(Unit) { AI.setKycStep("mutual_fund_kyc") }
+            LegacyMutualFundKycScreen(
                 onBack = { navController.popBackStack() },
                 onSubmit = { 
                     navController.navigate(Routes.SUCCESS)

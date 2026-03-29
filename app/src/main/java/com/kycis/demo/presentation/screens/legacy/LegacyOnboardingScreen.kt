@@ -1,4 +1,4 @@
-package com.kycis.demo.presentation.screens
+package com.kycis.demo.presentation.screens.legacy
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -46,7 +46,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun OnboardingScreen(
+fun LegacyOnboardingScreen(
     onStartKyc: () -> Unit,
     onExploreAllDemos: () -> Unit,
     modifier: Modifier = Modifier,
@@ -201,7 +201,7 @@ fun OnboardingScreen(
                     fontWeight = FontWeight.Bold,
                 )
                 Text(
-                    text = "Then call AI.setKycStep(...) per screen and let Voice FAB handle real-time assistance.",
+                    text = "Then call AI.setKycStep(...) per screen and AI.trackValidationFailure(...) on user-facing validation issues.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -331,3 +331,4 @@ private data class OnboardingFeature(
     val points: List<String>,
     val icon: ImageVector,
 )
+

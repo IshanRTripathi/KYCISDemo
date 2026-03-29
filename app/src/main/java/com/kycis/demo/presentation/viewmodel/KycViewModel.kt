@@ -45,6 +45,80 @@ class KycViewModel @Inject constructor(
 
     private var otpTimerJob: Job? = null
 
+    private fun trackValidationFailure(
+        code: String,
+        componentId: String,
+        componentType: String,
+        expectedPattern: String? = null,
+        validationRuleId: String? = null,
+        enteredValueRedacted: String? = null,
+        businessStep: String,
+        validationIntent: String,
+        recoveryPlaybookId: String? = null,
+    ) {
+        AI.trackValidationFailure(
+            failureReasonCode = code,
+            componentId = componentId,
+            componentType = componentType,
+            expectedPattern = expectedPattern,
+            validationRuleId = validationRuleId,
+            enteredValueRedacted = enteredValueRedacted,
+            businessStep = businessStep,
+            validationIntent = validationIntent,
+            recoveryPlaybookId = recoveryPlaybookId,
+        )
+    }
+
+    private fun reportPanInputForAssistant(pan: String) {
+        val redacted = when {
+            pan.length >= 10 -> pan.take(5) + "****" + pan.takeLast(1)
+            pan.isNotEmpty() -> pan.take(3) + "****"
+            else -> ""
+        }
+        AI.reportComponentInput(
+            componentId = "pan_field",
+            valueRedacted = redacted,
+            screen = "pan_entry",
+            componentType = "text_input",
+        )
+    }
+
+    private fun reportAadhaarInputForAssistant(digits: String) {
+        val redacted = if (digits.length >= 4) {
+            "********" + digits.takeLast(4)
+        } else {
+            "****"
+        }
+        AI.reportComponentInput(
+            componentId = "aadhaar_field",
+            valueRedacted = redacted,
+            screen = "aadhaar_entry",
+            componentType = "text_input",
+        )
+    }
+
+    private fun reportOtpProgressForAssistant(digits: List<String>) {
+        val filled = digits.count { it.isNotBlank() }
+        AI.reportComponentInput(
+            componentId = "otp_field",
+            valueRedacted = "*".repeat(filled) + ".".repeat((6 - filled).coerceAtLeast(0)),
+            screen = "otp_verify",
+            componentType = "otp_input",
+            properties = mapOf("digits_filled" to filled.toString()),
+        )
+    }
+
+    private fun reportPhoneInputForAssistant(phone: String) {
+        val digits = phone.filter { it.isDigit() }
+        val redacted = if (digits.length >= 4) "******" + digits.takeLast(4) else "******"
+        AI.reportComponentInput(
+            componentId = "phone_field",
+            valueRedacted = redacted,
+            screen = "personal_details",
+            componentType = "text_input",
+        )
+    }
+
     init {
         loadConfiguration()
         loadSavedProgress()
@@ -142,24 +216,25 @@ class KycViewModel @Inject constructor(
         validatePersonalDetails()
     }
 
-    fun onDateOfBirthChanged(value: String) {
-        _uiState.update { state ->
-            state.copy(
-                personalDetails = state.personalDetails.copy(
-                    dateOfBirth = value,
-                    dateOfBirthError = null
-                )
-            )
-        }
-        validatePersonalDetails()
-    }
-
     fun onPhoneNumberChanged(value: String) {
         _uiState.update { state ->
             state.copy(
                 personalDetails = state.personalDetails.copy(
                     phoneNumber = value.filter { it.isDigit() }.take(10),
                     phoneNumberError = null
+                )
+            )
+        }
+        validatePersonalDetails()
+        reportPhoneInputForAssistant(value.filter { it.isDigit() })
+    }
+
+    fun onDateOfBirthChanged(value: String) {
+        _uiState.update { state ->
+            state.copy(
+                personalDetails = state.personalDetails.copy(
+                    dateOfBirth = value,
+                    dateOfBirthError = null
                 )
             )
         }
@@ -258,6 +333,9 @@ class KycViewModel @Inject constructor(
 
             submitPersonalDetailsUseCase(personalDetails)
                 .onSuccess {
+                    val phone = details.phoneNumber.takeIf { it.isNotBlank() }
+                    val resolvedUserId = phone ?: details.email.takeIf { it.isNotBlank() } ?: "demo-user"
+                    AI.setUser(id = resolvedUserId, phone = phone)
                     _uiState.update { it.copy(isLoading = false) }
                     onSuccess()
                 }
@@ -280,6 +358,7 @@ class KycViewModel @Inject constructor(
             )
         }
         validatePAN()
+        reportPanInputForAssistant(upperValue)
     }
 
     private fun validatePAN() {
@@ -308,7 +387,18 @@ class KycViewModel @Inject constructor(
         return if (_uiState.value.panState.isValid) {
             true
         } else {
-            AI.trackError("pan_invalid")
+            val pan = _uiState.value.panState.panNumber
+            trackValidationFailure(
+                code = "pan_invalid",
+                componentId = "pan_field",
+                componentType = "text_input",
+                expectedPattern = "[A-Z]{5}[0-9]{4}[A-Z]",
+                validationRuleId = "pan_format_v1",
+                enteredValueRedacted = pan.take(5) + "****" + pan.takeLast(1),
+                businessStep = "PAN_ENTRY",
+                validationIntent = "PAN_FORMAT",
+                recoveryPlaybookId = "retry_pan_format",
+            )
             false
         }
     }
@@ -387,7 +477,15 @@ class KycViewModel @Inject constructor(
                     onSuccess()
                 }
                 .onFailure { error ->
-                    AI.trackError("pan_upload_failed")
+                    trackValidationFailure(
+                        code = "pan_upload_failed",
+                        componentId = "pan_upload_card",
+                        componentType = "document_upload",
+                        validationRuleId = "pan_document_quality_v1",
+                        businessStep = "PAN_UPLOAD",
+                        validationIntent = "PAN_IMAGE_QUALITY",
+                        recoveryPlaybookId = "retry_pan_upload",
+                    )
                     _uiState.update { state ->
                         state.copy(
                             panUploadState = state.panUploadState.copy(
@@ -422,6 +520,7 @@ class KycViewModel @Inject constructor(
             )
         }
         validateAadhaar()
+        reportAadhaarInputForAssistant(digits)
     }
 
     private fun formatAadhaar(digits: String): String {
@@ -438,7 +537,6 @@ class KycViewModel @Inject constructor(
                 }
             }
             is ValidationResult.Invalid -> {
-                AI.trackError("aadhaar_invalid")
                 _uiState.update { state ->
                     state.copy(
                         aadhaarState = state.aadhaarState.copy(
@@ -454,6 +552,24 @@ class KycViewModel @Inject constructor(
     fun submitAadhaar(onSuccess: () -> Unit = {}) {
         if (_uiState.value.aadhaarState.isValid) {
             sendOTP(onSuccess)
+        } else {
+            val raw = _uiState.value.aadhaarState.aadhaarNumber.filter { it.isDigit() }
+            val redacted = if (raw.length >= 4) {
+                "********" + raw.takeLast(4)
+            } else {
+                "****"
+            }
+            trackValidationFailure(
+                code = "aadhaar_invalid",
+                componentId = "aadhaar_field",
+                componentType = "text_input",
+                expectedPattern = "[0-9]{12}",
+                validationRuleId = "aadhaar_length_12_v1",
+                enteredValueRedacted = redacted,
+                businessStep = "AADHAAR_ENTRY",
+                validationIntent = "AADHAAR_LENGTH_12",
+                recoveryPlaybookId = "retry_aadhaar_entry",
+            )
         }
     }
 
@@ -512,6 +628,7 @@ class KycViewModel @Inject constructor(
                 )
             )
         }
+        reportOtpProgressForAssistant(newDigits)
     }
 
     fun verifyOTP(onSuccess: () -> Unit = {}) {
@@ -534,7 +651,17 @@ class KycViewModel @Inject constructor(
                     if (response.isValid) {
                         onSuccess()
                     } else {
-                        AI.trackError("otp_invalid")
+                        trackValidationFailure(
+                            code = "otp_invalid",
+                            componentId = "otp_field",
+                            componentType = "otp_input",
+                            expectedPattern = "[0-9]{6}",
+                            validationRuleId = "otp_6_digit_v1",
+                            enteredValueRedacted = "******",
+                            businessStep = "OTP_VERIFY",
+                            validationIntent = "OTP_INVALID_OR_EXPIRED",
+                            recoveryPlaybookId = "retry_otp_verify",
+                        )
                         _uiState.update { state ->
                             state.copy(
                                 otpState = state.otpState.copy(
@@ -635,7 +762,15 @@ class KycViewModel @Inject constructor(
                     onSuccess()
                 }
                 .onFailure { error ->
-                    AI.trackError("selfie_upload_failed")
+                    trackValidationFailure(
+                        code = "selfie_upload_failed",
+                        componentId = "selfie_capture",
+                        componentType = "camera_capture",
+                        validationRuleId = "selfie_quality_v1",
+                        businessStep = "SELFIE_CAPTURE",
+                        validationIntent = "SELFIE_IMAGE_QUALITY",
+                        recoveryPlaybookId = "retry_selfie_capture",
+                    )
                     _uiState.update { state ->
                         state.copy(
                             selfieState = state.selfieState.copy(

@@ -1,4 +1,4 @@
-package com.kycis.demo.presentation.screens
+package com.kycis.demo.presentation.screens.legacy
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -12,7 +12,7 @@ import com.kycis.demo.presentation.components.LoadingIndicator
 import com.kycis.demo.presentation.state.OtpState
 
 @Composable
-fun OtpVerificationScreen(
+fun LegacyOtpVerificationScreen(
     state: OtpState,
     onDigitChange: (Int, String) -> Unit,
     onVerify: () -> Unit,
@@ -91,3 +91,4 @@ fun OtpVerificationScreen(
         }
     }
 }
+

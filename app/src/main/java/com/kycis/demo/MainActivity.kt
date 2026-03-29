@@ -12,6 +12,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,6 +33,8 @@ import com.kycis.sdk.voice.VoiceFabType
 import com.kycis.sdk.voice.VoiceRoomConnector
 import com.kycis.sdk.voice.TranscriptBackground
 import dagger.hilt.android.AndroidEntryPoint
+import io.livekit.android.events.RoomEvent
+import io.livekit.android.events.collect
 import io.livekit.android.room.Room
 import kotlinx.coroutines.launch
 
@@ -66,6 +69,7 @@ class MainActivity : ComponentActivity() {
 private fun VoiceAssistantContent() {
     var voiceRoom by remember { mutableStateOf<Room?>(null) }
     var isMuted by remember { mutableStateOf(false) }
+    var stopNotified by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val currentActivity = context as? FragmentActivity
@@ -92,6 +96,7 @@ private fun VoiceAssistantContent() {
                     ) { room ->
                         voiceRoom = room
                         isMuted = false
+                        stopNotified = false
                     }
                 } catch (_: SecurityException) {
                     // RECORD_AUDIO not granted – user should grant in settings
@@ -101,6 +106,19 @@ private fun VoiceAssistantContent() {
         onDispose {
             AI.setVoiceSessionListener(null)
             voiceConnector.release()
+        }
+    }
+
+    LaunchedEffect(voiceRoom) {
+        val room = voiceRoom ?: return@LaunchedEffect
+        room.events.collect { event: RoomEvent ->
+            if (event is RoomEvent.Disconnected) {
+                voiceRoom = null
+                if (!stopNotified) {
+                    stopNotified = true
+                    AI.stopAssistant()
+                }
+            }
         }
     }
 
@@ -122,11 +140,15 @@ private fun VoiceAssistantContent() {
             onEndCall = {
                 voiceConnector.disconnect()
                 voiceRoom = null
+                if (!stopNotified) {
+                    stopNotified = true
+                    AI.stopAssistant()
+                }
             },
             onStartClick = { AI.startAssistant() },
             fabType = VoiceFabType.PREMIUM,
             config = VoiceFabConfig(
-                assistantName = "Sophie",
+                assistantName = "Ishan",
                 transcriptBackground = TranscriptBackground.DotGrid,
             ),
             modifier = Modifier

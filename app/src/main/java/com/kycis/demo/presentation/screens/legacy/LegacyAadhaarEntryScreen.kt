@@ -1,4 +1,4 @@
-package com.kycis.demo.presentation.screens
+package com.kycis.demo.presentation.screens.legacy
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -13,7 +13,7 @@ import com.kycis.demo.presentation.components.LoadingIndicator
 import com.kycis.demo.presentation.state.AadhaarState
 
 @Composable
-fun AadhaarEntryScreen(
+fun LegacyAadhaarEntryScreen(
     state: AadhaarState,
     isLoading: Boolean,
     onAadhaarChanged: (String) -> Unit,
@@ -83,3 +83,4 @@ fun AadhaarEntryScreen(
         }
     }
 }
+

@@ -2,10 +2,16 @@ package com.kycis.demo.presentation.theme
 
 import androidx.compose.ui.graphics.Color
 
+// New Vibrant Light Theme Colors
+val ThemePrimary = Color(0xFF0EAD69)
+val ThemePrimaryVariant = Color(0xFF0B8A53)
+val ThemePrimaryLight = Color(0xFFE7F7F0)
+
 // Primary colors - Trust and Security
 val Blue700 = Color(0xFF1565C0)
 val Blue500 = Color(0xFF2196F3)
 val Blue200 = Color(0xFF90CAF9)
+val BlueLight = Color(0xFFE8F0FE)
 
 // Secondary colors - Success
 val Green700 = Color(0xFF2E7D32)

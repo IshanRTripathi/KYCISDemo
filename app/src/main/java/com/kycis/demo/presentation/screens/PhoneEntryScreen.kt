@@ -8,6 +8,8 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -16,7 +18,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.kycis.demo.presentation.HintKind
 import com.kycis.demo.presentation.theme.KycDemoTheme
+import com.kycis.demo.presentation.maskHint
+import com.kycis.sdk.AI
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -41,6 +46,11 @@ fun PhoneEntryScreen(
                         contentDescription = "Back",
                         tint = MaterialTheme.colorScheme.onBackground
                     )
+                }
+            },
+            actions = {
+                TextButton(onClick = { onGetOtp("9999999999") }) {
+                    Text("Skip", color = MaterialTheme.colorScheme.primary)
                 }
             },
             colors = TopAppBarDefaults.topAppBarColors(
@@ -76,9 +86,28 @@ fun PhoneEntryScreen(
 
             val isPhoneValid = phoneNumber.length == 10 && phoneNumber.all { it.isDigit() }
 
+            LaunchedEffect(Unit) {
+                snapshotFlow { phoneNumber }
+                    .debounce(600L)
+                    .collectLatest { p ->
+                        if (p.isEmpty()) return@collectLatest
+                        val digits = p.filter { ch -> ch.isDigit() }
+                        AI.reportComponentInput(
+                            componentId = "phone_field",
+                            hint = maskHint(HintKind.PHONE, digits),
+                            screen = "phone_entry",
+                            componentType = "text_input",
+                        )
+                    }
+            }
+
             OutlinedTextField(
                 value = phoneNumber,
-                onValueChange = { if (it.length <= 10) phoneNumber = it },
+                onValueChange = {
+                    if (it.length <= 10) {
+                        phoneNumber = it
+                    }
+                },
                 label = { Text("10-digit mobile number") },
                 placeholder = { Text("Phone no.") },
                 modifier = Modifier.fillMaxWidth(),

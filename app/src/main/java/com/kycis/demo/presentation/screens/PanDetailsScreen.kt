@@ -17,7 +17,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.kycis.demo.presentation.HintKind
+import com.kycis.demo.presentation.maskHint
 import com.kycis.demo.presentation.theme.KycDemoTheme
+import com.kycis.sdk.AI
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,6 +58,11 @@ fun PanDetailsScreen(
                     )
                 }
             },
+            actions = {
+                TextButton(onClick = onNext) {
+                    Text("Skip", color = MaterialTheme.colorScheme.primary)
+                }
+            },
             colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = Color.Transparent
             ),
@@ -76,6 +86,21 @@ fun PanDetailsScreen(
             val isPanValid = panNumber.matches(panRegex)
             val isDobValid = dob.isNotEmpty()
             val canProceed = isPanValid && isDobValid && agreedToTerms
+
+            LaunchedEffect(Unit) {
+                snapshotFlow { panNumber }
+                    .debounce(600L)
+                    .collectLatest { raw ->
+                        val p = raw.filter { c -> c.isLetterOrDigit() }
+                        if (p.isEmpty()) return@collectLatest
+                        AI.reportComponentInput(
+                            componentId = "n_pan_field",
+                            hint = maskHint(HintKind.PAN, p),
+                            screen = "pan_details",
+                            componentType = "text_input",
+                        )
+                    }
+            }
 
             OutlinedTextField(
                 value = panNumber,
@@ -127,7 +152,26 @@ fun PanDetailsScreen(
                     .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(12.dp)),
                 contentAlignment = Alignment.Center
             ) {
-                Text("PAN Card Mockup Here", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                val context = androidx.compose.ui.platform.LocalContext.current
+                val imageLoader = coil.ImageLoader.Builder(context)
+                    .components {
+                        if (android.os.Build.VERSION.SDK_INT >= 28) {
+                            add(coil.decode.ImageDecoderDecoder.Factory())
+                        } else {
+                            add(coil.decode.GifDecoder.Factory())
+                        }
+                    }
+                    .build()
+
+                coil.compose.AsyncImage(
+                    model = coil.request.ImageRequest.Builder(context)
+                        .data("file:///android_asset/PanCard.gif")
+                        .build(),
+                    imageLoader = imageLoader,
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize().padding(16.dp),
+                    contentScale = androidx.compose.ui.layout.ContentScale.Fit
+                )
             }
 
             Spacer(modifier = Modifier.weight(1f))

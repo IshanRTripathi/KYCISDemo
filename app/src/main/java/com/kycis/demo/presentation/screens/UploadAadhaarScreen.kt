@@ -20,6 +20,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kycis.demo.presentation.theme.KycDemoTheme
+import com.kycis.sdk.AI
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -109,7 +110,15 @@ fun UploadAadhaarScreen(
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    IconButton(onClick = { isFileUploaded = true }) {
+                    IconButton(onClick = { 
+                        isFileUploaded = true
+                        AI.reportComponentInput(
+                            componentId = if (isFront) "n_aadhaar_front" else "n_aadhaar_back",
+                            hint = "file_uploaded.png",
+                            screen = if (isFront) "upload_aadhaar_front" else "upload_aadhaar_back",
+                            componentType = "file_upload"
+                        )
+                    }) {
                         Icon(
                             imageVector = Icons.Default.CloudUpload,
                             contentDescription = "Upload",

@@ -17,6 +17,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kycis.demo.presentation.theme.KycDemoTheme
+import com.kycis.sdk.AI
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -100,7 +101,15 @@ fun SignatureScreen(
             Spacer(modifier = Modifier.weight(1f))
 
             Button(
-                onClick = onSubmit,
+                onClick = {
+                    AI.reportComponentInput(
+                        componentId = "n_signature_pad",
+                        hint = "signature_submitted",
+                        screen = "new_signature",
+                        componentType = "button",
+                    )
+                    onSubmit()
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),

@@ -16,6 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.kycis.sdk.AI
 import com.kycis.demo.presentation.theme.KycDemoTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -80,18 +81,26 @@ fun VerifyDocumentsScreen(
                     .weight(1f),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = Icons.Default.AssignmentInd,
+                coil.compose.AsyncImage(
+                    model = "file:///android_asset/adhaar_verification_image.png",
                     contentDescription = null,
-                    modifier = Modifier.size(160.dp),
-                    tint = MaterialTheme.colorScheme.primaryContainer
+                    modifier = Modifier.size(240.dp),
+                    contentScale = androidx.compose.ui.layout.ContentScale.Fit
                 )
             }
 
             Spacer(modifier = Modifier.height(32.dp))
 
             Button(
-                onClick = onProceedWithAadhaar,
+                onClick = {
+                    AI.reportComponentInput(
+                        componentId = "n_document_checklist",
+                        hint = "documents_checklist",
+                        screen = "verify_documents",
+                        componentType = "button",
+                    )
+                    onProceedWithAadhaar()
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
@@ -108,7 +117,15 @@ fun VerifyDocumentsScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             OutlinedButton(
-                onClick = onOfflineProcess,
+                onClick = {
+                    AI.reportComponentInput(
+                        componentId = "n_document_checklist",
+                        hint = "documents_checklist",
+                        screen = "verify_documents",
+                        componentType = "button",
+                    )
+                    onOfflineProcess()
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),

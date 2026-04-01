@@ -112,3 +112,6 @@ test-output/
 
 # Dependency reduced POM (Gradle shadow)
 dependency_reduced_pom.xml
+
+# Project specific
+reverse-engineered-data/

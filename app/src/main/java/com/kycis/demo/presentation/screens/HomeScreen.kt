@@ -26,7 +26,6 @@ import com.kycis.demo.presentation.theme.ThemePrimary
 @Composable
 fun HomeScreen(
     onStartFlow: () -> Unit,
-    onLegacyScreensClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var selectedFlow by remember { mutableStateOf("kyc") }
@@ -93,16 +92,6 @@ fun HomeScreen(
         )
 
         Spacer(modifier = Modifier.weight(1f))
-
-        // Legacy Button requested by user
-        TextButton(
-            onClick = onLegacyScreensClick,
-            modifier = Modifier.align(Alignment.CenterHorizontally)
-        ) {
-            Text("Legacy Screens", color = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
 
         // Start Button
         Button(
@@ -197,7 +186,7 @@ private fun FlowSelectionCard(
 @Composable
 fun HomeScreenPreview() {
     KycDemoTheme {
-        HomeScreen(onStartFlow = {}, onLegacyScreensClick = {})
+        HomeScreen(onStartFlow = {})
     }
 }
 

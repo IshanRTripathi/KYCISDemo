@@ -9,6 +9,8 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -16,7 +18,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.kycis.demo.presentation.HintKind
 import com.kycis.demo.presentation.theme.KycDemoTheme
+import com.kycis.demo.presentation.maskHint
+import com.kycis.sdk.AI
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -41,6 +46,11 @@ fun EmailEntryScreen(
                         contentDescription = "Back",
                         tint = MaterialTheme.colorScheme.onBackground
                     )
+                }
+            },
+            actions = {
+                TextButton(onClick = { onGetOtp("demo@example.com") }) {
+                    Text("Skip", color = MaterialTheme.colorScheme.primary)
                 }
             },
             colors = TopAppBarDefaults.topAppBarColors(
@@ -76,6 +86,20 @@ fun EmailEntryScreen(
 
             val emailRegex = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$".toRegex()
             val isEmailValid = email.matches(emailRegex)
+
+            LaunchedEffect(Unit) {
+                snapshotFlow { email }
+                    .debounce(600L)
+                    .collectLatest { raw ->
+                        if (raw.isEmpty()) return@collectLatest
+                        AI.reportComponentInput(
+                            componentId = "n_email_field",
+                            hint = maskHint(HintKind.EMAIL, raw),
+                            screen = "email_entry",
+                            componentType = "text_input",
+                        )
+                    }
+            }
 
             OutlinedTextField(
                 value = email,

@@ -7,7 +7,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -17,7 +16,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.kycis.demo.presentation.form.DemoFormOptions
+import com.kycis.demo.presentation.HintKind
 import com.kycis.demo.presentation.theme.KycDemoTheme
+import com.kycis.demo.presentation.maskHint
+import com.kycis.sdk.AI
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -55,6 +60,11 @@ fun PersonalDetailsScreen(
                     )
                 }
             },
+            actions = {
+                TextButton(onClick = onProceed) {
+                    Text("Skip", color = MaterialTheme.colorScheme.primary)
+                }
+            },
             colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = Color.Transparent
             ),
@@ -70,6 +80,34 @@ fun PersonalDetailsScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             val isFormValid = name.isNotEmpty() && gender.isNotEmpty() && maritalStatus.isNotEmpty() && residencyStatus.isNotEmpty() && fatherName.isNotEmpty()
+
+            LaunchedEffect(Unit) {
+                snapshotFlow { name }
+                    .debounce(600L)
+                    .collectLatest { n ->
+                        if (n.isBlank()) return@collectLatest
+                        AI.reportComponentInput(
+                            componentId = "n_full_name",
+                            hint = maskHint(HintKind.NAME, n),
+                            screen = "new_personal_details",
+                            componentType = "text_input",
+                        )
+                    }
+            }
+
+            LaunchedEffect(Unit) {
+                snapshotFlow { fatherName }
+                    .debounce(600L)
+                    .collectLatest { f ->
+                        if (f.isBlank()) return@collectLatest
+                        AI.reportComponentInput(
+                            componentId = "n_father_name",
+                            hint = maskHint(HintKind.FATHER_NAME, f),
+                            screen = "new_personal_details",
+                            componentType = "text_input",
+                        )
+                    }
+            }
 
             OutlinedTextField(
                 value = name,
@@ -88,29 +126,35 @@ fun PersonalDetailsScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            DropdownField(
+            ExposedPickListField(
                 label = "Gender",
                 value = gender,
                 placeholder = "Select Gender",
-                onValueChange = { gender = it }
+                options = DemoFormOptions.GENDER,
+                sdkComponentId = "n_gender",
+                onValueChange = { gender = it },
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            DropdownField(
+            ExposedPickListField(
                 label = "Marital Status",
                 value = maritalStatus,
                 placeholder = "Select Marital Status",
-                onValueChange = { maritalStatus = it }
+                options = DemoFormOptions.MARITAL_STATUS,
+                sdkComponentId = "n_marital_status",
+                onValueChange = { maritalStatus = it },
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            DropdownField(
+            ExposedPickListField(
                 label = "Residency Status",
                 value = residencyStatus,
                 placeholder = "Select Residency Status",
-                onValueChange = { residencyStatus = it }
+                options = DemoFormOptions.RESIDENCY_STATUS,
+                sdkComponentId = "n_residency_status",
+                onValueChange = { residencyStatus = it },
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -156,54 +200,57 @@ fun PersonalDetailsScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun DropdownField(
+private fun ExposedPickListField(
     label: String,
     value: String,
     placeholder: String,
-    onValueChange: (String) -> Unit
+    options: List<String>,
+    sdkComponentId: String,
+    onValueChange: (String) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
 
-    Box {
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = it },
+    ) {
         OutlinedTextField(
             value = value,
             onValueChange = {},
             readOnly = true,
             label = { Text(label) },
             placeholder = { Text(placeholder) },
-            trailingIcon = {
-                IconButton(onClick = { expanded = true }) {
-                    Icon(Icons.Default.KeyboardArrowDown, contentDescription = "Dropdown")
-                }
-            },
-            modifier = Modifier.fillMaxWidth(),
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .menuAnchor(),
             shape = RoundedCornerShape(12.dp),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = MaterialTheme.colorScheme.primary,
-                unfocusedBorderColor = MaterialTheme.colorScheme.outline
-            )
+                unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+            ),
         )
-        // Dummy dropdown just for UI behavior
-        DropdownMenu(
+        ExposedDropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
-            modifier = Modifier.fillMaxWidth(0.8f)
         ) {
-            DropdownMenuItem(
-                text = { Text("Option 1") },
-                onClick = {
-                    onValueChange("Option 1")
-                    expanded = false
-                }
-            )
-            DropdownMenuItem(
-                text = { Text("Option 2") },
-                onClick = {
-                    onValueChange("Option 2")
-                    expanded = false
-                }
-            )
+            options.forEach { option ->
+                DropdownMenuItem(
+                    text = { Text(option) },
+                    onClick = {
+                        onValueChange(option)
+                        expanded = false
+                        AI.reportComponentInput(
+                            componentId = sdkComponentId,
+                            hint = option,
+                            screen = "new_personal_details",
+                            componentType = "dropdown",
+                        )
+                    },
+                )
+            }
         }
     }
 }

@@ -338,21 +338,31 @@ AI.init(
 
 ---
 
-## Screen Tracking
+## Screen tracking
+
+Use the SDK step hint (same contract as KYCIS `API_CONTRACTS.md`):
 
 ```kotlin
-AI.trackScreen("pan_upload")
+AI.setKycStep("pan_upload")
 ```
 
 ---
 
-## Event Tracking
+## Event tracking
+
+- Field / rule validation → **`validation_failed`** on the backend:
 
 ```kotlin
-AI.trackEvent(
-    "validation_error",
-    mapOf("field" to "pan")
+AI.trackValidationFailure(
+    failureReasonCode = "pan_invalid",
+    componentId = "pan_field",
 )
+```
+
+- Generic errors (network, non-field) → **`error_reported`**:
+
+```kotlin
+AI.trackError("network_timeout", properties = mapOf("endpoint" to "/api/kyc"))
 ```
 
 ---

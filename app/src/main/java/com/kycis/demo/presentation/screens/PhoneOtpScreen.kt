@@ -19,7 +19,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.kycis.demo.presentation.HintKind
+import com.kycis.demo.presentation.maskHint
 import com.kycis.demo.presentation.theme.KycDemoTheme
+import com.kycis.sdk.AI
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -47,6 +50,11 @@ fun PhoneOtpScreen(
                         contentDescription = "Back",
                         tint = MaterialTheme.colorScheme.onBackground
                     )
+                }
+            },
+            actions = {
+                TextButton(onClick = { onVerify("0000") }) {
+                    Text("Skip", color = MaterialTheme.colorScheme.primary)
                 }
             },
             colors = TopAppBarDefaults.topAppBarColors(
@@ -79,6 +87,17 @@ fun PhoneOtpScreen(
             )
 
             Spacer(modifier = Modifier.height(32.dp))
+
+            LaunchedEffect(otpValue) {
+                if (otpValue.length != otpLength) return@LaunchedEffect
+                AI.reportComponentInput(
+                    componentId = "n_phone_otp_field",
+                    hint = maskHint(HintKind.OTP, otpValue),
+                    screen = "phone_otp",
+                    componentType = "otp_input",
+                    properties = mapOf("digits_filled" to otpLength.toString()),
+                )
+            }
 
             // Custom OTP digits row
             BasicTextField(
@@ -123,7 +142,10 @@ fun PhoneOtpScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            Row(modifier = Modifier.align(Alignment.CenterHorizontally)) {
+            Row(
+                modifier = Modifier.align(Alignment.CenterHorizontally),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Text(
                     text = "Didn't get a code? ",
                     style = MaterialTheme.typography.bodyMedium,

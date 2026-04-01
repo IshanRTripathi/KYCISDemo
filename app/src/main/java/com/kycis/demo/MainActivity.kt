@@ -138,12 +138,14 @@ private fun VoiceAssistantContent() {
                 }
             },
             onEndCall = {
-                voiceConnector.disconnect()
-                voiceRoom = null
+                // Notify backend before tearing down the room so we do not race with
+                // RoomEvent.Disconnected (which would otherwise issue a second stop).
                 if (!stopNotified) {
                     stopNotified = true
                     AI.stopAssistant()
                 }
+                voiceConnector.disconnect()
+                voiceRoom = null
             },
             onStartClick = { AI.startAssistant() },
             fabType = VoiceFabType.PREMIUM,

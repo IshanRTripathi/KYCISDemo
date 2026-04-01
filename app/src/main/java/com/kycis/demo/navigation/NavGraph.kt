@@ -37,7 +37,7 @@ fun KycNavGraph(
         modifier = modifier.fillMaxSize()
     ) {
         composable(Routes.HOME) {
-            LaunchedEffect(Unit) { AI.setKycStep("home") }
+            LaunchedEffect(Unit) { AI.setKycStep("new_home") }
             HomeScreen(
                 onStartFlow = { navController.navigate(Routes.PHONE_ENTRY) }
             )
@@ -122,7 +122,7 @@ fun KycNavGraph(
         }
 
         composable(Routes.DIGILOCKER_AADHAAR) {
-            LaunchedEffect(Unit) { AI.setKycStep("digilocker_aadhaar") }
+            LaunchedEffect(Unit) { AI.setKycStep("new_digilocker_aadhaar") }
             DigilockerAadhaarScreen(
                 onBack = { navController.popBackStack() },
                 onNext = { navController.navigate(Routes.SELFIE_CAPTURE) },
@@ -149,14 +149,14 @@ fun KycNavGraph(
         }
 
         composable(Routes.SELFIE_CAPTURE) {
-            LaunchedEffect(Unit) { AI.setKycStep("selfie_capture") }
+            LaunchedEffect(Unit) { AI.setKycStep("new_selfie_capture") }
             SelfieCaptureScreen(
                 onCaptured = { navController.navigate(Routes.SIGNATURE) }
             )
         }
 
         composable(Routes.SIGNATURE) {
-            LaunchedEffect(Unit) { AI.setKycStep("signature") }
+            LaunchedEffect(Unit) { AI.setKycStep("new_signature") }
             SignatureScreen(
                 onBack = { navController.popBackStack() },
                 onSubmit = { navController.navigate(Routes.HOME) { popUpTo(Routes.HOME) { inclusive = true } } }

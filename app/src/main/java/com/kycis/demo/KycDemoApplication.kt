@@ -6,13 +6,10 @@ import android.widget.Toast
 import com.kycis.sdk.AI
 import com.kycis.sdk.core.ComponentSchema
 import com.kycis.sdk.core.ComponentType
-import com.kycis.sdk.core.ConfirmUiText
-import com.kycis.sdk.core.KycStepStrategy
-import com.kycis.sdk.core.RuntimePolicy
+import com.kycis.sdk.core.ConfigDuration
+import com.kycis.sdk.core.KycisConfig
 import com.kycis.sdk.core.ScreenSchema
 import com.kycis.sdk.core.SdkStatusCode
-import com.kycis.sdk.core.TriggerSettings
-import com.kycis.sdk.core.TriggerStartMode
 import com.kycis.sdk.core.ValidationRule
 import dagger.hilt.android.HiltAndroidApp
 
@@ -486,34 +483,28 @@ class KycDemoApplication : Application() {
             ),
         ))
 
+        // Configure SDK with simplified KycisConfig
+        KycisConfig.init {
+            apiKey = "demo-api-key"
+            appVersion = "1.0.0"
+            clientId = "kycis_demo"
+            
+            // Trigger settings
+            triggerMode = KycisConfig.TriggerMode.CONFIRM_UI
+            triggerTimeSpent = ConfigDuration(15)
+            autoTrigger = true
+            kycStepStrategy = KycisConfig.KycStepMode.HINT_THEN_INFER
+            
+            // Passive evaluation
+            passiveEval = true
+            evalInterval = ConfigDuration(10)
+        }
+
+        // Initialize SDK (uses KycisConfig for settings)
         AI.init(
             application = this,
-            apiKey = "demo-api-key",
             userId = "demo-user",
-            policy = RuntimePolicy(
-                // backendBaseUrl defaults to BuildConfig.KYCIS_BACKEND_URL
-                // For emulator: http://10.0.2.2:8000/v1
-                clientId = "kycis_demo",
-                mappingVersion = "v1",
-                appVersion = "1.0.0",
-                minTriggerIntervalSeconds = 15,
-                triggerStartMode = TriggerStartMode.CONFIRM_UI,
-                kycStepStrategy = KycStepStrategy.HINT_THEN_INFER,
-                triggerSettings = TriggerSettings(
-                    autoTriggerEnabled = true,
-                    includeErrorSignals = true,
-                    includeTimeSpentSignals = true,
-                    includeIdleSignals = false,
-                    includeStepHints = true,
-                ),
-                confirmUiText = ConfirmUiText(
-                    title = "Need help completing this step?",
-                    startCta = "Start",
-                    dismissCta = "Not now",
-                ),
-                passiveEvalEnabled = true,
-                passiveEvalIntervalSeconds = 10,
-            ),
+            mappingVersion = "v1",
         )
         AI.attach(this)
     }

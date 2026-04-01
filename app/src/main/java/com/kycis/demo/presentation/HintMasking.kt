@@ -23,7 +23,7 @@ private const val COMPONENT_INPUT_HINTS_MASKED_FEATURE = "component_input_hints_
  */
 fun componentInputHintsAreMasked(): Boolean {
     return runCatching {
-        AI.getConfig().isFeatureEnabled(COMPONENT_INPUT_HINTS_MASKED_FEATURE)
+        AI.isFeatureEnabled(COMPONENT_INPUT_HINTS_MASKED_FEATURE)
     }.getOrDefault(true) // Fail closed: prefer masking if config isn't available.
 }
 

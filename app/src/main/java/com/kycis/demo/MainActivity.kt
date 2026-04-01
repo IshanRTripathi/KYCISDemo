@@ -55,6 +55,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    @Deprecated("Deprecated in Java 13, kept for Hilt compatibility")
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
@@ -154,8 +155,7 @@ private fun VoiceAssistantContent() {
                 transcriptBackground = TranscriptBackground.DotGrid,
             ),
             modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(24.dp),
+                .align(Alignment.BottomEnd),
         )
     }
 }

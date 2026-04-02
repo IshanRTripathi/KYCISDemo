@@ -17,7 +17,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kycis.demo.presentation.theme.KycDemoTheme
-import com.kycis.sdk.AI
+import com.kycis.sdk.ui.KycEvent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -102,10 +102,10 @@ fun SignatureScreen(
 
             Button(
                 onClick = {
-                    AI.reportComponentInput(
-                        componentId = "n_signature_pad",
+                    KycEvent.componentInput(
+                        componentId = "signature_field",
                         hint = "signature_submitted",
-                        screen = "new_signature",
+                        screen = "signature",
                         componentType = "button",
                     )
                     onSubmit()

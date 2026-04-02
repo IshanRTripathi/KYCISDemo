@@ -9,7 +9,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -17,15 +16,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kycis.demo.presentation.form.DemoFormOptions
-import com.kycis.demo.presentation.HintKind
 import com.kycis.demo.presentation.theme.KycDemoTheme
-import com.kycis.demo.presentation.maskHint
-import com.kycis.sdk.AI
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.debounce
+import com.kycis.sdk.ui.KycEvent
 
-@OptIn(ExperimentalMaterial3Api::class, FlowPreview::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PersonalDetailsScreen(
     onBack: () -> Unit,
@@ -82,32 +76,39 @@ fun PersonalDetailsScreen(
 
             val isFormValid = name.isNotEmpty() && gender.isNotEmpty() && maritalStatus.isNotEmpty() && residencyStatus.isNotEmpty() && fatherName.isNotEmpty()
 
-            LaunchedEffect(Unit) {
-                snapshotFlow { name }
-                    .debounce(600L)
-                    .collectLatest { n ->
-                        if (n.isBlank()) return@collectLatest
-                        AI.reportComponentInput(
-                            componentId = "n_full_name",
-                            hint = maskHint(HintKind.NAME, n),
-                            screen = "new_personal_details",
-                            componentType = "text_input",
-                        )
-                    }
+            // Auto-capture using SDK's KycEvent with debounce
+            var debouncedName by remember { mutableStateOf("") }
+            LaunchedEffect(name) {
+                kotlinx.coroutines.delay(600)
+                debouncedName = name
+            }
+            LaunchedEffect(debouncedName) {
+                if (debouncedName.isNotBlank()) {
+                    // Send unmasked value so the agent can see what the user actually typed
+                    KycEvent.componentInput(
+                        componentId = "name_field",
+                        hint = debouncedName,
+                        screen = "personal_details",
+                        componentType = "text_input",
+                    )
+                }
             }
 
-            LaunchedEffect(Unit) {
-                snapshotFlow { fatherName }
-                    .debounce(600L)
-                    .collectLatest { f ->
-                        if (f.isBlank()) return@collectLatest
-                        AI.reportComponentInput(
-                            componentId = "n_father_name",
-                            hint = maskHint(HintKind.FATHER_NAME, f),
-                            screen = "new_personal_details",
-                            componentType = "text_input",
-                        )
-                    }
+            var debouncedFatherName by remember { mutableStateOf("") }
+            LaunchedEffect(fatherName) {
+                kotlinx.coroutines.delay(600)
+                debouncedFatherName = fatherName
+            }
+            LaunchedEffect(debouncedFatherName) {
+                if (debouncedFatherName.isNotBlank()) {
+                    // Send unmasked value so the agent can see what the user actually typed
+                    KycEvent.componentInput(
+                        componentId = "father_name_field",
+                        hint = debouncedFatherName,
+                        screen = "personal_details",
+                        componentType = "text_input",
+                    )
+                }
             }
 
             OutlinedTextField(
@@ -132,7 +133,7 @@ fun PersonalDetailsScreen(
                 value = gender,
                 placeholder = "Select Gender",
                 options = DemoFormOptions.GENDER,
-                sdkComponentId = "n_gender",
+                sdkComponentId = "gender_field",
                 onValueChange = { gender = it },
             )
 
@@ -143,7 +144,7 @@ fun PersonalDetailsScreen(
                 value = maritalStatus,
                 placeholder = "Select Marital Status",
                 options = DemoFormOptions.MARITAL_STATUS,
-                sdkComponentId = "n_marital_status",
+                sdkComponentId = "marital_status_field",
                 onValueChange = { maritalStatus = it },
             )
 
@@ -154,7 +155,7 @@ fun PersonalDetailsScreen(
                 value = residencyStatus,
                 placeholder = "Select Residency Status",
                 options = DemoFormOptions.RESIDENCY_STATUS,
-                sdkComponentId = "n_residency_status",
+                sdkComponentId = "residency_status_field",
                 onValueChange = { residencyStatus = it },
             )
 
@@ -243,10 +244,10 @@ private fun ExposedPickListField(
                     onClick = {
                         onValueChange(option)
                         expanded = false
-                        AI.reportComponentInput(
+                        KycEvent.componentInput(
                             componentId = sdkComponentId,
                             hint = option,
-                            screen = "new_personal_details",
+                            screen = "personal_details",
                             componentType = "dropdown",
                         )
                     },

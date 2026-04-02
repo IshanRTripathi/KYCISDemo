@@ -18,10 +18,10 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.kycis.demo.presentation.HintKind
-import com.kycis.demo.presentation.maskHint
 import com.kycis.demo.presentation.theme.KycDemoTheme
-import com.kycis.sdk.AI
+import com.kycis.sdk.ui.HintKind
+import com.kycis.sdk.ui.KycEvent
+import com.kycis.sdk.ui.maskHint
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -90,8 +90,8 @@ fun EmailOtpScreen(
 
             LaunchedEffect(otpValue) {
                 if (otpValue.length != otpLength) return@LaunchedEffect
-                AI.reportComponentInput(
-                    componentId = "n_email_otp_field",
+                KycEvent.componentInput(
+                    componentId = "email_otp_field",
                     hint = maskHint(HintKind.OTP, otpValue),
                     screen = "email_otp",
                     componentType = "otp_input",

@@ -16,7 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.kycis.sdk.AI
+import com.kycis.sdk.ui.KycEvent
 import com.kycis.demo.presentation.theme.KycDemoTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -93,9 +93,9 @@ fun VerifyDocumentsScreen(
 
             Button(
                 onClick = {
-                    AI.reportComponentInput(
-                        componentId = "n_document_checklist",
-                        hint = "documents_checklist",
+                    KycEvent.componentInput(
+                        componentId = "verify_documents_button",
+                        hint = "proceed_with_aadhaar",
                         screen = "verify_documents",
                         componentType = "button",
                     )
@@ -118,9 +118,9 @@ fun VerifyDocumentsScreen(
 
             OutlinedButton(
                 onClick = {
-                    AI.reportComponentInput(
-                        componentId = "n_document_checklist",
-                        hint = "documents_checklist",
+                    KycEvent.componentInput(
+                        componentId = "verify_documents_button",
+                        hint = "offline_process",
                         screen = "verify_documents",
                         componentType = "button",
                     )

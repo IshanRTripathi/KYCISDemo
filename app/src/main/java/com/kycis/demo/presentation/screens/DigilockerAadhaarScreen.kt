@@ -15,16 +15,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.kycis.demo.R
 import com.kycis.demo.presentation.theme.KycDemoTheme
-import com.kycis.demo.presentation.HintKind
-import com.kycis.demo.presentation.maskHint
-import com.kycis.sdk.AI
+import com.kycis.sdk.ui.KycEvent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -114,7 +115,19 @@ fun DigilockerAadhaarScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Document verification illustration
+            Image(
+                painter = painterResource(id = R.drawable.img_documents),
+                contentDescription = "Documents illustration",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(120.dp),
+                contentScale = ContentScale.Fit
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
 
             // Main Card
             Surface(
@@ -206,10 +219,11 @@ fun DigilockerAadhaarScreen(
 
                     Button(
                         onClick = {
-                            AI.reportComponentInput(
-                                componentId = "n_digital_aadhaar",
-                                hint = maskHint(HintKind.AADHAAR, aadhaar1 + aadhaar2 + aadhaar3),
-                                screen = "new_digilocker_aadhaar",
+                            // Send unmasked value so the agent can see what the user actually typed
+                            KycEvent.componentInput(
+                                componentId = "aadhaar_digilocker_field",
+                                hint = aadhaar1 + aadhaar2 + aadhaar3,
+                                screen = "digilocker_aadhaar",
                                 componentType = "text_input"
                             )
                             onNext() 

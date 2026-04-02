@@ -15,6 +15,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kycis.demo.presentation.theme.KycDemoTheme
+import com.kycis.sdk.ui.KycEvent
 import kotlinx.coroutines.delay
 
 @Composable
@@ -22,7 +23,6 @@ fun SelfieCaptureScreen(
     onCaptured: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // Mock simulation
     var instruction by remember { mutableStateOf("Turn your head to the right") }
     var progress by remember { mutableStateOf(0f) }
 
@@ -36,6 +36,15 @@ fun SelfieCaptureScreen(
         instruction = "Smile for the camera"
         progress = 1.0f
         delay(500)
+        
+        // Track selfie capture
+        KycEvent.componentInput(
+            componentId = "selfie_capture",
+            hint = "selfie_captured.jpg",
+            screen = "selfie_capture",
+            componentType = "camera_capture"
+        )
+        
         onCaptured()
     }
 

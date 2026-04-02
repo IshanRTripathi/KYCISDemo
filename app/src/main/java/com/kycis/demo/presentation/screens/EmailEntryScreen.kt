@@ -1,30 +1,28 @@
 package com.kycis.demo.presentation.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.debounce
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.kycis.demo.presentation.HintKind
+import com.kycis.demo.R
 import com.kycis.demo.presentation.theme.KycDemoTheme
-import com.kycis.demo.presentation.maskHint
-import com.kycis.sdk.AI
+import com.kycis.sdk.ui.KycEvent
 
-@OptIn(ExperimentalMaterial3Api::class, FlowPreview::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EmailEntryScreen(
     onBack: () -> Unit,
@@ -88,18 +86,21 @@ fun EmailEntryScreen(
             val emailRegex = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$".toRegex()
             val isEmailValid = email.matches(emailRegex)
 
-            LaunchedEffect(Unit) {
-                snapshotFlow { email }
-                    .debounce(600L)
-                    .collectLatest { raw ->
-                        if (raw.isEmpty()) return@collectLatest
-                        AI.reportComponentInput(
-                            componentId = "n_email_field",
-                            hint = maskHint(HintKind.EMAIL, raw),
-                            screen = "email_entry",
-                            componentType = "text_input",
-                        )
-                    }
+            var debouncedEmail by remember { mutableStateOf("") }
+            LaunchedEffect(email) {
+                kotlinx.coroutines.delay(600)
+                debouncedEmail = email
+            }
+            LaunchedEffect(debouncedEmail) {
+                if (debouncedEmail.isNotBlank()) {
+                    // Send unmasked value so the agent can see what the user actually typed
+                    KycEvent.componentInput(
+                        componentId = "email_field",
+                        hint = debouncedEmail,
+                        screen = "email_entry",
+                        componentType = "text_input",
+                    )
+                }
             }
 
             OutlinedTextField(
@@ -123,20 +124,15 @@ fun EmailEntryScreen(
             
             Spacer(modifier = Modifier.height(48.dp))
             
-            // Placeholder for illustration shown in design
-            Box(
+            // Email illustration
+            Image(
+                painter = painterResource(id = R.drawable.emailinput),
+                contentDescription = "Email illustration",
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(200.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Email,
-                    contentDescription = null,
-                    modifier = Modifier.size(100.dp),
-                    tint = MaterialTheme.colorScheme.primaryContainer
-                )
-            }
+                contentScale = ContentScale.Fit
+            )
 
             Spacer(modifier = Modifier.weight(1f))
 

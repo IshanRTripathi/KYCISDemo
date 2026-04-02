@@ -1,5 +1,6 @@
 package com.kycis.demo.presentation.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -8,23 +9,21 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.debounce
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.kycis.demo.presentation.HintKind
+import com.kycis.demo.R
 import com.kycis.demo.presentation.theme.KycDemoTheme
-import com.kycis.demo.presentation.maskHint
-import com.kycis.sdk.AI
+import com.kycis.sdk.ui.KycEvent
 
-@OptIn(ExperimentalMaterial3Api::class, FlowPreview::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PhoneEntryScreen(
     onBack: () -> Unit,
@@ -87,19 +86,41 @@ fun PhoneEntryScreen(
 
             val isPhoneValid = phoneNumber.length == 10 && phoneNumber.all { it.isDigit() }
 
-            LaunchedEffect(Unit) {
-                snapshotFlow { phoneNumber }
-                    .debounce(600L)
-                    .collectLatest { p ->
-                        if (p.isEmpty()) return@collectLatest
-                        val digits = p.filter { ch -> ch.isDigit() }
-                        AI.reportComponentInput(
-                            componentId = "phone_field",
-                            hint = maskHint(HintKind.PHONE, digits),
-                            screen = "phone_entry",
-                            componentType = "text_input",
+            // Auto-capture using SDK's KycEvent with debounce (reduced for faster voice response)
+            var debouncedPhone by remember { mutableStateOf("") }
+            LaunchedEffect(phoneNumber) {
+                kotlinx.coroutines.delay(200)  // Reduced from 600ms for faster voice response
+                debouncedPhone = phoneNumber
+            }
+            LaunchedEffect(debouncedPhone) {
+                if (debouncedPhone.isNotEmpty()) {
+                    // Send unmasked value so the agent can see what the user actually typed
+                    // The masked=false flag tells the backend this is unmasked
+                    KycEvent.componentInput(
+                        componentId = "phone_field",
+                        hint = debouncedPhone,  // Send unmasked value
+                        screen = "phone_entry",
+                        componentType = "phone_number",
+                        sdkKb = KycEvent.ComponentKb(
+                            displayName = "Phone Number",
+                            validations = listOf(
+                                "Must be exactly 10 digits",
+                                "Must start with 6, 7, 8, or 9",
+                                "Do not include country code (+91 or 0)"
+                            ),
+                            commonIssues = listOf(
+                                "User adds +91 or 0 prefix",
+                                "User enters 11 digits",
+                                "User enters letters or special characters"
+                            ),
+                            faqs = listOf(
+                                "Enter 10-digit mobile number without +91",
+                                "Example: 9876543210",
+                                "Do not use spaces or dashes"
+                            )
                         )
-                    }
+                    )
+                }
             }
 
             OutlinedTextField(
@@ -126,6 +147,17 @@ fun PhoneEntryScreen(
                 )
             )
 
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Image(
+                painter = painterResource(id = R.drawable.phonenumberinput),
+                contentDescription = "Phone number illustration",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(180.dp),
+                contentScale = ContentScale.Fit
+            )
+
             Spacer(modifier = Modifier.weight(1f))
 
             Text(
@@ -139,7 +171,9 @@ fun PhoneEntryScreen(
             Spacer(modifier = Modifier.height(12.dp))
 
             Button(
-                onClick = { onGetOtp(phoneNumber) },
+                onClick = {
+                    onGetOtp(phoneNumber)
+                },
                 enabled = isPhoneValid,
                 modifier = Modifier
                     .fillMaxWidth()

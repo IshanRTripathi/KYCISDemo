@@ -118,3 +118,12 @@ dependencies {
 kapt {
     correctErrorTypes = true
 }
+
+// Ensure SDK is built before the app runs
+tasks.matching { it.name == "assembleDebug" || it.name == "compileDebugKotlin" }
+    .configureEach {
+        val sdkBuild = gradle.includedBuilds.find { it.name == "android-sdk" }
+        if (sdkBuild != null) {
+            dependsOn(sdkBuild.task(":sdk:compileDebugKotlin"))
+        }
+    }

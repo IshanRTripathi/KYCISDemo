@@ -95,7 +95,10 @@ fun HomeScreen(
 
         // Start Button
         Button(
-            onClick = onStartFlow,
+            onClick = {
+                android.util.Log.d("KYCIS", "HomeScreen: Start button clicked")
+                onStartFlow()
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),

@@ -1,6 +1,5 @@
 package com.kycis.demo.presentation.screens
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -11,21 +10,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.kycis.demo.presentation.HintKind
-import com.kycis.demo.presentation.maskHint
 import com.kycis.demo.presentation.theme.KycDemoTheme
-import com.kycis.sdk.AI
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.debounce
+import com.kycis.sdk.ui.KycEvent
 
-@OptIn(ExperimentalMaterial3Api::class, FlowPreview::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PanDetailsScreen(
     onBack: () -> Unit,
@@ -88,19 +80,44 @@ fun PanDetailsScreen(
             val isDobValid = dob.isNotEmpty()
             val canProceed = isPanValid && isDobValid && agreedToTerms
 
-            LaunchedEffect(Unit) {
-                snapshotFlow { panNumber }
-                    .debounce(600L)
-                    .collectLatest { raw ->
-                        val p = raw.filter { c -> c.isLetterOrDigit() }
-                        if (p.isEmpty()) return@collectLatest
-                        AI.reportComponentInput(
-                            componentId = "n_pan_field",
-                            hint = maskHint(HintKind.PAN, p),
+            var debouncedPan by remember { mutableStateOf("") }
+            LaunchedEffect(panNumber) {
+                kotlinx.coroutines.delay(600)
+                debouncedPan = panNumber
+            }
+            LaunchedEffect(debouncedPan) {
+                if (debouncedPan.isNotBlank()) {
+                    val filtered: String = debouncedPan.filter { c -> c.isLetterOrDigit() }
+                    if (filtered.isNotEmpty()) {
+                        // Send unmasked value so the agent can see what the user actually typed
+                        KycEvent.componentInput(
+                            componentId = "pan_field",
+                            hint = filtered.uppercase(),  // Send unmasked, normalized value
                             screen = "pan_details",
-                            componentType = "text_input",
+                            componentType = "pan",
+                            sdkKb = KycEvent.ComponentKb(
+                                displayName = "PAN Number",
+                                validations = listOf(
+                                    "Must be exactly 10 characters",
+                                    "Format: 5 letters, 4 digits, 1 letter",
+                                    "Example: ABCDE1234F",
+                                    "All uppercase, no spaces"
+                                ),
+                                commonIssues = listOf(
+                                    "User enters lowercase letters",
+                                    "User adds spaces or dashes",
+                                    "Confusion between O and 0, I and 1"
+                                ),
+                                faqs = listOf(
+                                    "Find your PAN on the front of your PAN card",
+                                    "First 3 letters indicate IT department",
+                                    "4th letter is P for person",
+                                    "Last letter is a checksum"
+                                )
+                            )
                         )
                     }
+                }
             }
 
             OutlinedTextField(

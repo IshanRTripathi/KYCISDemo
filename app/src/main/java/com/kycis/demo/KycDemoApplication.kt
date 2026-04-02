@@ -17,26 +17,10 @@ import dagger.hilt.android.HiltAndroidApp
 class KycDemoApplication : Application() {
     override fun onCreate() {
         super.onCreate()
-        initKycSdk()
+        registerScreenSchemas()
     }
 
-    private fun initKycSdk() {
-        AI.setStatusListener { status ->
-            val codeStr = status.code.toString()
-            Log.d("KYCIS", "SDK Status Update: [$codeStr] - ${status.message}")
-            if (codeStr.contains("READY")) {
-                Log.d("KYCIS", "Assistant is connected and ready to help.")
-            } else if (codeStr.contains("ERROR")) {
-                Log.e("KYCIS", "SDK Error: $codeStr - ${status.message}")
-            }
-            if (status.code == SdkStatusCode.ERROR) {
-                Toast.makeText(this, status.message, Toast.LENGTH_LONG).show()
-            }
-        }
-
-        // Register all screen schemas BEFORE AI.init() so they are pushed immediately at init.
-        // screenId must match the string passed to AI.setKycStep() on each screen.
-        // mappingVersion below is "v1" — bump to "v2" if any schema or validation rule changes.
+    private fun registerScreenSchemas() {
         AI.registerScreenSchemas(listOf(
             ScreenSchema(
                 screenId = "pan_entry",
@@ -186,7 +170,6 @@ class KycDemoApplication : Application() {
                     ),
                 ),
             ),
-            // New onboarding flow (must match AI.setKycStep in NavGraph NewRoutes)
             ScreenSchema(
                 screenId = "new_home",
                 displayName = "Home",
@@ -249,14 +232,14 @@ class KycDemoApplication : Application() {
                 flowOrder = 13,
                 components = listOf(
                     ComponentSchema(
-                        id = "n_email_field",
+                        id = "email_field",
                         type = ComponentType.TEXT_INPUT,
                         displayName = "Email",
                         validations = listOf(
                             ValidationRule(
-                                ruleId = "n_email_format_v1",
+                                ruleId = "email_format_v1",
                                 intent = "EMAIL_IN",
-                                errorCodes = listOf("n_email_invalid"),
+                                errorCodes = listOf("email_invalid"),
                                 description = "Valid email address",
                             ),
                         ),
@@ -270,14 +253,14 @@ class KycDemoApplication : Application() {
                 flowOrder = 14,
                 components = listOf(
                     ComponentSchema(
-                        id = "n_email_otp_field",
+                        id = "email_otp_field",
                         type = ComponentType.OTP_INPUT,
                         displayName = "OTP",
                         validations = listOf(
                             ValidationRule(
-                                ruleId = "n_otp_email_v1",
+                                ruleId = "otp_email_v1",
                                 intent = "OTP_VERIFY",
-                                errorCodes = listOf("n_email_otp_invalid", "n_otp_expired"),
+                                errorCodes = listOf("email_otp_invalid", "otp_expired"),
                                 description = "OTP sent to email",
                             ),
                         ),
@@ -291,29 +274,29 @@ class KycDemoApplication : Application() {
                 flowOrder = 15,
                 components = listOf(
                     ComponentSchema(
-                        id = "n_pan_field",
+                        id = "pan_field",
                         type = ComponentType.TEXT_INPUT,
                         displayName = "PAN",
                         validations = listOf(
                             ValidationRule(
-                                ruleId = "n_pan_format_v1",
+                                ruleId = "pan_format_v1",
                                 intent = "PAN_FORMAT",
                                 pattern = "[A-Z]{5}[0-9]{4}[A-Z]",
-                                errorCodes = listOf("n_pan_invalid", "n_pan_format_error"),
+                                errorCodes = listOf("pan_invalid", "pan_format_error"),
                                 recoveryPlaybookId = "retry_pan_01",
                                 description = "10-character PAN",
                             ),
                         ),
                     ),
                     ComponentSchema(
-                        id = "n_dob_field",
+                        id = "dob_field",
                         type = ComponentType.DATE_PICKER,
                         displayName = "DOB",
                         validations = listOf(
                             ValidationRule(
-                                ruleId = "n_dob_required_v1",
+                                ruleId = "dob_required_v1",
                                 intent = "DOB_FORMAT",
-                                errorCodes = listOf("n_dob_invalid"),
+                                errorCodes = listOf("dob_invalid"),
                                 description = "Date of birth",
                             ),
                         ),
@@ -327,38 +310,38 @@ class KycDemoApplication : Application() {
                 flowOrder = 15,
                 components = listOf(
                     ComponentSchema(
-                        id = "n_full_name",
+                        id = "name_field",
                         type = ComponentType.TEXT_INPUT,
                         displayName = "Full Name",
                         validations = listOf(
                             ValidationRule(
-                                ruleId = "n_name_required_v1",
+                                ruleId = "name_required_v1",
                                 intent = "NAME_REQUIRED",
-                                errorCodes = listOf("n_name_empty"),
+                                errorCodes = listOf("name_empty"),
                                 description = "Full name as on identity documents",
                             ),
                         ),
                     ),
                     ComponentSchema(
-                        id = "n_father_name",
+                        id = "father_name_field",
                         type = ComponentType.TEXT_INPUT,
                         displayName = "Father Name",
                         validations = emptyList(),
                     ),
                     ComponentSchema(
-                        id = "n_gender",
+                        id = "gender_field",
                         type = ComponentType.DROPDOWN,
                         displayName = "Gender",
                         validations = emptyList(),
                     ),
                     ComponentSchema(
-                        id = "n_marital_status",
+                        id = "marital_status_field",
                         type = ComponentType.DROPDOWN,
                         displayName = "Marital Status",
                         validations = emptyList(),
                     ),
                     ComponentSchema(
-                        id = "n_residency_status",
+                        id = "residency_status_field",
                         type = ComponentType.DROPDOWN,
                         displayName = "Residency Status",
                         validations = emptyList(),
@@ -372,7 +355,7 @@ class KycDemoApplication : Application() {
                 flowOrder = 16,
                 components = listOf(
                     ComponentSchema(
-                        id = "n_document_checklist",
+                        id = "verify_documents_button",
                         type = ComponentType.BUTTON,
                         displayName = "Continue",
                         required = false,
@@ -387,15 +370,15 @@ class KycDemoApplication : Application() {
                 flowOrder = 16,
                 components = listOf(
                     ComponentSchema(
-                        id = "n_digital_aadhaar",
+                        id = "aadhaar_digilocker_field",
                         type = ComponentType.TEXT_INPUT,
                         displayName = "Aadhaar number",
                         validations = listOf(
                             ValidationRule(
-                                ruleId = "n_aadhaar_length_v1",
+                                ruleId = "aadhaar_length_v1",
                                 intent = "AADHAAR_LENGTH",
                                 pattern = "[0-9]{12}",
-                                errorCodes = listOf("n_aadhaar_invalid"),
+                                errorCodes = listOf("aadhaar_invalid"),
                                 description = "12-digit Aadhaar",
                             ),
                         ),
@@ -409,14 +392,14 @@ class KycDemoApplication : Application() {
                 flowOrder = 17,
                 components = listOf(
                     ComponentSchema(
-                        id = "n_aadhaar_front",
+                        id = "aadhaar_front_field",
                         type = ComponentType.FILE_UPLOAD,
                         displayName = "Aadhaar front",
                         validations = listOf(
                             ValidationRule(
-                                ruleId = "n_doc_upload_v1",
+                                ruleId = "doc_upload_v1",
                                 intent = "DOCUMENT_UPLOAD",
-                                errorCodes = listOf("n_upload_failed", "n_file_too_large"),
+                                errorCodes = listOf("upload_failed", "file_too_large"),
                                 description = "Clear image of Aadhaar front",
                             ),
                         ),
@@ -430,14 +413,14 @@ class KycDemoApplication : Application() {
                 flowOrder = 18,
                 components = listOf(
                     ComponentSchema(
-                        id = "n_aadhaar_back",
+                        id = "aadhaar_back_field",
                         type = ComponentType.FILE_UPLOAD,
                         displayName = "Aadhaar back",
                         validations = listOf(
                             ValidationRule(
-                                ruleId = "n_doc_upload_v1",
+                                ruleId = "doc_upload_v1",
                                 intent = "DOCUMENT_UPLOAD",
-                                errorCodes = listOf("n_upload_failed", "n_file_too_large"),
+                                errorCodes = listOf("upload_failed", "file_too_large"),
                                 description = "Clear image of Aadhaar back",
                             ),
                         ),
@@ -451,14 +434,14 @@ class KycDemoApplication : Application() {
                 flowOrder = 19,
                 components = listOf(
                     ComponentSchema(
-                        id = "n_selfie_camera",
+                        id = "selfie_capture",
                         type = ComponentType.CAMERA,
                         displayName = "Selfie",
                         validations = listOf(
                             ValidationRule(
-                                ruleId = "n_selfie_quality_v1",
+                                ruleId = "selfie_quality_v1",
                                 intent = "LIVENESS_CHECK",
-                                errorCodes = listOf("n_face_not_detected", "n_liveness_failed"),
+                                errorCodes = listOf("face_not_detected", "liveness_failed"),
                                 recoveryPlaybookId = "retake_selfie_01",
                                 description = "Selfie for KYC",
                             ),
@@ -473,7 +456,7 @@ class KycDemoApplication : Application() {
                 flowOrder = 20,
                 components = listOf(
                     ComponentSchema(
-                        id = "n_signature_pad",
+                        id = "signature_field",
                         type = ComponentType.BUTTON,
                         displayName = "Sign",
                         required = false,
@@ -482,30 +465,5 @@ class KycDemoApplication : Application() {
                 ),
             ),
         ))
-
-        // Configure SDK with simplified KycisConfig
-        KycisConfig.init {
-            apiKey = "demo-api-key"
-            appVersion = "1.0.0"
-            clientId = "kycis_demo"
-            
-            // Trigger settings
-            triggerMode = KycisConfig.TriggerMode.CONFIRM_UI
-            triggerTimeSpent = ConfigDuration(15)
-            autoTrigger = true
-            kycStepStrategy = KycisConfig.KycStepMode.HINT_THEN_INFER
-            
-            // Passive evaluation
-            passiveEval = true
-            evalInterval = ConfigDuration(10)
-        }
-
-        // Initialize SDK (uses KycisConfig for settings)
-        AI.init(
-            application = this,
-            userId = "demo-user",
-            mappingVersion = "v1",
-        )
-        AI.attach(this)
     }
 }

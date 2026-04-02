@@ -14,11 +14,20 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import com.kycis.sdk.ui.HintKind
+import com.kycis.sdk.ui.KycTextField
+import com.kycis.sdk.ui.EmbedProviderState
 
+/**
+ * Wrapper for the SDK's KycTextField with demo-specific defaults.
+ */
 @Composable
 fun KycTextField(
     value: String,
     onValueChange: (String) -> Unit,
+    componentId: String,
+    hintKind: HintKind,
+    providerState: EmbedProviderState?,
     label: String,
     modifier: Modifier = Modifier,
     error: String? = null,
@@ -34,38 +43,26 @@ fun KycTextField(
     leadingIcon: @Composable (() -> Unit)? = null,
     trailingIcon: @Composable (() -> Unit)? = null
 ) {
-    Column(modifier = modifier) {
-        OutlinedTextField(
-            value = value,
-            onValueChange = onValueChange,
-            label = { Text(label) },
-            modifier = Modifier.fillMaxWidth(),
-            isError = error != null,
-            enabled = enabled,
-            readOnly = readOnly,
-            keyboardOptions = KeyboardOptions(
-                keyboardType = keyboardType,
-                imeAction = imeAction
-            ),
-            keyboardActions = KeyboardActions(
-                onDone = { onImeAction() },
-                onNext = { onImeAction() },
-                onSearch = { onImeAction() }
-            ),
-            visualTransformation = visualTransformation,
-            singleLine = singleLine,
-            maxLines = maxLines,
-            placeholder = placeholder?.let { { Text(it) } },
-            leadingIcon = leadingIcon,
-            trailingIcon = trailingIcon
-        )
-        if (error != null) {
-            Text(
-                text = error,
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(start = 16.dp, top = 4.dp)
-            )
-        }
-    }
+    // Delegate to SDK's KycTextField
+    com.kycis.sdk.ui.KycTextField(
+        value = value,
+        onValueChange = onValueChange,
+        componentId = componentId,
+        hintKind = hintKind,
+        providerState = providerState,
+        label = label,
+        modifier = modifier,
+        error = error,
+        enabled = enabled,
+        readOnly = readOnly,
+        keyboardType = keyboardType,
+        imeAction = imeAction,
+        onImeAction = onImeAction,
+        visualTransformation = visualTransformation,
+        singleLine = singleLine,
+        maxLines = maxLines,
+        placeholder = placeholder,
+        leadingIcon = leadingIcon,
+        trailingIcon = trailingIcon
+    )
 }

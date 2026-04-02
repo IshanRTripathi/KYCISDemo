@@ -21,7 +21,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kycis.demo.presentation.theme.KycDemoTheme
-import com.kycis.sdk.AI
+import com.kycis.sdk.ui.KycEvent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -113,8 +113,8 @@ fun UploadAadhaarScreen(
                 ) {
                     IconButton(onClick = { 
                         isFileUploaded = true
-                        AI.reportComponentInput(
-                            componentId = if (isFront) "n_aadhaar_front" else "n_aadhaar_back",
+                        KycEvent.componentInput(
+                            componentId = if (isFront) "aadhaar_front_field" else "aadhaar_back_field",
                             hint = "file_uploaded.png",
                             screen = if (isFront) "upload_aadhaar_front" else "upload_aadhaar_back",
                             componentType = "file_upload"

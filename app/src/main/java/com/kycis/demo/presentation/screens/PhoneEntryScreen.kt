@@ -147,14 +147,14 @@ fun PhoneEntryScreen(
                 )
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             Image(
-                painter = painterResource(id = R.drawable.phonenumberinput),
+                painter = painterResource(id = R.drawable.phoneinput2),
                 contentDescription = "Phone number illustration",
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(180.dp),
+                    .height(220.dp),
                 contentScale = ContentScale.Fit
             )
 
@@ -181,7 +181,9 @@ fun PhoneEntryScreen(
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
-                    disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                    disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
+                    disabledContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f)
                 )
             ) {
                 Text(

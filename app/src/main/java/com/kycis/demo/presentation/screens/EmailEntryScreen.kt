@@ -126,11 +126,11 @@ fun EmailEntryScreen(
             
             // Email illustration
             Image(
-                painter = painterResource(id = R.drawable.emailinput),
+                painter = painterResource(id = R.drawable.emailinput2),
                 contentDescription = "Email illustration",
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(200.dp),
+                    .height(240.dp),
                 contentScale = ContentScale.Fit
             )
 
@@ -167,8 +167,8 @@ fun EmailEntryScreen(
                     .height(56.dp),
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF00308F),
-                    disabledContainerColor = Color(0xFF00308F).copy(alpha = 0.5f)
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
                 )
             ) {
                 Text(

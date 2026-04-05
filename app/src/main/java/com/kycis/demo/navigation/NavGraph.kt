@@ -18,9 +18,11 @@ import com.kycis.demo.presentation.screens.DigilockerAadhaarScreen
 import com.kycis.demo.presentation.screens.UploadAadhaarScreen
 import com.kycis.demo.presentation.screens.SelfieCaptureScreen
 import com.kycis.demo.presentation.screens.SignatureScreen
+import com.kycis.demo.presentation.screens.SdkDiagnosticsScreen
 
 object Routes {
     const val HOME = "home"
+    const val SDK_DIAGNOSTICS = "sdk_diagnostics"
     const val PHONE_ENTRY = "phone_entry"
     const val PHONE_OTP = "phone_otp/{phone}"
     const val EMAIL_ENTRY = "email_entry"
@@ -50,8 +52,15 @@ fun KycNavGraph(
                 onStartFlow = {
                     android.util.Log.d("KYCIS", "NavGraph: onStartFlow called, navigating to phone_entry")
                     navController.navigate(Routes.PHONE_ENTRY)
-                }
+                },
+                onOpenSdkHarness = {
+                    navController.navigate(Routes.SDK_DIAGNOSTICS)
+                },
             )
+        }
+
+        composable(Routes.SDK_DIAGNOSTICS) {
+            SdkDiagnosticsScreen(onBack = { navController.popBackStack() })
         }
 
         composable(Routes.PHONE_ENTRY) {

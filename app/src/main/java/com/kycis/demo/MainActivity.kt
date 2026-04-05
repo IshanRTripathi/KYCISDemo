@@ -42,6 +42,7 @@ import com.kycis.sdk.voice.VoiceFabConfig
 import com.kycis.sdk.voice.VoiceFabHost
 import com.kycis.sdk.voice.VoiceFabType
 import com.kycis.sdk.voice.VoiceRoomConnector
+import com.kycis.sdk.voice.FabPosition
 import com.kycis.sdk.voice.TranscriptBackground
 import dagger.hilt.android.AndroidEntryPoint
 import io.livekit.android.events.RoomEvent
@@ -225,7 +226,7 @@ private fun VoiceAssistantContent() {
                 EmbedProvider(
                     state = providerState,
                     flowName = "onboarding",
-                    includeRoutes = listOf("phone_entry", "phone_otp", "email_entry", "email_otp", "pan_details", "personal_details", "verify_documents", "digilocker_aadhaar", "upload_aadhaar_front", "upload_aadhaar_back", "selfie_capture", "signature"),
+                    includeRoutes = listOf("phone_entry", "phone_otp", "email_entry", "email_otp", "pan_details", "personal_details", "verify_documents", "digilocker_aadhaar", "upload_aadhaar_front", "upload_aadhaar_back", "selfie_capture", "signature", "sdk_diagnostics"),
                     excludeRoutes = listOf("home"),
                     autoTrackScreen = true,
                     autoCheckPopup = true
@@ -236,6 +237,7 @@ private fun VoiceAssistantContent() {
                 VoiceFabHost(
                     room = voiceRoom,
                     isMuted = isMuted,
+                    initialPosition = FabPosition.BOTTOM_START,
                     onMuteToggle = { muted ->
                         isMuted = muted
                         voiceRoom?.let { room ->
@@ -264,6 +266,7 @@ private fun VoiceAssistantContent() {
                     config = VoiceFabConfig(
                         assistantName = "Ishan",
                         transcriptBackground = TranscriptBackground.DotGrid,
+                        fabLottieResId = R.raw.fab_animated,
                     ),
                     modifier = Modifier
                         .align(Alignment.BottomEnd)

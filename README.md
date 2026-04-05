@@ -6,7 +6,7 @@ Sample host app for the **KYCIS** Android SDK. Business logic lives in the **KYC
 
 | Topic | Location |
 |--------|----------|
-| Canonical SDK source | [KYCIS/android-sdk/sdk/](../KYCIS/android-sdk/sdk/) |
+| Canonical SDK source | [KYCIS/android-sdk/sdk/](../KYCIS/android-sdk/sdk/) — use sibling repo branch **`v2`** for parity with this demo branch |
 | Backend API + contracts | `../KYCIS/backend/`, [API_CONTRACTS.md](../KYCIS/API_CONTRACTS.md) |
 | Web SDK simulator (same events as Android) | [KYCIS/frontend/src/SdkSimulator.tsx](../KYCIS/frontend/src/SdkSimulator.tsx) |
 
@@ -38,6 +38,18 @@ Optional **`RuntimePolicy.clientId`** / **`mappingVersion`** match the backend m
    - Emulator: `http://10.0.2.2:8000/v1`
    - Physical device: `http://<your-LAN-ip>:8000/v1`
 3. Open the demo app, complete flows; verify backend logs and `/v1/assistant/context/{session_id}`.
+
+## Manual harness (voice trigger + dynamic popup)
+
+Use the demo as a **parity harness** against the KYCIS backend:
+
+| Goal | What to do |
+|------|------------|
+| **Voice / `trigger/evaluate`** | Stay on a step until passive thresholds fire, or call **`AI.trackError`** / validation paths that your flow wires to **`trackValidationFailure`** so the SDK evaluates triggers. Confirm **`POST /v1/assistant/trigger/evaluate`** and **`decision_trace`** in logs or **`/api/activity`** (`kind: trigger`). |
+| **Popup / `popup/evaluate`** | Navigate between screens so the SDK calls **`checkForDynamicPopup`** (or equivalent) after meaningful state changes. Confirm **`POST /v1/assistant/popup/evaluate`** and activity `kind: popup_evaluate`. |
+| **Combined round-trip** | If the SDK exposes it, use **`POST /v1/assistant/evaluate`** with both surfaces; backend uses the same **`evaluate_surfaces`** path as the dedicated URLs (see KYCIS `ARCHITECTURE.md`). |
+
+Enable **`ui.dynamic_popups`** and related flags in `kycis.yaml` / env if popups are suppressed server-side.
 
 ## See also
 

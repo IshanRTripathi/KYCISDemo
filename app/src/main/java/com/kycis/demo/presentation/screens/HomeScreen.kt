@@ -26,7 +26,8 @@ import com.kycis.demo.presentation.theme.ThemePrimary
 @Composable
 fun HomeScreen(
     onStartFlow: () -> Unit,
-    modifier: Modifier = Modifier
+    onOpenSdkHarness: () -> Unit = {},
+    modifier: Modifier = Modifier,
 ) {
     var selectedFlow by remember { mutableStateOf("kyc") }
 
@@ -103,7 +104,12 @@ fun HomeScreen(
                 .fillMaxWidth()
                 .height(56.dp),
             shape = RoundedCornerShape(12.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00308F)) // Matched to design screenshot
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+                disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
+                disabledContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f)
+            )
         ) {
             Text(
                 text = "Start",
@@ -112,6 +118,16 @@ fun HomeScreen(
             )
         }
         
+        TextButton(
+            onClick = onOpenSdkHarness,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text(
+                text = "SDK ↔ backend harness (popup + trigger)",
+                style = MaterialTheme.typography.labelLarge,
+            )
+        }
+
         Spacer(modifier = Modifier.height(16.dp))
     }
 }
@@ -189,7 +205,7 @@ private fun FlowSelectionCard(
 @Composable
 fun HomeScreenPreview() {
     KycDemoTheme {
-        HomeScreen(onStartFlow = {})
+        HomeScreen(onStartFlow = {}, onOpenSdkHarness = {})
     }
 }
 

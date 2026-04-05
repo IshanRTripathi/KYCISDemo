@@ -19,7 +19,7 @@
         android:theme="@style/Theme.KycDemoApp"
         tools:targetApi="34">
         <activity
-            android:name=".MainActivity"
+            android:name=".SplashActivity"
             android:exported="true"
             android:theme="@style/Theme.KycDemoApp">
             <intent-filter>
@@ -27,6 +27,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".MainActivity"
+            android:exported="false"
+            android:theme="@style/Theme.KycDemoApp" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

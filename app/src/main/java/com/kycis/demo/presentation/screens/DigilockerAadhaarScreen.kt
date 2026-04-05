@@ -117,18 +117,6 @@ fun DigilockerAadhaarScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Document verification illustration
-            Image(
-                painter = painterResource(id = R.drawable.img_documents),
-                contentDescription = "Documents illustration",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(120.dp),
-                contentScale = ContentScale.Fit
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
             // Main Card
             Surface(
                 modifier = Modifier
@@ -233,10 +221,10 @@ fun DigilockerAadhaarScreen(
                             .fillMaxWidth()
                             .height(56.dp),
                         shape = RoundedCornerShape(8.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF22C55E), // Green button as in screenshot
-                            disabledContainerColor = Color(0xFF22C55E).copy(alpha = 0.5f)
-                        )
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+                )
                     ) {
                         Text(
                             text = "Next",

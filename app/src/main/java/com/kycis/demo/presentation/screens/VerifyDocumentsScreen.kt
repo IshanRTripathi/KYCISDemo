@@ -1,5 +1,6 @@
 package com.kycis.demo.presentation.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
@@ -12,10 +13,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.kycis.demo.R
 import com.kycis.sdk.ui.KycEvent
 import com.kycis.demo.presentation.theme.KycDemoTheme
 
@@ -81,11 +85,11 @@ fun VerifyDocumentsScreen(
                     .weight(1f),
                 contentAlignment = Alignment.Center
             ) {
-                coil.compose.AsyncImage(
-                    model = "file:///android_asset/adhaar_verification_image.png",
+                Image(
+                    painter = painterResource(id = R.drawable.aadhaarinput2),
                     contentDescription = null,
-                    modifier = Modifier.size(240.dp),
-                    contentScale = androidx.compose.ui.layout.ContentScale.Fit
+                    modifier = Modifier.size(280.dp),
+                    contentScale = ContentScale.Fit
                 )
             }
 
@@ -105,7 +109,10 @@ fun VerifyDocumentsScreen(
                     .fillMaxWidth()
                     .height(56.dp),
                 shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00308F))
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+                )
             ) {
                 Text(
                     text = "Proceed with Aadhaar",

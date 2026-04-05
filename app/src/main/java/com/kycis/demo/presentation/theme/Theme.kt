@@ -7,6 +7,7 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
@@ -15,10 +16,10 @@ import androidx.core.view.WindowCompat
 import com.kycis.demo.presentation.theme.*
 
 private val LightColorScheme = lightColorScheme(
-    primary = ThemePrimary,
-    onPrimary = White,
-    primaryContainer = ThemePrimaryLight,
-    onPrimaryContainer = Gray900,
+    primary = Color.Black,
+    onPrimary = ThemePrimary,
+    primaryContainer = Gray900,
+    onPrimaryContainer = White,
     secondary = Blue500,
     onSecondary = White,
     secondaryContainer = BlueLight,
@@ -39,9 +40,9 @@ private val LightColorScheme = lightColorScheme(
 )
 
 private val DarkColorScheme = darkColorScheme(
-    primary = ThemePrimary,
-    onPrimary = Gray900,
-    primaryContainer = ThemePrimaryVariant,
+    primary = Color.Black,
+    onPrimary = ThemePrimary,
+    primaryContainer = Gray900,
     onPrimaryContainer = White,
     secondary = Blue200,
     onSecondary = Gray900,

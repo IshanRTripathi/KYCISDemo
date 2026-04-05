@@ -35,6 +35,7 @@ object Phase2Examples {
                     println("Show popup: $message")
                     // Display popup to user
                 }
+                AgentEventType.TRANSCRIPTION_RECEIVED -> Unit
             }
         }
     }
@@ -78,6 +79,7 @@ object Phase2Examples {
                     AgentEventType.POPUP_VISIBLE -> {
                         // Handle popup
                     }
+                    AgentEventType.TRANSCRIPTION_RECEIVED -> Unit
                 }
             }
             
@@ -104,7 +106,7 @@ object Phase2Examples {
         AI.setAgentEventListener { event ->
             if (event.type == AgentEventType.POPUP_VISIBLE) {
                 val message = event.metadata.message ?: return@setAgentEventListener
-                val trigger = event.metadata.trigger
+                val popupReasonCode = event.metadata.popupReasonCode
                 
                 // Show popup dialog
                 showPopupDialog(message)
@@ -112,7 +114,7 @@ object Phase2Examples {
                 // Track popup shown
                 AI.trackAnalytics("popup_shown", mapOf(
                     "message" to message,
-                    "trigger" to (trigger ?: "unknown")
+                    "popup_reason_code" to (popupReasonCode ?: "unknown")
                 ))
             }
         }
@@ -186,10 +188,11 @@ object Phase2Examples {
                 AgentEventType.POPUP_VISIBLE -> {
                     AI.trackAnalytics("popup_displayed", mapOf(
                         "message" to event.metadata.message,
-                        "trigger" to event.metadata.trigger,
+                        "popup_reason_code" to event.metadata.popupReasonCode,
                         "screen" to getCurrentScreen()
                     ))
                 }
+                AgentEventType.TRANSCRIPTION_RECEIVED -> Unit
             }
         }
     }

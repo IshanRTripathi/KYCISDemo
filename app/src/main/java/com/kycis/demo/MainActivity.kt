@@ -29,10 +29,15 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.navigation.compose.rememberNavController
+import com.kycis.demo.BuildConfig
 import com.kycis.demo.navigation.KycNavGraph
 import com.kycis.demo.presentation.theme.KycDemoTheme
 import com.kycis.sdk.AI
+import com.kycis.sdk.core.ConfirmUiText
+import com.kycis.sdk.core.KycStepStrategy
 import com.kycis.sdk.core.RuntimePolicy
+import com.kycis.sdk.core.TriggerSettings
+import com.kycis.sdk.core.TriggerStartMode
 import com.kycis.sdk.ui.EmbedProvider
 import com.kycis.sdk.ui.KycEvent
 import com.kycis.sdk.ui.KycisOptions
@@ -49,6 +54,19 @@ import io.livekit.android.events.RoomEvent
 import io.livekit.android.events.collect
 import io.livekit.android.room.Room
 import kotlinx.coroutines.launch
+
+/**
+ * Maps Navigation Compose routes to [AI.setKycStep] ids so they match [ScreenSchema.screenId]
+ * (see CLIENT_APP_INTEGRATION.md). Parameterized routes must not be sent verbatim.
+ */
+private fun normalizeNavRouteToKycStep(route: String?): String {
+    if (route.isNullOrBlank()) return ""
+    return when {
+        route.startsWith("phone_otp") -> "phone_otp"
+        route.startsWith("email_otp") -> "email_otp"
+        else -> route
+    }
+}
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -67,6 +85,11 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        AI.refreshVoiceAudioFocus()
     }
 
     @Deprecated("Deprecated in Java 13, kept for Hilt compatibility")
@@ -121,7 +144,7 @@ private fun VoiceAssistantContent() {
     }
 
     navController.addOnDestinationChangedListener { _, destination, _ ->
-        providerState.updateRoute(destination.route ?: "")
+        providerState.updateRoute(normalizeNavRouteToKycStep(destination.route))
     }
 
     val kycis = useKycis(
@@ -131,14 +154,38 @@ private fun VoiceAssistantContent() {
             userId = "demo-user",
             policy = RuntimePolicy(
                 backendBaseUrl = "http://10.0.2.2:8000/v1",
-                componentInputHintsMasked = false,  // Send unmasked values for demo/debug
+                clientId = "kycis_demo",
+                mappingVersion = "v1",
+                appVersion = BuildConfig.VERSION_NAME,
+                triggerStartMode = TriggerStartMode.CONFIRM_UI,
+                kycStepStrategy = KycStepStrategy.HINT_THEN_INFER,
+                triggerSettings = TriggerSettings(
+                    autoTriggerEnabled = true,
+                    includeErrorSignals = true,
+                    includeTimeSpentSignals = true,
+                    includeIdleSignals = true,
+                    includeStepHints = true,
+                ),
+                confirmUiText = ConfirmUiText(
+                    title = "Need help completing this step?",
+                    startCta = "Start",
+                    dismissCta = "Not now",
+                ),
+                passiveEvalEnabled = true,
+                passiveEvalIntervalSeconds = 10,
+                componentInputHintsMasked = false, // demo: send unmasked hints when reporting component_input
             ),
             attachToLifecycle = true,
             autoTrackScreen = true,
             autoCheckPopup = true,
             onPopup = { popup ->
                 if (popup.show) {
-                    Toast.makeText(context, popup.message, Toast.LENGTH_LONG).show()
+                    Log.d(
+                        "KYCIS",
+                        "Dynamic popup: message=${popup.message} popup_reason_code=${popup.popupReasonCode} delayMs=${popup.delayMs}",
+                    )
+                    val suffix = popup.popupReasonCode?.let { "\n[$it]" } ?: ""
+                    Toast.makeText(context, popup.message + suffix, Toast.LENGTH_LONG).show()
                 }
             }
         ),
@@ -163,6 +210,7 @@ private fun VoiceAssistantContent() {
                             ).show()
                         },
                         onConnected = { room ->
+                            voiceConnector.setHostWantsMicOn(true)
                             voiceRoom = room
                             isMuted = false
                             stopNotified = false
@@ -239,6 +287,7 @@ private fun VoiceAssistantContent() {
                     isMuted = isMuted,
                     initialPosition = FabPosition.BOTTOM_START,
                     onMuteToggle = { muted ->
+                        voiceConnector.setHostWantsMicOn(!muted)
                         isMuted = muted
                         voiceRoom?.let { room ->
                             scope.launch {

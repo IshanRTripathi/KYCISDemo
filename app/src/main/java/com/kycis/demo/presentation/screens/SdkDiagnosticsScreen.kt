@@ -34,10 +34,11 @@ private const val TAG = "KYCIS"
 /**
  * QA / integrator harness for backend-assisted UX (Phase 5 roadmap).
  *
- * - **Popup path:** `validation_failed` on the server session → `checkForDynamicPopup()`.
- * - **Trigger path:** `trackError` / `trackValidationFailure` may call `trigger/evaluate`
- *   (see Logcat); with default [com.kycis.sdk.core.TriggerStartMode.CONFIRM_UI] the user
- *   gets a confirm step before voice starts.
+ * - **Popup path:** `validation_failed` updates session → `AI.checkForDynamicPopup()` →
+ *   `POST /v1/assistant/popup/evaluate`. Response uses **`popup_reason_code`** (not voice `trigger`);
+ *   optional **`decision_trace`** for analytics (see **API_CONTRACTS.md** / **CLIENT_APP_INTEGRATION.md**).
+ * - **Trigger path:** passive eval + `trackError` / `trackValidationFailure` may call
+ *   `POST /v1/assistant/trigger/evaluate`; with [TriggerStartMode.CONFIRM_UI] the user confirms before voice.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -79,9 +80,9 @@ fun SdkDiagnosticsScreen(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Text(
-                text = "1) Send validation failure so the server stores last_validation_failure.\n" +
-                    "2) Check popup — should call POST /assistant/popup/evaluate.\n" +
-                    "3) Generic error — may run trigger/evaluate (confirm UI before voice).",
+                text = "1) Send validation failure → server stores last_validation_failure.\n" +
+                    "2) Check popup → POST /v1/assistant/popup/evaluate (see popup_reason_code in Logcat).\n" +
+                    "3) Generic error → may run POST /v1/assistant/trigger/evaluate (confirm UI before voice).",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

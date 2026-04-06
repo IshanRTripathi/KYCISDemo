@@ -32,8 +32,9 @@ object Phase2Examples {
                 }
                 AgentEventType.POPUP_VISIBLE -> {
                     val message = event.metadata.message
-                    println("Show popup: $message")
-                    // Display popup to user
+                    val reason = event.metadata.popupReasonCode
+                    println("Show popup: $message (popup_reason_code=$reason)")
+                    // Display popup to user; branch analytics on popup_reason_code (voice trigger is separate)
                 }
                 AgentEventType.TRANSCRIPTION_RECEIVED -> Unit
             }
@@ -133,21 +134,30 @@ object Phase2Examples {
         AI.setAgentEventListener { event ->
             if (event.type == AgentEventType.POPUP_VISIBLE) {
                 val message = event.metadata.message ?: return@setAgentEventListener
-                
+                val popupReasonCode = event.metadata.popupReasonCode
+
                 showPopupWithCallbacks(
                     message = message,
                     onAccept = {
-                        AI.trackAnalytics("popup_accepted", mapOf(
-                            "message" to message,
-                            "action" to "start_assistant"
-                        ))
+                        AI.trackAnalytics(
+                            "popup_accepted",
+                            mapOf(
+                                "message" to message,
+                                "popup_reason_code" to (popupReasonCode ?: ""),
+                                "action" to "start_assistant",
+                            ),
+                        )
                         AI.startAssistant()
                     },
                     onDismiss = {
-                        AI.trackAnalytics("popup_dismissed", mapOf(
-                            "message" to message
-                        ))
-                    }
+                        AI.trackAnalytics(
+                            "popup_dismissed",
+                            mapOf(
+                                "message" to message,
+                                "popup_reason_code" to (popupReasonCode ?: ""),
+                            ),
+                        )
+                    },
                 )
             }
         }

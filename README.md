@@ -51,6 +51,12 @@ Use the demo as a **parity harness** against the KYCIS backend:
 
 Enable **`ui.dynamic_popups`** and related flags in `kycis.yaml` / env if popups are suppressed server-side.
 
+**Demo integration details (matches CLIENT_APP_INTEGRATION.md):**
+
+- **`MainActivity`** passes **`clientId = kycis_demo`**, **`mappingVersion`**, **`BuildConfig.VERSION_NAME`**, confirm UI, passive eval, and trigger settings so **`GET /v1/sdk/config`** and trigger behavior align with the backend.
+- Navigation routes with arguments (`phone_otp/…`, `email_otp/…`) are normalized to **`phone_otp`** / **`email_otp`** before **`AI.setKycStep`**, so step ids match **`ScreenSchema.screenId`** in **`KycDemoApplication`**.
+- Dynamic popups log and display **`popup_reason_code`** alongside the message (voice **`trigger`** is a separate contract).
+
 ## See also
 
 - [KYCIS/CLIENT_APP_INTEGRATION.md](../KYCIS/CLIENT_APP_INTEGRATION.md)

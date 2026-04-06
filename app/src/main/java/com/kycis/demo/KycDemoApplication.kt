@@ -46,41 +46,6 @@ class KycDemoApplication : Application() {
                 ),
             ),
             ScreenSchema(
-                screenId = "personal_details",
-                displayName = "Personal Details",
-                nextScreenId = "pan_upload",
-                flowOrder = 2,
-                components = listOf(
-                    ComponentSchema(
-                        id = "full_name",
-                        type = ComponentType.TEXT_INPUT,
-                        displayName = "Full Name",
-                        validations = listOf(
-                            ValidationRule(
-                                ruleId = "name_required_v1",
-                                intent = "NAME_REQUIRED",
-                                errorCodes = listOf("name_empty", "name_invalid"),
-                                description = "Full name as on PAN card",
-                            ),
-                        ),
-                    ),
-                    ComponentSchema(
-                        id = "dob_field",
-                        type = ComponentType.DATE_PICKER,
-                        displayName = "Date of Birth",
-                        validations = listOf(
-                            ValidationRule(
-                                ruleId = "dob_format_v1",
-                                intent = "DOB_FORMAT",
-                                pattern = "DD/MM/YYYY",
-                                errorCodes = listOf("dob_invalid", "dob_future"),
-                                description = "Date of birth as on PAN card. Format: DD/MM/YYYY",
-                            ),
-                        ),
-                    ),
-                ),
-            ),
-            ScreenSchema(
                 screenId = "pan_upload",
                 displayName = "Upload PAN Card",
                 nextScreenId = "aadhaar_entry",
@@ -148,30 +113,9 @@ class KycDemoApplication : Application() {
                     ),
                 ),
             ),
+            // Single `selfie_capture` schema (below, new flow) — avoids duplicate screenId in registry.
             ScreenSchema(
-                screenId = "selfie_capture",
-                displayName = "Selfie Capture",
-                nextScreenId = "success",
-                flowOrder = 6,
-                components = listOf(
-                    ComponentSchema(
-                        id = "selfie_photo",
-                        type = ComponentType.CAMERA,
-                        displayName = "Selfie",
-                        validations = listOf(
-                            ValidationRule(
-                                ruleId = "selfie_quality_v1",
-                                intent = "LIVENESS_CHECK",
-                                errorCodes = listOf("face_not_detected", "multiple_faces", "liveness_failed"),
-                                recoveryPlaybookId = "retake_selfie_01",
-                                description = "Clear front-facing selfie in good lighting, no glasses",
-                            ),
-                        ),
-                    ),
-                ),
-            ),
-            ScreenSchema(
-                screenId = "new_home",
+                screenId = "home",
                 displayName = "Home",
                 nextScreenId = "phone_entry",
                 flowOrder = 10,
@@ -270,7 +214,7 @@ class KycDemoApplication : Application() {
             ScreenSchema(
                 screenId = "pan_details",
                 displayName = "PAN details (new flow)",
-                nextScreenId = "new_personal_details",
+                nextScreenId = "personal_details",
                 flowOrder = 15,
                 components = listOf(
                     ComponentSchema(
@@ -304,7 +248,7 @@ class KycDemoApplication : Application() {
                 ),
             ),
             ScreenSchema(
-                screenId = "new_personal_details",
+                screenId = "personal_details",
                 displayName = "Personal details (new flow)",
                 nextScreenId = "verify_documents",
                 flowOrder = 15,
@@ -364,9 +308,9 @@ class KycDemoApplication : Application() {
                 ),
             ),
             ScreenSchema(
-                screenId = "new_digilocker_aadhaar",
+                screenId = "digilocker_aadhaar",
                 displayName = "DigiLocker Aadhaar",
-                nextScreenId = "new_selfie_capture",
+                nextScreenId = "selfie_capture",
                 flowOrder = 16,
                 components = listOf(
                     ComponentSchema(
@@ -409,7 +353,7 @@ class KycDemoApplication : Application() {
             ScreenSchema(
                 screenId = "upload_aadhaar_back",
                 displayName = "Aadhaar back",
-                nextScreenId = "new_selfie_capture",
+                nextScreenId = "selfie_capture",
                 flowOrder = 18,
                 components = listOf(
                     ComponentSchema(
@@ -428,9 +372,9 @@ class KycDemoApplication : Application() {
                 ),
             ),
             ScreenSchema(
-                screenId = "new_selfie_capture",
+                screenId = "selfie_capture",
                 displayName = "Selfie (new flow)",
-                nextScreenId = "new_signature",
+                nextScreenId = "signature",
                 flowOrder = 19,
                 components = listOf(
                     ComponentSchema(
@@ -450,7 +394,7 @@ class KycDemoApplication : Application() {
                 ),
             ),
             ScreenSchema(
-                screenId = "new_signature",
+                screenId = "signature",
                 displayName = "Signature",
                 nextScreenId = null,
                 flowOrder = 20,
@@ -461,6 +405,27 @@ class KycDemoApplication : Application() {
                         displayName = "Sign",
                         required = false,
                         validations = emptyList(),
+                    ),
+                ),
+            ),
+            ScreenSchema(
+                screenId = "sdk_diagnostics",
+                displayName = "SDK ↔ backend harness",
+                nextScreenId = null,
+                flowOrder = 99,
+                components = listOf(
+                    ComponentSchema(
+                        id = "harness_field",
+                        type = ComponentType.TEXT_INPUT,
+                        displayName = "Harness field",
+                        validations = listOf(
+                            ValidationRule(
+                                ruleId = "harness_validation_v1",
+                                intent = "HARNESS",
+                                errorCodes = listOf("harness_invalid_field"),
+                                description = "Used by SdkDiagnosticsScreen validation telemetry",
+                            ),
+                        ),
                     ),
                 ),
             ),

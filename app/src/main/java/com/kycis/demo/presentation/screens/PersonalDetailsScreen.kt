@@ -83,7 +83,6 @@ fun PersonalDetailsScreen(
 
             // Send ALL fields to backend so LLM knows what's filled vs empty
             LaunchedEffect(name, gender, maritalStatus, residencyStatus, fatherName) {
-                kotlinx.coroutines.delay(300)
                 VoiceUiSnapshotHolder.setCurrentScreen("personal_details")
                 val status = if (name.isBlank()) "REQUIRED" else "FILLED"
                 val fatherStatus = if (fatherName.isBlank()) "REQUIRED" else "FILLED"
@@ -102,6 +101,7 @@ fun PersonalDetailsScreen(
                     value = name.ifBlank { null },
                     screen = "personal_details",
                     componentType = "text_input",
+                    semanticSlot = "full_name",
                     properties = mapOf("field_status" to status),
                 )
                 KycEvent.componentInput(
@@ -109,6 +109,7 @@ fun PersonalDetailsScreen(
                     value = fatherName.ifBlank { null },
                     screen = "personal_details",
                     componentType = "text_input",
+                    semanticSlot = "father_name",
                     properties = mapOf("field_status" to fatherStatus),
                 )
                 KycEvent.componentInput(
@@ -116,6 +117,7 @@ fun PersonalDetailsScreen(
                     value = gender.ifBlank { null },
                     screen = "personal_details",
                     componentType = "dropdown",
+                    semanticSlot = "gender",
                     properties = mapOf("field_status" to genderStatus),
                 )
                 KycEvent.componentInput(
@@ -123,6 +125,7 @@ fun PersonalDetailsScreen(
                     value = maritalStatus.ifBlank { null },
                     screen = "personal_details",
                     componentType = "dropdown",
+                    semanticSlot = "marital_status",
                     properties = mapOf("field_status" to maritalStatusField),
                 )
                 KycEvent.componentInput(
@@ -130,6 +133,7 @@ fun PersonalDetailsScreen(
                     value = residencyStatus.ifBlank { null },
                     screen = "personal_details",
                     componentType = "dropdown",
+                    semanticSlot = "residency_status",
                     properties = mapOf("field_status" to residencyStatusField),
                 )
             }
@@ -157,6 +161,7 @@ fun PersonalDetailsScreen(
                 placeholder = "Select Gender",
                 options = DemoFormOptions.GENDER,
                 sdkComponentId = "gender_field",
+                semanticSlot = "gender",
                 onValueChange = { gender = it },
             )
 
@@ -168,6 +173,7 @@ fun PersonalDetailsScreen(
                 placeholder = "Select Marital Status",
                 options = DemoFormOptions.MARITAL_STATUS,
                 sdkComponentId = "marital_status_field",
+                semanticSlot = "marital_status",
                 onValueChange = { maritalStatus = it },
             )
 
@@ -179,6 +185,7 @@ fun PersonalDetailsScreen(
                 placeholder = "Select Residency Status",
                 options = DemoFormOptions.RESIDENCY_STATUS,
                 sdkComponentId = "residency_status_field",
+                semanticSlot = "residency_status",
                 onValueChange = { residencyStatus = it },
             )
 
@@ -244,6 +251,7 @@ private fun ExposedPickListField(
     placeholder: String,
     options: List<String>,
     sdkComponentId: String,
+    semanticSlot: String? = null,
     onValueChange: (String) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -283,6 +291,7 @@ private fun ExposedPickListField(
                             value = option,
                             screen = "personal_details",
                             componentType = "dropdown",
+                            semanticSlot = semanticSlot,
                         )
                     },
                 )

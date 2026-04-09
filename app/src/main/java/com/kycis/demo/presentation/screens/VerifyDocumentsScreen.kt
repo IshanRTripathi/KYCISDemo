@@ -99,7 +99,7 @@ fun VerifyDocumentsScreen(
                 onClick = {
                     KycEvent.componentInput(
                         componentId = "verify_documents_button",
-                        hint = "proceed_with_aadhaar",
+                        value = "proceed_with_aadhaar",
                         screen = "verify_documents",
                         componentType = "button",
                     )
@@ -127,7 +127,7 @@ fun VerifyDocumentsScreen(
                 onClick = {
                     KycEvent.componentInput(
                         componentId = "verify_documents_button",
-                        hint = "offline_process",
+                        value = "offline_process",
                         screen = "verify_documents",
                         componentType = "button",
                     )

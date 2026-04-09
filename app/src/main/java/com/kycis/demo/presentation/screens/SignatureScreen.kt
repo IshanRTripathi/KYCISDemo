@@ -104,7 +104,7 @@ fun SignatureScreen(
                 onClick = {
                     KycEvent.componentInput(
                         componentId = "signature_field",
-                        hint = "signature_submitted",
+                        value = "signature_submitted",
                         screen = "signature",
                         componentType = "button",
                     )

@@ -98,7 +98,7 @@ fun PhoneEntryScreen(
                     // The masked=false flag tells the backend this is unmasked
                     KycEvent.componentInput(
                         componentId = "phone_field",
-                        hint = debouncedPhone,  // Send unmasked value
+                        value = debouncedPhone,  // Send unmasked value
                         screen = "phone_entry",
                         componentType = "phone_number",
                         sdkKb = KycEvent.ComponentKb(

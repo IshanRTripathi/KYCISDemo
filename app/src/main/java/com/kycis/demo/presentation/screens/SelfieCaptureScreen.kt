@@ -40,7 +40,7 @@ fun SelfieCaptureScreen(
         // Track selfie capture
         KycEvent.componentInput(
             componentId = "selfie_capture",
-            hint = "selfie_captured.jpg",
+            value = "selfie_captured.jpg",
             screen = "selfie_capture",
             componentType = "camera_capture"
         )

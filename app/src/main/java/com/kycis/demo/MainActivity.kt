@@ -81,7 +81,9 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    VoiceAssistantContent()
+                    VoiceAssistantContent(
+                        onBackendUrlSaved = { recreate() },
+                    )
                 }
             }
         }
@@ -104,9 +106,12 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-private fun VoiceAssistantContent() {
+private fun VoiceAssistantContent(
+    onBackendUrlSaved: () -> Unit,
+) {
     val context = LocalContext.current
     val currentActivity = context as? FragmentActivity
+    var backendBaseUrl by remember { mutableStateOf(BackendUrlStore.get(context)) }
 
     var voiceRoom by remember { mutableStateOf<Room?>(null) }
     var isMuted by remember { mutableStateOf(false) }
@@ -144,7 +149,9 @@ private fun VoiceAssistantContent() {
     }
 
     navController.addOnDestinationChangedListener { _, destination, _ ->
-        providerState.updateRoute(normalizeNavRouteToKycStep(destination.route))
+        val step = normalizeNavRouteToKycStep(destination.route)
+        providerState.updateRoute(step)
+        VoiceUiSnapshotHolder.setCurrentScreen(step)
     }
 
     val kycis = useKycis(
@@ -153,7 +160,7 @@ private fun VoiceAssistantContent() {
             apiKey = "demo-api-key",
             userId = "demo-user",
             policy = RuntimePolicy(
-                backendBaseUrl = "http://10.0.2.2:8000/v1",
+                backendBaseUrl = backendBaseUrl,
                 clientId = "kycis_demo",
                 mappingVersion = "v1",
                 appVersion = BuildConfig.VERSION_NAME,
@@ -242,6 +249,7 @@ private fun VoiceAssistantContent() {
 
     LaunchedEffect(kycis.isReady) {
         if (kycis.isReady) {
+            AI.setVoiceUiSnapshotProvider { VoiceUiSnapshotHolder.buildSnapshot() }
             providerState.setOnPopupCheck {
                 AI.checkForDynamicPopup()
             }
@@ -279,7 +287,14 @@ private fun VoiceAssistantContent() {
                     autoTrackScreen = true,
                     autoCheckPopup = true
                 ) {
-                    KycNavGraph(navController = navController)
+                    KycNavGraph(
+                        navController = navController,
+                        backendBaseUrl = backendBaseUrl,
+                        onBackendUrlSaved = { savedUrl ->
+                            backendBaseUrl = savedUrl
+                            onBackendUrlSaved()
+                        },
+                    )
                 }
 
                 VoiceFabHost(

@@ -19,10 +19,12 @@ import com.kycis.demo.presentation.screens.UploadAadhaarScreen
 import com.kycis.demo.presentation.screens.SelfieCaptureScreen
 import com.kycis.demo.presentation.screens.SignatureScreen
 import com.kycis.demo.presentation.screens.SdkDiagnosticsScreen
+import com.kycis.demo.presentation.screens.BackendSettingsScreen
 
 object Routes {
     const val HOME = "home"
     const val SDK_DIAGNOSTICS = "sdk_diagnostics"
+    const val BACKEND_SETTINGS = "backend_settings"
     const val PHONE_ENTRY = "phone_entry"
     const val PHONE_OTP = "phone_otp/{phone}"
     const val EMAIL_ENTRY = "email_entry"
@@ -40,6 +42,8 @@ object Routes {
 @Composable
 fun KycNavGraph(
     navController: NavHostController,
+    backendBaseUrl: String,
+    onBackendUrlSaved: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     NavHost(
@@ -56,11 +60,25 @@ fun KycNavGraph(
                 onOpenSdkHarness = {
                     navController.navigate(Routes.SDK_DIAGNOSTICS)
                 },
+                onOpenBackendSettings = {
+                    navController.navigate(Routes.BACKEND_SETTINGS)
+                },
             )
         }
 
         composable(Routes.SDK_DIAGNOSTICS) {
             SdkDiagnosticsScreen(onBack = { navController.popBackStack() })
+        }
+
+        composable(Routes.BACKEND_SETTINGS) {
+            BackendSettingsScreen(
+                currentBaseUrl = backendBaseUrl,
+                onBack = { navController.popBackStack() },
+                onBackendUrlSaved = { saved ->
+                    onBackendUrlSaved(saved)
+                    navController.popBackStack()
+                },
+            )
         }
 
         composable(Routes.PHONE_ENTRY) {

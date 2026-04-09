@@ -210,7 +210,7 @@ fun DigilockerAadhaarScreen(
                             // Send unmasked value so the agent can see what the user actually typed
                             KycEvent.componentInput(
                                 componentId = "aadhaar_digilocker_field",
-                                hint = aadhaar1 + aadhaar2 + aadhaar3,
+                                value = aadhaar1 + aadhaar2 + aadhaar3,
                                 screen = "digilocker_aadhaar",
                                 componentType = "text_input"
                             )

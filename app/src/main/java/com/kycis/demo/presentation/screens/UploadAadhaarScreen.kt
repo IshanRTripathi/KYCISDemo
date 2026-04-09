@@ -115,7 +115,7 @@ fun UploadAadhaarScreen(
                         isFileUploaded = true
                         KycEvent.componentInput(
                             componentId = if (isFront) "aadhaar_front_field" else "aadhaar_back_field",
-                            hint = "file_uploaded.png",
+                            value = "file_uploaded.png",
                             screen = if (isFront) "upload_aadhaar_front" else "upload_aadhaar_back",
                             componentType = "file_upload"
                         )

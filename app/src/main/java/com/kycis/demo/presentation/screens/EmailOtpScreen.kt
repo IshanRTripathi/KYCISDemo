@@ -92,7 +92,7 @@ fun EmailOtpScreen(
                 if (otpValue.length != otpLength) return@LaunchedEffect
                 KycEvent.componentInput(
                     componentId = "email_otp_field",
-                    hint = maskHint(HintKind.OTP, otpValue),
+                    value = maskHint(HintKind.OTP, otpValue),
                     screen = "email_otp",
                     componentType = "otp_input",
                     properties = mapOf("digits_filled" to otpLength.toString()),

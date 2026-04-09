@@ -19,6 +19,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kycis.demo.R
+import com.kycis.demo.VoiceUiSnapshotHolder
 import com.kycis.demo.presentation.form.DemoFormOptions
 import com.kycis.demo.presentation.theme.KycDemoTheme
 import com.kycis.sdk.ui.KycEvent
@@ -83,44 +84,50 @@ fun PersonalDetailsScreen(
             // Send ALL fields to backend so LLM knows what's filled vs empty
             LaunchedEffect(name, gender, maritalStatus, residencyStatus, fatherName) {
                 kotlinx.coroutines.delay(300)
+                VoiceUiSnapshotHolder.setCurrentScreen("personal_details")
                 val status = if (name.isBlank()) "REQUIRED" else "FILLED"
                 val fatherStatus = if (fatherName.isBlank()) "REQUIRED" else "FILLED"
                 val genderStatus = if (gender.isBlank()) "REQUIRED" else "FILLED"
                 val maritalStatusField = if (maritalStatus.isBlank()) "REQUIRED" else "FILLED"
                 val residencyStatusField = if (residencyStatus.isBlank()) "REQUIRED" else "FILLED"
+                VoiceUiSnapshotHolder.upsertField("name_field", name)
+                VoiceUiSnapshotHolder.upsertField("father_name_field", fatherName)
+                VoiceUiSnapshotHolder.upsertField("gender_field", gender)
+                VoiceUiSnapshotHolder.upsertField("marital_status_field", maritalStatus)
+                VoiceUiSnapshotHolder.upsertField("residency_status_field", residencyStatus)
                 
                 // Send each field individually with filled status via properties map
                 KycEvent.componentInput(
                     componentId = "name_field",
-                    hint = name.ifBlank { "__EMPTY__" },
+                    value = name.ifBlank { null },
                     screen = "personal_details",
                     componentType = "text_input",
                     properties = mapOf("field_status" to status),
                 )
                 KycEvent.componentInput(
                     componentId = "father_name_field",
-                    hint = fatherName.ifBlank { "__EMPTY__" },
+                    value = fatherName.ifBlank { null },
                     screen = "personal_details",
                     componentType = "text_input",
                     properties = mapOf("field_status" to fatherStatus),
                 )
                 KycEvent.componentInput(
                     componentId = "gender_field",
-                    hint = gender.ifBlank { "__EMPTY__" },
+                    value = gender.ifBlank { null },
                     screen = "personal_details",
                     componentType = "dropdown",
                     properties = mapOf("field_status" to genderStatus),
                 )
                 KycEvent.componentInput(
                     componentId = "marital_status_field",
-                    hint = maritalStatus.ifBlank { "__EMPTY__" },
+                    value = maritalStatus.ifBlank { null },
                     screen = "personal_details",
                     componentType = "dropdown",
                     properties = mapOf("field_status" to maritalStatusField),
                 )
                 KycEvent.componentInput(
                     componentId = "residency_status_field",
-                    hint = residencyStatus.ifBlank { "__EMPTY__" },
+                    value = residencyStatus.ifBlank { null },
                     screen = "personal_details",
                     componentType = "dropdown",
                     properties = mapOf("field_status" to residencyStatusField),
@@ -273,7 +280,7 @@ private fun ExposedPickListField(
                         expanded = false
                         KycEvent.componentInput(
                             componentId = sdkComponentId,
-                            hint = option,
+                            value = option,
                             screen = "personal_details",
                             componentType = "dropdown",
                         )

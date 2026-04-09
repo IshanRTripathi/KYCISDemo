@@ -96,7 +96,7 @@ fun EmailEntryScreen(
                     // Send unmasked value so the agent can see what the user actually typed
                     KycEvent.componentInput(
                         componentId = "email_field",
-                        hint = debouncedEmail,
+                        value = debouncedEmail,
                         screen = "email_entry",
                         componentType = "text_input",
                     )

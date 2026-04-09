@@ -27,6 +27,7 @@ import com.kycis.demo.presentation.theme.ThemePrimary
 fun HomeScreen(
     onStartFlow: () -> Unit,
     onOpenSdkHarness: () -> Unit = {},
+    onOpenBackendSettings: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     var selectedFlow by remember { mutableStateOf("kyc") }
@@ -128,6 +129,16 @@ fun HomeScreen(
             )
         }
 
+        TextButton(
+            onClick = onOpenBackendSettings,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text(
+                text = "Backend settings (URL + health test)",
+                style = MaterialTheme.typography.labelLarge,
+            )
+        }
+
         Spacer(modifier = Modifier.height(16.dp))
     }
 }
@@ -205,7 +216,7 @@ private fun FlowSelectionCard(
 @Composable
 fun HomeScreenPreview() {
     KycDemoTheme {
-        HomeScreen(onStartFlow = {}, onOpenSdkHarness = {})
+        HomeScreen(onStartFlow = {}, onOpenSdkHarness = {}, onOpenBackendSettings = {})
     }
 }
 

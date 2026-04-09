@@ -92,7 +92,7 @@ fun PanDetailsScreen(
                         // Send unmasked value so the agent can see what the user actually typed
                         KycEvent.componentInput(
                             componentId = "pan_field",
-                            hint = filtered.uppercase(),  // Send unmasked, normalized value
+                            value = filtered.uppercase(),  // Send unmasked, normalized value
                             screen = "pan_details",
                             componentType = "pan",
                             sdkKb = KycEvent.ComponentKb(

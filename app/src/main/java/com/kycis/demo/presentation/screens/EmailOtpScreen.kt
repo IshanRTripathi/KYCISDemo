@@ -92,10 +92,15 @@ fun EmailOtpScreen(
                 if (otpValue.length != otpLength) return@LaunchedEffect
                 KycEvent.componentInput(
                     componentId = "email_otp_field",
-                    value = maskHint(HintKind.OTP, otpValue),
+                    hint = maskHint(HintKind.OTP, otpValue),
                     screen = "email_otp",
                     componentType = "otp_input",
                     properties = mapOf("digits_filled" to otpLength.toString()),
+                    sdkKb = KycEvent.ComponentKb(
+                        displayName = "Email OTP",
+                        validations = listOf("Must be exactly 4 digits"),
+                        commonIssues = listOf("User enters wrong OTP", "OTP expired", "Check spam folder")
+                    )
                 )
             }
 
@@ -168,8 +173,20 @@ fun EmailOtpScreen(
             Spacer(modifier = Modifier.weight(1f))
 
             Button(
-                onClick = { onVerify(otpValue) },
-                enabled = otpValue.length == otpLength,
+                onClick = { 
+                    if (otpValue.length == otpLength) {
+                        onVerify(otpValue) 
+                    } else {
+                        KycEvent.validationFailed(
+                            code = "otp_incomplete",
+                            componentId = "email_otp_field",
+                            componentType = "otp_input",
+                            hint = otpValue,
+                            businessStep = "email_otp"
+                        )
+                    }
+                },
+                enabled = true,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),

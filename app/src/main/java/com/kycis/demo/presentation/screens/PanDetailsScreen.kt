@@ -92,7 +92,7 @@ fun PanDetailsScreen(
                         // Send unmasked value so the agent can see what the user actually typed
                         KycEvent.componentInput(
                             componentId = "pan_field",
-                            value = filtered.uppercase(),  // Send unmasked, normalized value
+                            hint = filtered.uppercase(),  // Send unmasked, normalized value
                             screen = "pan_details",
                             componentType = "pan",
                             sdkKb = KycEvent.ComponentKb(
@@ -117,6 +117,27 @@ fun PanDetailsScreen(
                             )
                         )
                     }
+                }
+            }
+
+            var debouncedDob by remember { mutableStateOf("") }
+            LaunchedEffect(dob) {
+                kotlinx.coroutines.delay(600)
+                debouncedDob = dob
+            }
+            LaunchedEffect(debouncedDob) {
+                if (debouncedDob.isNotBlank()) {
+                    KycEvent.componentInput(
+                        componentId = "dob_field",
+                        hint = debouncedDob,
+                        screen = "pan_details",
+                        componentType = "date",
+                        sdkKb = KycEvent.ComponentKb(
+                            displayName = "Date of Birth",
+                            validations = listOf("Must be a valid date", "Format: DD/MM/YYYY"),
+                            commonIssues = listOf("User enters wrong format", "User enters future date")
+                        )
+                    )
                 }
             }
 
@@ -211,8 +232,29 @@ fun PanDetailsScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
-                onClick = onNext,
-                enabled = canProceed,
+                onClick = {
+                    if (canProceed) {
+                        onNext()
+                    } else {
+                        if (panNumber.isEmpty()) {
+                            KycEvent.validationFailed("pan_required", "pan_field", "pan", businessStep = "pan_details")
+                        } else if (!isPanValid) {
+                            KycEvent.validationFailed(
+                                code = "pan_invalid_format",
+                                componentId = "pan_field",
+                                componentType = "pan",
+                                hint = panNumber,
+                                expectedPattern = "[A-Z]{5}[0-9]{4}[A-Z]",
+                                businessStep = "pan_details"
+                            )
+                        } else if (dob.isEmpty()) {
+                            KycEvent.validationFailed("dob_required", "dob_field", "date", businessStep = "pan_details")
+                        } else if (!agreedToTerms) {
+                            KycEvent.validationFailed("terms_not_accepted", "terms_checkbox", "checkbox", businessStep = "pan_details")
+                        }
+                    }
+                },
+                enabled = true,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),

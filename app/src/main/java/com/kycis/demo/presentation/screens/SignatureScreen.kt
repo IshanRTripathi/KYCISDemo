@@ -104,9 +104,14 @@ fun SignatureScreen(
                 onClick = {
                     KycEvent.componentInput(
                         componentId = "signature_field",
-                        value = "signature_submitted",
+                        hint = "signature_submitted",
                         screen = "signature",
                         componentType = "button",
+                        sdkKb = KycEvent.ComponentKb(
+                            displayName = "Signature Field",
+                            validations = listOf("Must provide a signature"),
+                            commonIssues = listOf("Signature is too small", "Signature goes outside the box")
+                        )
                     )
                     onSubmit()
                 },

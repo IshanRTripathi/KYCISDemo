@@ -48,7 +48,19 @@ fun EmailEntryScreen(
                 }
             },
             actions = {
-                TextButton(onClick = { onGetOtp("demo@example.com") }) {
+                TextButton(
+                    onClick = {
+                        KycEvent.analytics(
+                            eventName = "otp_requested",
+                            data = mapOf(
+                                "screen" to "email_entry",
+                                "source" to "skip_button",
+                                "email" to "demo@example.com",
+                            ),
+                        )
+                        onGetOtp("demo@example.com")
+                    },
+                ) {
                     Text("Skip", color = MaterialTheme.colorScheme.primary)
                 }
             },
@@ -93,10 +105,9 @@ fun EmailEntryScreen(
             }
             LaunchedEffect(debouncedEmail) {
                 if (debouncedEmail.isNotBlank()) {
-                    // Send unmasked value so the agent can see what the user actually typed
                     KycEvent.componentInput(
                         componentId = "email_field",
-                        value = debouncedEmail,
+                        hint = debouncedEmail,
                         screen = "email_entry",
                         componentType = "text_input",
                     )
@@ -160,8 +171,26 @@ fun EmailEntryScreen(
             Spacer(modifier = Modifier.height(12.dp))
 
             Button(
-                onClick = { onGetOtp(email) },
-                enabled = isEmailValid,
+                onClick = {
+                    if (isEmailValid) {
+                        KycEvent.analytics(
+                            eventName = "otp_requested",
+                            data = mapOf(
+                                "screen" to "email_entry",
+                                "source" to "email_entry_button",
+                            ),
+                        )
+                        onGetOtp(email)
+                    } else {
+                        KycEvent.validationFailed(
+                            code = "email_invalid",
+                            componentId = "email_field",
+                            componentType = "text_input",
+                            businessStep = "email_entry",
+                        )
+                    }
+                },
+                enabled = true,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),

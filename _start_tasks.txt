@@ -1,0 +1,12 @@
+ 69:             tasks: list[asyncio.Task[None]] = []
+134:                             task = asyncio.create_task(
+139:                             tasks.append(task)
+155:                     tasks.append(
+156:                         asyncio.create_task(self._ivr_activity.start(), name="_ivr_activity_start")
+164:                     tasks.append(asyncio.create_task(job_ctx.connect(), name="_job_ctx_connect"))
+182:             tasks.append(
+183:                 asyncio.create_task(self._update_activity(self._agent, wait_on_enter=False))
+187:                 await asyncio.gather(*tasks)
+189:                 await utils.aio.cancel_and_wait(*tasks)
+198:                 self._forward_audio_atask = asyncio.create_task(
+203:                 self._forward_video_atask = asyncio.create_task(

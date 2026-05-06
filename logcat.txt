@@ -1,0 +1,345 @@
+MainActivity: showing ready state
+system_server:b667a0d0: onCancelled at PHASE_CLIENT_ON_CONTROLS_CHANGED
+VoiceRoomConnector: Track subscribed: audio
+[connector] Track subscribed: audio
+attributionTag  not declared in manifest of com.kycis.demo
+attributionTag  not declared in manifest of com.kycis.demo
+attributionTag  not declared in manifest of com.kycis.demo
+attributionTag  not declared in manifest of com.kycis.demo
+[active_speakers] Local=false Remote=true {speakers=Identity(value=agent-AJ_5nXeBPk6kKT6)}
+[active_speakers] Local=false Remote=false {speakers=}
+system_server:403f598d: onCancelled at PHASE_CLIENT_ON_CONTROLS_CHANGED
+[active_speakers] Local=false Remote=true {speakers=Identity(value=agent-AJ_5nXeBPk6kKT6)}
+[active_speakers] Local=false Remote=true {speakers=Identity(value=agent-AJ_5nXeBPk6kKT6)}
+[transcript] [AGENT] Wapas aa gaye! Chaliye wahin se shuru karte hain jahan aapne choda tha
+[active_speakers] Local=false Remote=false {speakers=}
+Config loaded from resources: allow_multiple=true, cooldown=45s
+Config merged from remote: {sdk_version=1.0.0, client_id=kycis_demo, defaults_version=1.0.0
+Config merged: {source=merged, sdk_version=1.0.0, environment=dev, client_id=kycis_demo, de
+Voice session stopped (notifying backend)
+AgentEventDispatcher: Event DISCONNECTED dispatched but no listeners registered
+stop(40): called with 104320 frames delivered
+attributionTag  not declared in manifest of com.kycis.demo
+attributionTag  not declared in manifest of com.kycis.demo
+[connector] Disconnected
+[room] Disconnected
+MainActivity: showing ready state
+[connector] Disconnected
+stopAssistantSession: backend stop already sent for this voice engagement
+channel '5f188a8 com.kycis.demo/com.kycis.demo.MainActivity' ~ Channel is unrecoverably bro
+Late-enabling -Xcheck:jni
+Using CollectorTypeCMC GC.
+Unexpected CPU variant for x86: x86_64.
+Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, goldmont-without-sh
+Load libframework-connectivity-tiramisu-jni.so using APEX ns com_android_tethering for call
+Suspending all threads took: 5.968ms
+Load /data/user/0/com.kycis.demo/code_cache/startup_agents/3fc68f17-agent.so using system n
+hiddenapi: DexFile /data/data/com.kycis.demo/code_cache/.studio/instruments-c9b0d10a.jar is
+Redefining intrinsic method java.lang.Thread java.lang.Thread.currentThread(). This may cau
+Redefining intrinsic method boolean java.lang.Thread.interrupted(). This may cause the unex
+Compat change id reported: 242716250; UID 10221; state: ENABLED
+Configuring clns-9 for other apk /data/app/~~EJrLfw1RbCTOOHt9sf5Dxg==/com.kycis.demo-8oJddT
+AssetManager2(0x72da4f1d4178) locale list changing from [] to [en-US]
+AssetManager2(0x72da4f1d4ad8) locale list changing from [] to [en-US]
+Currently set values for:
+  angle_gl_driver_selection_pkgs=[]
+  angle_gl_driver_selection_values=[]
+com.kycis.demo is not listed in per-application setting
+ANGLE allowlist from config: com.dreamgames.royalmatch com.dts.freefiremax com.dxx.firenow 
+com.kycis.demo is not listed in ANGLE allowlist or settings, returning default
+Neither updatable production driver nor prerelease driver is supported.
+Choreographer implicitly registered for the refresh rate.
+AssetManager2(0x72da4f1da258) locale list changing from [] to [en-US]
+Pinning is deprecated since Android Q. Please use trim or other methods.
+Opening libGLESv1_CM_emulation.so
+Opening libGLESv2_emulation.so
+Toggle override initialized to: OVERRIDE_UNSET
+Failed to choose config with EGL_SWAP_BEHAVIOR_PRESERVED, retrying without...
+Failed to initialize 101010-2 format, error = EGL_SUCCESS
+Unknown dataspace 0
+Image decoding logging dropped!
+hide(ime(), fromIme=false)
+com.kycis.demo:74a34ded: onCancelled at PHASE_CLIENT_ALREADY_HIDDEN
+Compiler allocated 5042KB to compile void android.view.ViewRootImpl.performTraversals()
+AI.bindActivity: activity=MainActivity
+SdkRuntime.bindCurrentActivity: ENTRY - activity=MainActivity, started=false
+SdkRuntime.bindCurrentActivity: uiBridge updated, now checking started flag
+SdkRuntime.bindCurrentActivity: SDK NOT started yet, activity will be captured later
+AI.bindActivity: activity=MainActivity
+SdkRuntime.bindCurrentActivity: ENTRY - activity=MainActivity, started=false
+SdkRuntime.bindCurrentActivity: uiBridge updated, now checking started flag
+SdkRuntime.bindCurrentActivity: SDK NOT started yet, activity will be captured later
+isInitialized check failed: AI SDK not initialized. Call AI.init first.
+MainActivity: showing loading state
+MainActivity: restoring start destination=phone_entry
+isInitialized check failed: AI SDK not initialized. Call AI.init first.
+useKycis: hasInitialized=false, AI.isInitialized=false
+isInitialized check failed: AI SDK not initialized. Call AI.init first.
+AI.init: ENTRY - apiKey=demo-api-key, userId=demo-user
+AI.init: calling runtime.initialize...
+AI.resolveSessionId: reusing persisted session for userId=demo-user
+Config loaded from resources: allow_multiple=true, cooldown=45s
+SdkRuntime.initialize: setting started=true, checking for current activity...
+SdkRuntime.initialize: currentActivity from uiBridge = MainActivity
+SdkRuntime.initialize: capturing current activity=MainActivity
+AI.init: runtime.initialize complete, setting up listeners
+AI.init: COMPLETE
+useKycis: SDK initialized successfully
+AI.attach: ENTRY - application=KycDemoApplication
+AI.attach: creating LifecycleTracker and registering
+LifecycleTracker.register: registering activity lifecycle callbacks
+LifecycleTracker.register: currentActivity from bridge = MainActivity
+SdkRuntime.bindCurrentActivity: ENTRY - activity=MainActivity, started=true
+SdkRuntime.bindCurrentActivity: uiBridge updated, now checking started flag
+SdkRuntime.bindCurrentActivity: SDK is started, lifecycle tracking active
+SdkRuntime.bindCurrentActivity: lifecycleAttached set to true
+Status changed: LIFECYCLE_ATTACHED message=Lifecycle tracking attached successfully.
+AI.attach: COMPLETE
+useKycis: AI.attach completed
+MainActivity: showing ready state
+EmbedProviderState.updateRoute: route=phone_entry, previous=
+SdkRuntime.setKycStep: setting kycStep=phone_entry (previous=null)
+Config loaded from resources: allow_multiple=true, cooldown=45s
+Config merged from remote: {sdk_version=1.0.0, client_id=kycis_demo, defaults_version=1.0.0
+Config merged: {source=merged, sdk_version=1.0.0, environment=dev, client_id=kycis_demo, de
+Image decoding logging dropped!
+Compat change id reported: 289878283; UID 10221; state: ENABLED
+useKycis: loading complete, isReady=true
+useKycis: config fetched
+EmbedProvider LaunchedEffect: triggered, state.currentRoute=phone_entry
+EmbedProvider: calling AI.setKycStep(route=phone_entry)
+SdkRuntime.setKycStep: setting kycStep=phone_entry (previous=phone_entry)
+EmbedProvider: AI.setKycStep completed for route=phone_entry
+EmbedProvider LaunchedEffect: triggered, state.currentRoute=phone_entry
+EmbedProvider: calling AI.setKycStep(route=phone_entry)
+SdkRuntime.setKycStep: setting kycStep=phone_entry (previous=phone_entry)
+EmbedProvider: AI.setKycStep completed for route=phone_entry
+hide(ime(), fromIme=false)
+com.kycis.demo:502bac22: onCancelled at PHASE_CLIENT_ALREADY_HIDDEN
+HttpBackendClient: component_input sent successfully (hint=__EMPTY__)
+visibilityChanged oldVisibility=true newVisibility=false
+LifecycleTracker.onActivityStopped: SplashActivity
+Dropoff registration skipped: no dialable phone for session=7664f88e-4980-41c3-bec0-f0e1591
+LifecycleTracker.onActivityDestroyed: SplashActivity
+sendCancelIfRunning: isInProgress=false callback=android.view.ViewRootImpl$$ExternalSynthet
+Skipping stats log for color mode
+Installing profile for com.kycis.demo
+Cleared Reference was only reachable from finalizer (only reported once)
+channel '43dc934 com.kycis.demo/com.kycis.demo.MainActivity' ~ Channel is unrecoverably bro
+Late-enabling -Xcheck:jni
+Using CollectorTypeCMC GC.
+Unexpected CPU variant for x86: x86_64.
+Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, goldmont-without-sh
+Load libframework-connectivity-tiramisu-jni.so using APEX ns com_android_tethering for call
+Load /data/user/0/com.kycis.demo/code_cache/startup_agents/3fc68f17-agent.so using system n
+hiddenapi: DexFile /data/data/com.kycis.demo/code_cache/.studio/instruments-c9b0d10a.jar is
+type=1400 audit(0.0:594): avc:  granted  { execute } for  path="/data/data/com.kycis.demo/c
+Redefining intrinsic method java.lang.Thread java.lang.Thread.currentThread(). This may cau
+Redefining intrinsic method boolean java.lang.Thread.interrupted(). This may cause the unex
+Compat change id reported: 242716250; UID 10221; state: ENABLED
+Configuring clns-9 for other apk /data/app/~~EJrLfw1RbCTOOHt9sf5Dxg==/com.kycis.demo-8oJddT
+AssetManager2(0x72da4f1d4178) locale list changing from [] to [en-US]
+AssetManager2(0x72da4f1d4ad8) locale list changing from [] to [en-US]
+Currently set values for:
+  angle_gl_driver_selection_pkgs=[]
+  angle_gl_driver_selection_values=[]
+com.kycis.demo is not listed in per-application setting
+ANGLE allowlist from config: com.dreamgames.royalmatch com.dts.freefiremax com.dxx.firenow 
+com.kycis.demo is not listed in ANGLE allowlist or settings, returning default
+Neither updatable production driver nor prerelease driver is supported.
+Choreographer implicitly registered for the refresh rate.
+AssetManager2(0x72da4f1da258) locale list changing from [] to [en-US]
+Pinning is deprecated since Android Q. Please use trim or other methods.
+Toggle override initialized to: OVERRIDE_UNSET
+Opening libGLESv1_CM_emulation.so
+Opening libGLESv2_emulation.so
+Failed to choose config with EGL_SWAP_BEHAVIOR_PRESERVED, retrying without...
+Failed to initialize 101010-2 format, error = EGL_SUCCESS
+Unknown dataspace 0
+Image decoding logging dropped!
+hide(ime(), fromIme=false)
+com.kycis.demo:9a19b573: onCancelled at PHASE_CLIENT_ALREADY_HIDDEN
+Compiler allocated 5042KB to compile void android.view.ViewRootImpl.performTraversals()
+AI.bindActivity: activity=MainActivity
+SdkRuntime.bindCurrentActivity: ENTRY - activity=MainActivity, started=false
+SdkRuntime.bindCurrentActivity: uiBridge updated, now checking started flag
+SdkRuntime.bindCurrentActivity: SDK NOT started yet, activity will be captured later
+AI.bindActivity: activity=MainActivity
+SdkRuntime.bindCurrentActivity: ENTRY - activity=MainActivity, started=false
+SdkRuntime.bindCurrentActivity: uiBridge updated, now checking started flag
+SdkRuntime.bindCurrentActivity: SDK NOT started yet, activity will be captured later
+isInitialized check failed: AI SDK not initialized. Call AI.init first.
+MainActivity: showing loading state
+MainActivity: restoring start destination=phone_entry
+isInitialized check failed: AI SDK not initialized. Call AI.init first.
+useKycis: hasInitialized=false, AI.isInitialized=false
+isInitialized check failed: AI SDK not initialized. Call AI.init first.
+AI.init: ENTRY - apiKey=demo-api-key, userId=demo-user
+AI.init: calling runtime.initialize...
+AI.resolveSessionId: reusing persisted session for userId=demo-user
+Config loaded from resources: allow_multiple=true, cooldown=45s
+SdkRuntime.initialize: setting started=true, checking for current activity...
+SdkRuntime.initialize: currentActivity from uiBridge = MainActivity
+SdkRuntime.initialize: capturing current activity=MainActivity
+AI.init: runtime.initialize complete, setting up listeners
+AI.init: COMPLETE
+useKycis: SDK initialized successfully
+AI.attach: ENTRY - application=KycDemoApplication
+AI.attach: creating LifecycleTracker and registering
+LifecycleTracker.register: registering activity lifecycle callbacks
+LifecycleTracker.register: currentActivity from bridge = MainActivity
+SdkRuntime.bindCurrentActivity: ENTRY - activity=MainActivity, started=true
+SdkRuntime.bindCurrentActivity: uiBridge updated, now checking started flag
+SdkRuntime.bindCurrentActivity: SDK is started, lifecycle tracking active
+SdkRuntime.bindCurrentActivity: lifecycleAttached set to true
+Status changed: LIFECYCLE_ATTACHED message=Lifecycle tracking attached successfully.
+AI.attach: COMPLETE
+useKycis: AI.attach completed
+MainActivity: showing ready state
+EmbedProviderState.updateRoute: route=phone_entry, previous=
+SdkRuntime.setKycStep: setting kycStep=phone_entry (previous=null)
+Config loaded from resources: allow_multiple=true, cooldown=45s
+Config merged from remote: {sdk_version=1.0.0, client_id=kycis_demo, defaults_version=1.0.0
+Config merged: {source=merged, sdk_version=1.0.0, environment=dev, client_id=kycis_demo, de
+Image decoding logging dropped!
+Compat change id reported: 289878283; UID 10221; state: ENABLED
+useKycis: loading complete, isReady=true
+useKycis: config fetched
+EmbedProvider LaunchedEffect: triggered, state.currentRoute=phone_entry
+EmbedProvider: calling AI.setKycStep(route=phone_entry)
+SdkRuntime.setKycStep: setting kycStep=phone_entry (previous=phone_entry)
+EmbedProvider: AI.setKycStep completed for route=phone_entry
+EmbedProvider LaunchedEffect: triggered, state.currentRoute=phone_entry
+EmbedProvider: calling AI.setKycStep(route=phone_entry)
+SdkRuntime.setKycStep: setting kycStep=phone_entry (previous=phone_entry)
+EmbedProvider: AI.setKycStep completed for route=phone_entry
+hide(ime(), fromIme=false)
+com.kycis.demo:b03f89a8: onCancelled at PHASE_CLIENT_ALREADY_HIDDEN
+HttpBackendClient: component_input sent successfully (hint=__EMPTY__)
+visibilityChanged oldVisibility=true newVisibility=false
+LifecycleTracker.onActivityStopped: SplashActivity
+Dropoff registration skipped: no dialable phone for session=7664f88e-4980-41c3-bec0-f0e1591
+LifecycleTracker.onActivityDestroyed: SplashActivity
+sendCancelIfRunning: isInProgress=false callback=android.view.ViewRootImpl$$ExternalSynthet
+Skipping stats log for color mode
+EmbedProviderState.updateRoute: route=phone_otp, previous=phone_entry
+SdkRuntime.setKycStep: setting kycStep=phone_otp (previous=phone_entry)
+OnBackInvokedCallback is not enabled for the application.
+Set 'android:enableOnBackInvokedCallback="true"' in the application manifest.
+EmbedProvider LaunchedEffect: triggered, state.currentRoute=phone_otp
+EmbedProvider: calling AI.setKycStep(route=phone_otp)
+SdkRuntime.setKycStep: setting kycStep=phone_otp (previous=phone_otp)
+EmbedProvider: AI.setKycStep completed for route=phone_otp
+HttpBackendClient: component_input sent successfully (hint=__EMPTY__)
+EmbedProviderState.updateRoute: route=email_entry, previous=phone_otp
+SdkRuntime.setKycStep: setting kycStep=email_entry (previous=phone_otp)
+Image decoding logging dropped!
+EmbedProvider LaunchedEffect: triggered, state.currentRoute=email_entry
+EmbedProvider: calling AI.setKycStep(route=email_entry)
+SdkRuntime.setKycStep: setting kycStep=email_entry (previous=email_entry)
+EmbedProvider: AI.setKycStep completed for route=email_entry
+HttpBackendClient: component_input sent successfully (hint=__EMPTY__)
+Installing profile for com.kycis.demo
+EmbedProviderState.updateRoute: route=pan_details, previous=email_entry
+SdkRuntime.setKycStep: setting kycStep=pan_details (previous=email_entry)
+Image decoding logging dropped!
+EmbedProvider LaunchedEffect: triggered, state.currentRoute=pan_details
+EmbedProvider: calling AI.setKycStep(route=pan_details)
+SdkRuntime.setKycStep: setting kycStep=pan_details (previous=pan_details)
+EmbedProvider: AI.setKycStep completed for route=pan_details
+HttpBackendClient: component_input sent successfully (hint=__EMPTY__)
+HttpBackendClient: component_input sent successfully (hint=__EMPTY__)
+Cleared Reference was only reachable from finalizer (only reported once)
+FAB: onStartClick called, hasAudioPermission=true
+AI.bindActivity: activity=MainActivity
+SdkRuntime.bindCurrentActivity: ENTRY - activity=MainActivity, started=true
+SdkRuntime.bindCurrentActivity: uiBridge updated, now checking started flag
+SdkRuntime.bindCurrentActivity: SDK is started, lifecycle tracking active
+AI.startAssistantInternal: called
+AI.startAssistantInternal: initialized check passed, calling runtime.startAssistantSession
+AI.startAssistantInternal: calling runtime.startAssistantSession with source=manual_start_a
+SdkRuntime.startAssistantSession: ENTRY - invokeSource=manual_start_assistant, started=true
+SdkRuntime.startAssistantSession: SDK is started, proceeding...
+SdkRuntime.startAssistantSession: context is valid: userId=demo-user, sessionId=7664f88e-49
+SdkRuntime.startAssistantSession: uiBridge.getCurrentActivity() = MainActivity
+SdkRuntime.startAssistantSession: permission check - hasPermission=true, activity=true
+SdkRuntime.startAssistantSession: hasPermission=true, calling proceedWithBackend()
+SdkRuntime.startAssistantSession: proceedWithBackend() called
+SdkRuntime.startAssistantSession: calling backendClient.startAssistant...
+SdkRuntime.startAssistantSession: screen debug - kycStep=pan_details, passiveSnapshot.curre
+AI.startAssistantInternal: runtime.startAssistantSession returned
+HttpBackendClient.startAssistant: STARTING - baseUrl=http://10.0.2.2:9000/v1, userId=demo-u
+HttpBackendClient.startAssistant: RESPONSE - statusCode=200, errorMessage=null
+HttpBackendClient.startAssistant: rawBody={"session_id":"7664f88e-4980-41c3-bec0-f0e1591ee5
+HttpBackendClient.startAssistant: response={"session_id":"7664f88e-4980-41c3-bec0-f0e1591ee
+HttpBackendClient.startAssistant: SUCCESS - token received, livekitUrl=wss://kyc-yxmusepc.l
+HttpBackendClient.startAssistant: COMPLETE - result=true, failure=null
+SdkRuntime.startAssistantSession: backendClient.startAssistant callback received - result=t
+Assistant prompt marked as shown at 1777917821
+Voice session started successfully - token present, connecting to LiveKit...
+AgentEventDispatcher: Event CONNECTED dispatched but no listeners registered
+VoiceRoomConnector: deferring audio focus management to LiveKit and proceeding with connect
+[connector] Connecting to room {url=wss://kyc-yxmusepc.livekit.cloud}
+NativeLibrary: Loading native library: lkjingle_peerconnection_so
+NativeLibrary: Loading library: lkjingle_peerconnection_so
+Config loaded from resources: allow_multiple=true, cooldown=45s
+Config merged from remote: {sdk_version=1.0.0, client_id=kycis_demo, defaults_version=1.0.0
+Config merged: {source=merged, sdk_version=1.0.0, environment=dev, client_id=kycis_demo, de
+Load /data/app/~~EJrLfw1RbCTOOHt9sf5Dxg==/com.kycis.demo-8oJddT3RwCuWVIcclPj1PA==/base.apk!
+Compat change id reported: 263076149; UID 10221; state: ENABLED
+onNewServiceWithAdapter: media.audio_flinger service obtained 0x72da7f209b10
+getService: checking for service media.audio_flinger: 0x72d92f21a410
+onNewService: media.audio_policy service obtained 0x72d92f218980
+getService: checking for service media.audio_policy: 0x72d92f218980
+attributionTag  not declared in manifest of com.kycis.demo
+attributionTag  not declared in manifest of com.kycis.demo
+[connector] Connected to room {room=kyc-room-7664f88e-4980-41c3-bec0-f0e1591ee548}
+[connector] Mic enabled (setMicrophoneEnabled=true)
+MainActivity: showing ready state
+VoiceRoomConnector: Track subscribed: audio
+[connector] Track subscribed: audio
+attributionTag  not declared in manifest of com.kycis.demo
+attributionTag  not declared in manifest of com.kycis.demo
+attributionTag  not declared in manifest of com.kycis.demo
+attributionTag  not declared in manifest of com.kycis.demo
+[active_speakers] Local=false Remote=true {speakers=Identity(value=agent-AJ_x2TpCrjUEQhc)}
+[active_speakers] Local=true Remote=true {speakers=Identity(value=demo-user), Identity(valu
+[active_speakers] Local=false Remote=true {speakers=Identity(value=agent-AJ_x2TpCrjUEQhc)}
+[transcript] [AGENT] Wapas aa gaye! Chaliye wahin se shuru karte hain jahan aapne choda tha
+[active_speakers] Local=false Remote=true {speakers=Identity(value=agent-AJ_x2TpCrjUEQhc)}
+[active_speakers] Local=false Remote=false {speakers=}
+Owner FocusChanged(true)
+show(ime(), fromIme=false)
+com.kycis.demo:8b6d74cb: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT_BY_INSETS_AP
+Setting requestedVisibleTypes to -1 (was -9)
+com.kycis.demo:a81163a: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser fals
+show(ime(), fromIme=false)
+com.kycis.demo:a81163a: onCancelled at PHASE_CLIENT_REPORT_REQUESTED_VISIBLE_TYPES
+requestCursorUpdates on inactive InputConnection
+Initializing without READ_DEVICE_CONFIG permission. enabled=false, interval=1, missedFrameT
+com.kycis.demo:8b6d74cb: onShown
+HttpBackendClient: component_input sent successfully (hint=D)
+HttpBackendClient: component_input sent successfully (hint=__EMPTY__)
+HttpBackendClient: component_input sent successfully (hint=DSFSFS)
+HttpBackendClient: component_input sent successfully (hint=__EMPTY__)
+HttpBackendClient: component_input sent successfully (hint=DSFSFSFWSF)
+HttpBackendClient: component_input sent successfully (hint=__EMPTY__)
+Config loaded from resources: allow_multiple=true, cooldown=45s
+Config merged from remote: {sdk_version=1.0.0, client_id=kycis_demo, defaults_version=1.0.0
+Config merged: {source=merged, sdk_version=1.0.0, environment=dev, client_id=kycis_demo, de
+[active_speakers] Local=true Remote=false {speakers=Identity(value=demo-user)}
+[active_speakers] Local=true Remote=false {speakers=Identity(value=demo-user)}
+[active_speakers] Local=false Remote=false {speakers=}
+[transcript] [USER] क्या मैंने सही डिटेल्स डाला है {role=USER}
+[active_speakers] Local=false Remote=true {speakers=Identity(value=agent-AJ_x2TpCrjUEQhc)}
+[active_speakers] Local=false Remote=true {speakers=Identity(value=agent-AJ_x2TpCrjUEQhc)}
+[active_speakers] Local=false Remote=true {speakers=Identity(value=agent-AJ_x2TpCrjUEQhc)}
+[active_speakers] Local=false Remote=true {speakers=Identity(value=agent-AJ_x2TpCrjUEQhc)}
+[active_speakers] Local=false Remote=false {speakers=}
+[active_speakers] Local=false Remote=true {speakers=Identity(value=agent-AJ_x2TpCrjUEQhc)}
+Config loaded from resources: allow_multiple=true, cooldown=45s
+Config merged from remote: {sdk_version=1.0.0, client_id=kycis_demo, defaults_version=1.0.0
+Config merged: {source=merged, sdk_version=1.0.0, environment=dev, client_id=kycis_demo, de
+[active_speakers] Local=false Remote=true {speakers=Identity(value=agent-AJ_x2TpCrjUEQhc)}
+[transcript] [AGENT] मैं आपकी मदद करने के लिए तैयार हूँ। लेकिन मुझे नहीं पता कि आप कौन से स
+क्या आप मुझे बता सकते हैं कि आप किस स्क्रीन पर हैं और आप क्या करना चाहते हैं? {role=AGENT}

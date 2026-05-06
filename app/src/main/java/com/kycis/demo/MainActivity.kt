@@ -181,6 +181,8 @@ private fun VoiceAssistantContent(
                 passiveEvalEnabled = true,
                 passiveEvalIntervalSeconds = 10,
                 componentInputHintsMasked = false, // demo: send unmasked hints when reporting component_input
+                autoCaptureEnabled = false, // demo app handles all component_input events manually for precision
+                debugEnabled = true, // demo app: enable detailed SDK logging in Logcat
             ),
             attachToLifecycle = true,
             autoTrackScreen = true,

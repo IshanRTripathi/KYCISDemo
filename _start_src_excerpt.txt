@@ -1,0 +1,41 @@
+=== Lines 165-190 ===
+165: 
+166:                 # session can be restarted, register the callbacks only once
+167:                 if not self._job_context_cb_registered:
+168:                     job_ctx.add_shutdown_callback(
+169:                         lambda: self._aclose_impl(reason=CloseReason.JOB_SHUTDOWN)
+170:                     )
+171:                     self._job_context_cb_registered = True
+172: 
+173:             run_state: RunResult | None = None
+174:             if capture_run:
+175:                 if self._global_run_state is not None and not self._global_run_state.done():
+176:                     raise RuntimeError("nested runs are not supported")
+177: 
+178:                 run_state = RunResult(output_type=None)
+179:                 self._global_run_state = run_state
+180: 
+181:             # it is ok to await it directly, there is no previous task to drain
+182:             tasks.append(
+183:                 asyncio.create_task(self._update_activity(self._agent, wait_on_enter=False))
+184:             )
+185: 
+186:             try:
+187:                 await asyncio.gather(*tasks)
+188:             finally:
+189:                 await utils.aio.cancel_and_wait(*tasks)
+190: 
+
+=== Lines 255-270 ===
+255:             if video_input or video_output:
+256:                 logger.debug(
+257:                     "using video io: %s > `AgentSession` > %s",
+258:                     " -> ".join([f"`{out.label}`" for out in video_input]) or "(none)",
+259:                     " -> ".join([f"`{out.label}`" for out in video_output]) or "(none)",
+260:                 )
+261: 
+262:             if run_state:
+263:                 await run_state
+264: 
+265:             return run_state
+266: 

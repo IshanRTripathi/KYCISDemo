@@ -98,43 +98,58 @@ fun PersonalDetailsScreen(
                 // Send each field individually with filled status via properties map
                 KycEvent.componentInput(
                     componentId = "name_field",
-                    value = name.ifBlank { null },
+                    hint = name.ifBlank { "" },
                     screen = "personal_details",
                     componentType = "text_input",
-                    semanticSlot = "full_name",
-                    properties = mapOf("field_status" to status),
+                    properties = mapOf("field_status" to status, "semantic_slot" to "full_name"),
+                    sdkKb = KycEvent.ComponentKb(
+                        displayName = "Full Name",
+                        validations = listOf("Required field", "Must contain only letters and spaces")
+                    )
                 )
                 KycEvent.componentInput(
                     componentId = "father_name_field",
-                    value = fatherName.ifBlank { null },
+                    hint = fatherName.ifBlank { "" },
                     screen = "personal_details",
                     componentType = "text_input",
-                    semanticSlot = "father_name",
-                    properties = mapOf("field_status" to fatherStatus),
+                    properties = mapOf("field_status" to fatherStatus, "semantic_slot" to "father_name"),
+                    sdkKb = KycEvent.ComponentKb(
+                        displayName = "Father's Name",
+                        validations = listOf("Required field", "Must contain only letters and spaces")
+                    )
                 )
                 KycEvent.componentInput(
                     componentId = "gender_field",
-                    value = gender.ifBlank { null },
+                    hint = gender.ifBlank { "" },
                     screen = "personal_details",
                     componentType = "dropdown",
-                    semanticSlot = "gender",
-                    properties = mapOf("field_status" to genderStatus),
+                    properties = mapOf("field_status" to genderStatus, "semantic_slot" to "gender"),
+                    sdkKb = KycEvent.ComponentKb(
+                        displayName = "Gender",
+                        validations = listOf("Required field", "Select from dropdown")
+                    )
                 )
                 KycEvent.componentInput(
                     componentId = "marital_status_field",
-                    value = maritalStatus.ifBlank { null },
+                    hint = maritalStatus.ifBlank { "" },
                     screen = "personal_details",
                     componentType = "dropdown",
-                    semanticSlot = "marital_status",
-                    properties = mapOf("field_status" to maritalStatusField),
+                    properties = mapOf("field_status" to maritalStatusField, "semantic_slot" to "marital_status"),
+                    sdkKb = KycEvent.ComponentKb(
+                        displayName = "Marital Status",
+                        validations = listOf("Required field", "Select from dropdown")
+                    )
                 )
                 KycEvent.componentInput(
                     componentId = "residency_status_field",
-                    value = residencyStatus.ifBlank { null },
+                    hint = residencyStatus.ifBlank { "" },
                     screen = "personal_details",
                     componentType = "dropdown",
-                    semanticSlot = "residency_status",
-                    properties = mapOf("field_status" to residencyStatusField),
+                    properties = mapOf("field_status" to residencyStatusField, "semantic_slot" to "residency_status"),
+                    sdkKb = KycEvent.ComponentKb(
+                        displayName = "Residency Status",
+                        validations = listOf("Required field", "Select from dropdown")
+                    )
                 )
             }
 
@@ -220,8 +235,18 @@ fun PersonalDetailsScreen(
             Spacer(modifier = Modifier.height(12.dp))
 
             Button(
-                onClick = onProceed,
-                enabled = isFormValid,
+                onClick = {
+                    if (isFormValid) {
+                        onProceed()
+                    } else {
+                        if (name.isEmpty()) KycEvent.validationFailed("required_field", "name_field", "text_input", businessStep = "personal_details")
+                        else if (gender.isEmpty()) KycEvent.validationFailed("required_field", "gender_field", "dropdown", businessStep = "personal_details")
+                        else if (maritalStatus.isEmpty()) KycEvent.validationFailed("required_field", "marital_status_field", "dropdown", businessStep = "personal_details")
+                        else if (residencyStatus.isEmpty()) KycEvent.validationFailed("required_field", "residency_status_field", "dropdown", businessStep = "personal_details")
+                        else if (fatherName.isEmpty()) KycEvent.validationFailed("required_field", "father_name_field", "text_input", businessStep = "personal_details")
+                    }
+                },
+                enabled = true,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
@@ -288,10 +313,10 @@ private fun ExposedPickListField(
                         expanded = false
                         KycEvent.componentInput(
                             componentId = sdkComponentId,
-                            value = option,
+                            hint = option,
                             screen = "personal_details",
                             componentType = "dropdown",
-                            semanticSlot = semanticSlot,
+                            properties = if (semanticSlot != null) mapOf("semantic_slot" to semanticSlot) else emptyMap(),
                         )
                     },
                 )

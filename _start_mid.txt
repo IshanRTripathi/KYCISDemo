@@ -1,0 +1,30 @@
+190: 
+191:             # Start client events handler after room is connected (requires local_participant)
+192:             if self._client_events_handler is not None:
+193:                 await self._client_events_handler.start()
+194: 
+195:             # important: no await should be done after this!
+196: 
+197:             if self.input.audio is not None:
+198:                 self._forward_audio_atask = asyncio.create_task(
+199:                     self._forward_audio_task(), name="_forward_audio_task"
+200:                 )
+201: 
+202:             if self.input.video is not None:
+203:                 self._forward_video_atask = asyncio.create_task(
+204:                     self._forward_video_task(), name="_forward_video_task"
+205:                 )
+206: 
+207:             self._started = True
+208:             self._update_agent_state("listening")
+209:             if self._room_io and self._room_io.subscribed_fut:
+210: 
+211:                 def on_room_io_subscribed(_: asyncio.Future[None]) -> None:
+212:                     if self._user_state == "listening" and self._agent_state == "listening":
+213:                         self._set_user_away_timer()
+214: 
+215:                 self._room_io.subscribed_fut.add_done_callback(on_room_io_subscribed)
+216: 
+217:             # log used IO
+218:             def _collect_source(
+219:                 inp: io.AudioInput | io.VideoInput | None,

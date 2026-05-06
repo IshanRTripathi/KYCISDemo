@@ -207,16 +207,30 @@ fun DigilockerAadhaarScreen(
 
                     Button(
                         onClick = {
-                            // Send unmasked value so the agent can see what the user actually typed
-                            KycEvent.componentInput(
-                                componentId = "aadhaar_digilocker_field",
-                                value = aadhaar1 + aadhaar2 + aadhaar3,
-                                screen = "digilocker_aadhaar",
-                                componentType = "text_input"
-                            )
-                            onNext() 
+                            if (isButtonEnabled) {
+                                KycEvent.componentInput(
+                                    componentId = "aadhaar_digilocker_field",
+                                    hint = aadhaar1 + aadhaar2 + aadhaar3,
+                                    screen = "digilocker_aadhaar",
+                                    componentType = "text_input",
+                                    sdkKb = KycEvent.ComponentKb(
+                                        displayName = "Aadhaar Number",
+                                        validations = listOf("Must be exactly 12 digits"),
+                                        commonIssues = listOf("User enters spaces", "Aadhaar not linked to mobile number")
+                                    )
+                                )
+                                onNext() 
+                            } else {
+                                KycEvent.validationFailed(
+                                    code = "aadhaar_incomplete",
+                                    componentId = "aadhaar_digilocker_field",
+                                    componentType = "text_input",
+                                    hint = aadhaar1 + aadhaar2 + aadhaar3,
+                                    businessStep = "digilocker_aadhaar"
+                                )
+                            }
                         },
-                        enabled = isButtonEnabled,
+                        enabled = true,
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(56.dp),

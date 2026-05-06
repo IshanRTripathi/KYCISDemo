@@ -98,7 +98,7 @@ fun PhoneEntryScreen(
                     // The masked=false flag tells the backend this is unmasked
                     KycEvent.componentInput(
                         componentId = "phone_field",
-                        value = debouncedPhone,  // Send unmasked value
+                        hint = debouncedPhone,  // Send unmasked value
                         screen = "phone_entry",
                         componentType = "phone_number",
                         sdkKb = KycEvent.ComponentKb(
@@ -172,9 +172,19 @@ fun PhoneEntryScreen(
 
             Button(
                 onClick = {
-                    onGetOtp(phoneNumber)
+                    if (isPhoneValid) {
+                        onGetOtp(phoneNumber)
+                    } else {
+                        KycEvent.validationFailed(
+                            code = "phone_invalid_format",
+                            componentId = "phone_field",
+                            componentType = "phone_number",
+                            hint = phoneNumber,
+                            businessStep = "phone_entry"
+                        )
+                    }
                 },
-                enabled = isPhoneValid,
+                enabled = true,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),

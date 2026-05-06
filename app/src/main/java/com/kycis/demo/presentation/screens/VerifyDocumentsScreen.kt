@@ -99,9 +99,13 @@ fun VerifyDocumentsScreen(
                 onClick = {
                     KycEvent.componentInput(
                         componentId = "verify_documents_button",
-                        value = "proceed_with_aadhaar",
+                        hint = "proceed_with_aadhaar",
                         screen = "verify_documents",
                         componentType = "button",
+                        sdkKb = KycEvent.ComponentKb(
+                            displayName = "Proceed with Aadhaar Button",
+                            faqs = listOf("Choosing this will verify your Aadhaar online via DigiLocker")
+                        )
                     )
                     onProceedWithAadhaar()
                 },
@@ -127,9 +131,13 @@ fun VerifyDocumentsScreen(
                 onClick = {
                     KycEvent.componentInput(
                         componentId = "verify_documents_button",
-                        value = "offline_process",
+                        hint = "offline_process",
                         screen = "verify_documents",
                         componentType = "button",
+                        sdkKb = KycEvent.ComponentKb(
+                            displayName = "Offline Process Button",
+                            faqs = listOf("Choosing this requires you to manually upload photos of your documents")
+                        )
                     )
                     onOfflineProcess()
                 },

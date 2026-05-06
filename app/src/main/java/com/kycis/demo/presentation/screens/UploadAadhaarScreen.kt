@@ -115,9 +115,14 @@ fun UploadAadhaarScreen(
                         isFileUploaded = true
                         KycEvent.componentInput(
                             componentId = if (isFront) "aadhaar_front_field" else "aadhaar_back_field",
-                            value = "file_uploaded.png",
+                            hint = "file_uploaded.png",
                             screen = if (isFront) "upload_aadhaar_front" else "upload_aadhaar_back",
-                            componentType = "file_upload"
+                            componentType = "file_upload",
+                            sdkKb = KycEvent.ComponentKb(
+                                displayName = if (isFront) "Aadhaar Front Image" else "Aadhaar Back Image",
+                                validations = listOf("Must be a clear image", "Max file size 5MB", "Supported formats: PNG, JPG, JPEG"),
+                                commonIssues = listOf("Image is blurry", "Glare on the card", "Edges of the card are cropped")
+                            )
                         )
                     }) {
                         Icon(

@@ -1,3 +1,14 @@
+> **⚠️ Superseded 2026-07-13.** This document is dated 2026-05-04 and several of its specific
+> technical claims are now stale (the codebase has moved fast since). Notably, section 11.4's
+> "Priority 1/2/3 COMPLETED" fixes (flow contract standardized on `flow_key`, `validation_failed`
+> moved to the sync path, `setUser` session_id) were independently re-verified as **already
+> correct in the current code** by a fresh 2026-07-13 audit — do not re-do that work. The
+> screen-by-screen gap analysis in sections 2–7 below is still broadly directionally accurate
+> (confirmed against current code) but see **[`../SDK_INTEGRATION_GAPS_2026-07-13.md`](../SDK_INTEGRATION_GAPS_2026-07-13.md)**
+> for the current, dated, re-verified gap list and remediation priority order — start there, use
+> this file only for historical screen-level detail it references. (This file was moved into
+> `archive/` on 2026-07-13 as part of a repo-wide freshness pass.)
+
 # KYCIS SDK Feature And Integration Analysis
 
 **Project:** `KYCISDemo`  

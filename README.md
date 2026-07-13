@@ -33,11 +33,21 @@ Optional **`RuntimePolicy.clientId`** / **`mappingVersion`** match the backend m
 
 ## Local run
 
-1. Start the KYCIS backend (e.g. `uvicorn` on port **8000**).
-2. In **KycDemoApplication**, set **`backendBaseUrl`** to:
+**One-shot on emulator** (starts AVD if needed, builds, installs, launches):
+
+```powershell
+.\scripts\run-on-emulator.ps1
+# .\scripts\run-on-emulator.ps1 -Avd Pixel_9_Pro
+```
+
+Full script index (backend, voice agent, SDK, deploy): [KYCIS/scripts/README.md](../KYCIS/scripts/README.md).
+
+1. Start the KYCIS backend: `cd ../KYCIS/backend; .\start-dev.ps1` (port **8000**).
+2. Optional voice: `.\start-voice-agent.ps1` in the same `backend` folder.
+3. Backend URL in the demo:
    - Emulator: `http://10.0.2.2:8000/v1`
    - Physical device: `http://<your-LAN-ip>:8000/v1`
-3. Open the demo app, complete flows; verify backend logs and `/v1/assistant/context/{session_id}`.
+4. Run the app (script above, or Android Studio); verify backend logs and `/v1/assistant/context/{session_id}`.
 
 ## Manual harness (voice trigger + dynamic popup)
 

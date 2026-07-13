@@ -6,7 +6,7 @@ object BackendUrlStore {
     private const val PREFS_NAME = "kycis_demo_prefs"
     private const val KEY_BACKEND_BASE_URL = "backend_base_url"
     private const val DEFAULT_BACKEND_BASE_URL =
-        "https://subpilose-abigail-unsuspectingly.ngrok-free.dev/v1"
+        "http://prod-alb-1551985914.ap-south-1.elb.amazonaws.com"
 
     fun get(context: Context): String {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)

@@ -20,7 +20,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kycis.demo.R
-import com.kycis.sdk.ui.KycEvent
+import com.kycis.demo.kycis.KycisIntegration
 import com.kycis.demo.presentation.theme.KycDemoTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -97,12 +97,12 @@ fun VerifyDocumentsScreen(
 
             Button(
                 onClick = {
-                    KycEvent.componentInput(
+                    KycisIntegration.reportComponentInput(
                         componentId = "verify_documents_button",
                         hint = "proceed_with_aadhaar",
                         screen = "verify_documents",
                         componentType = "button",
-                        sdkKb = KycEvent.ComponentKb(
+                        sdkKb = KycisIntegration.ComponentKb(
                             displayName = "Proceed with Aadhaar Button",
                             faqs = listOf("Choosing this will verify your Aadhaar online via DigiLocker")
                         )
@@ -129,12 +129,12 @@ fun VerifyDocumentsScreen(
 
             OutlinedButton(
                 onClick = {
-                    KycEvent.componentInput(
+                    KycisIntegration.reportComponentInput(
                         componentId = "verify_documents_button",
                         hint = "offline_process",
                         screen = "verify_documents",
                         componentType = "button",
-                        sdkKb = KycEvent.ComponentKb(
+                        sdkKb = KycisIntegration.ComponentKb(
                             displayName = "Offline Process Button",
                             faqs = listOf("Choosing this requires you to manually upload photos of your documents")
                         )

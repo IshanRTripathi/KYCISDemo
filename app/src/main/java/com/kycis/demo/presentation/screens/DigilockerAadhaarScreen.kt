@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kycis.demo.R
 import com.kycis.demo.presentation.theme.KycDemoTheme
-import com.kycis.sdk.ui.KycEvent
+import com.kycis.demo.kycis.KycisIntegration
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -208,12 +208,12 @@ fun DigilockerAadhaarScreen(
                     Button(
                         onClick = {
                             if (isButtonEnabled) {
-                                KycEvent.componentInput(
+                                KycisIntegration.reportComponentInput(
                                     componentId = "aadhaar_digilocker_field",
                                     hint = aadhaar1 + aadhaar2 + aadhaar3,
                                     screen = "digilocker_aadhaar",
                                     componentType = "text_input",
-                                    sdkKb = KycEvent.ComponentKb(
+                                    sdkKb = KycisIntegration.ComponentKb(
                                         displayName = "Aadhaar Number",
                                         validations = listOf("Must be exactly 12 digits"),
                                         commonIssues = listOf("User enters spaces", "Aadhaar not linked to mobile number")
@@ -221,7 +221,7 @@ fun DigilockerAadhaarScreen(
                                 )
                                 onNext() 
                             } else {
-                                KycEvent.validationFailed(
+                                KycisIntegration.onValidationFailed(
                                     code = "aadhaar_incomplete",
                                     componentId = "aadhaar_digilocker_field",
                                     componentType = "text_input",

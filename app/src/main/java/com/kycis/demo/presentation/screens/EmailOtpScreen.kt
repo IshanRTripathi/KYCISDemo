@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kycis.demo.presentation.theme.KycDemoTheme
 import com.kycis.sdk.ui.HintKind
-import com.kycis.sdk.ui.KycEvent
+import com.kycis.demo.kycis.KycisIntegration
 import com.kycis.sdk.ui.maskHint
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -90,13 +90,13 @@ fun EmailOtpScreen(
 
             LaunchedEffect(otpValue) {
                 if (otpValue.length != otpLength) return@LaunchedEffect
-                KycEvent.componentInput(
+                KycisIntegration.reportComponentInput(
                     componentId = "email_otp_field",
                     hint = maskHint(HintKind.OTP, otpValue),
                     screen = "email_otp",
                     componentType = "otp_input",
                     properties = mapOf("digits_filled" to otpLength.toString()),
-                    sdkKb = KycEvent.ComponentKb(
+                    sdkKb = KycisIntegration.ComponentKb(
                         displayName = "Email OTP",
                         validations = listOf("Must be exactly 4 digits"),
                         commonIssues = listOf("User enters wrong OTP", "OTP expired", "Check spam folder")
@@ -177,7 +177,7 @@ fun EmailOtpScreen(
                     if (otpValue.length == otpLength) {
                         onVerify(otpValue) 
                     } else {
-                        KycEvent.validationFailed(
+                        KycisIntegration.onValidationFailed(
                             code = "otp_incomplete",
                             componentId = "email_otp_field",
                             componentType = "otp_input",

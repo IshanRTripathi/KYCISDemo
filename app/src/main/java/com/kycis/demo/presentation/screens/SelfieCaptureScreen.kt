@@ -15,7 +15,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kycis.demo.presentation.theme.KycDemoTheme
-import com.kycis.sdk.ui.KycEvent
+import com.kycis.demo.kycis.KycisIntegration
 import kotlinx.coroutines.delay
 
 @Composable
@@ -38,12 +38,12 @@ fun SelfieCaptureScreen(
         delay(500)
         
         // Track selfie capture
-        KycEvent.componentInput(
+        KycisIntegration.reportComponentInput(
             componentId = "selfie_capture",
             hint = "selfie_captured.jpg",
             screen = "selfie_capture",
             componentType = "camera_capture",
-            sdkKb = KycEvent.ComponentKb(
+            sdkKb = KycisIntegration.ComponentKb(
                 displayName = "Selfie Capture",
                 validations = listOf("Face must be clearly visible", "Sufficient lighting required", "No sunglasses or hats"),
                 commonIssues = listOf("Room is too dark", "Face is partially outside the frame", "Multiple faces detected")

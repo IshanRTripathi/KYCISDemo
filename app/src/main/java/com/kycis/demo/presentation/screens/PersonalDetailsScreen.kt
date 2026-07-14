@@ -22,7 +22,7 @@ import com.kycis.demo.R
 import com.kycis.demo.VoiceUiSnapshotHolder
 import com.kycis.demo.presentation.form.DemoFormOptions
 import com.kycis.demo.presentation.theme.KycDemoTheme
-import com.kycis.sdk.ui.KycEvent
+import com.kycis.demo.kycis.KycisIntegration
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -96,57 +96,57 @@ fun PersonalDetailsScreen(
                 VoiceUiSnapshotHolder.upsertField("residency_status_field", residencyStatus)
                 
                 // Send each field individually with filled status via properties map
-                KycEvent.componentInput(
+                KycisIntegration.reportComponentInput(
                     componentId = "name_field",
                     hint = name.ifBlank { "" },
                     screen = "personal_details",
                     componentType = "text_input",
                     properties = mapOf("field_status" to status, "semantic_slot" to "full_name"),
-                    sdkKb = KycEvent.ComponentKb(
+                    sdkKb = KycisIntegration.ComponentKb(
                         displayName = "Full Name",
                         validations = listOf("Required field", "Must contain only letters and spaces")
                     )
                 )
-                KycEvent.componentInput(
+                KycisIntegration.reportComponentInput(
                     componentId = "father_name_field",
                     hint = fatherName.ifBlank { "" },
                     screen = "personal_details",
                     componentType = "text_input",
                     properties = mapOf("field_status" to fatherStatus, "semantic_slot" to "father_name"),
-                    sdkKb = KycEvent.ComponentKb(
+                    sdkKb = KycisIntegration.ComponentKb(
                         displayName = "Father's Name",
                         validations = listOf("Required field", "Must contain only letters and spaces")
                     )
                 )
-                KycEvent.componentInput(
+                KycisIntegration.reportComponentInput(
                     componentId = "gender_field",
                     hint = gender.ifBlank { "" },
                     screen = "personal_details",
                     componentType = "dropdown",
                     properties = mapOf("field_status" to genderStatus, "semantic_slot" to "gender"),
-                    sdkKb = KycEvent.ComponentKb(
+                    sdkKb = KycisIntegration.ComponentKb(
                         displayName = "Gender",
                         validations = listOf("Required field", "Select from dropdown")
                     )
                 )
-                KycEvent.componentInput(
+                KycisIntegration.reportComponentInput(
                     componentId = "marital_status_field",
                     hint = maritalStatus.ifBlank { "" },
                     screen = "personal_details",
                     componentType = "dropdown",
                     properties = mapOf("field_status" to maritalStatusField, "semantic_slot" to "marital_status"),
-                    sdkKb = KycEvent.ComponentKb(
+                    sdkKb = KycisIntegration.ComponentKb(
                         displayName = "Marital Status",
                         validations = listOf("Required field", "Select from dropdown")
                     )
                 )
-                KycEvent.componentInput(
+                KycisIntegration.reportComponentInput(
                     componentId = "residency_status_field",
                     hint = residencyStatus.ifBlank { "" },
                     screen = "personal_details",
                     componentType = "dropdown",
                     properties = mapOf("field_status" to residencyStatusField, "semantic_slot" to "residency_status"),
-                    sdkKb = KycEvent.ComponentKb(
+                    sdkKb = KycisIntegration.ComponentKb(
                         displayName = "Residency Status",
                         validations = listOf("Required field", "Select from dropdown")
                     )
@@ -239,11 +239,11 @@ fun PersonalDetailsScreen(
                     if (isFormValid) {
                         onProceed()
                     } else {
-                        if (name.isEmpty()) KycEvent.validationFailed("required_field", "name_field", "text_input", businessStep = "personal_details")
-                        else if (gender.isEmpty()) KycEvent.validationFailed("required_field", "gender_field", "dropdown", businessStep = "personal_details")
-                        else if (maritalStatus.isEmpty()) KycEvent.validationFailed("required_field", "marital_status_field", "dropdown", businessStep = "personal_details")
-                        else if (residencyStatus.isEmpty()) KycEvent.validationFailed("required_field", "residency_status_field", "dropdown", businessStep = "personal_details")
-                        else if (fatherName.isEmpty()) KycEvent.validationFailed("required_field", "father_name_field", "text_input", businessStep = "personal_details")
+                        if (name.isEmpty()) KycisIntegration.onValidationFailed("required_field", "name_field", "text_input", businessStep = "personal_details")
+                        else if (gender.isEmpty()) KycisIntegration.onValidationFailed("required_field", "gender_field", "dropdown", businessStep = "personal_details")
+                        else if (maritalStatus.isEmpty()) KycisIntegration.onValidationFailed("required_field", "marital_status_field", "dropdown", businessStep = "personal_details")
+                        else if (residencyStatus.isEmpty()) KycisIntegration.onValidationFailed("required_field", "residency_status_field", "dropdown", businessStep = "personal_details")
+                        else if (fatherName.isEmpty()) KycisIntegration.onValidationFailed("required_field", "father_name_field", "text_input", businessStep = "personal_details")
                     }
                 },
                 enabled = true,
@@ -311,7 +311,7 @@ private fun ExposedPickListField(
                     onClick = {
                         onValueChange(option)
                         expanded = false
-                        KycEvent.componentInput(
+                        KycisIntegration.reportComponentInput(
                             componentId = sdkComponentId,
                             hint = option,
                             screen = "personal_details",

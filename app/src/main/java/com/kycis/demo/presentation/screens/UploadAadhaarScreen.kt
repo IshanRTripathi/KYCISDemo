@@ -21,7 +21,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kycis.demo.presentation.theme.KycDemoTheme
-import com.kycis.sdk.ui.KycEvent
+import com.kycis.demo.kycis.KycisIntegration
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -113,12 +113,12 @@ fun UploadAadhaarScreen(
                 ) {
                     IconButton(onClick = { 
                         isFileUploaded = true
-                        KycEvent.componentInput(
+                        KycisIntegration.reportComponentInput(
                             componentId = if (isFront) "aadhaar_front_field" else "aadhaar_back_field",
                             hint = "file_uploaded.png",
                             screen = if (isFront) "upload_aadhaar_front" else "upload_aadhaar_back",
                             componentType = "file_upload",
-                            sdkKb = KycEvent.ComponentKb(
+                            sdkKb = KycisIntegration.ComponentKb(
                                 displayName = if (isFront) "Aadhaar Front Image" else "Aadhaar Back Image",
                                 validations = listOf("Must be a clear image", "Max file size 5MB", "Supported formats: PNG, JPG, JPEG"),
                                 commonIssues = listOf("Image is blurry", "Glare on the card", "Edges of the card are cropped")

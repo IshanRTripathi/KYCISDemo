@@ -17,7 +17,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kycis.demo.presentation.theme.KycDemoTheme
-import com.kycis.sdk.ui.KycEvent
+import com.kycis.demo.kycis.KycisIntegration
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -102,16 +102,19 @@ fun SignatureScreen(
 
             Button(
                 onClick = {
-                    KycEvent.componentInput(
+                    KycisIntegration.reportComponentInput(
                         componentId = "signature_field",
                         hint = "signature_submitted",
                         screen = "signature",
                         componentType = "button",
-                        sdkKb = KycEvent.ComponentKb(
+                        sdkKb = KycisIntegration.ComponentKb(
                             displayName = "Signature Field",
                             validations = listOf("Must provide a signature"),
                             commonIssues = listOf("Signature is too small", "Signature goes outside the box")
                         )
+                    )
+                    KycisIntegration.completeKycFlow(
+                        mapOf("screen" to "signature", "source" to "submit_button"),
                     )
                     onSubmit()
                 },

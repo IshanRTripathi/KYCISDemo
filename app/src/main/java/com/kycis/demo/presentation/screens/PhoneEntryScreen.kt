@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kycis.demo.R
 import com.kycis.demo.presentation.theme.KycDemoTheme
-import com.kycis.sdk.ui.KycEvent
+import com.kycis.demo.kycis.KycisIntegration
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -96,12 +96,12 @@ fun PhoneEntryScreen(
                 if (debouncedPhone.isNotEmpty()) {
                     // Send unmasked value so the agent can see what the user actually typed
                     // The masked=false flag tells the backend this is unmasked
-                    KycEvent.componentInput(
+                    KycisIntegration.reportComponentInput(
                         componentId = "phone_field",
                         hint = debouncedPhone,  // Send unmasked value
                         screen = "phone_entry",
                         componentType = "phone_number",
-                        sdkKb = KycEvent.ComponentKb(
+                        sdkKb = KycisIntegration.ComponentKb(
                             displayName = "Phone Number",
                             validations = listOf(
                                 "Must be exactly 10 digits",
@@ -175,7 +175,7 @@ fun PhoneEntryScreen(
                     if (isPhoneValid) {
                         onGetOtp(phoneNumber)
                     } else {
-                        KycEvent.validationFailed(
+                        KycisIntegration.onValidationFailed(
                             code = "phone_invalid_format",
                             componentId = "phone_field",
                             componentType = "phone_number",

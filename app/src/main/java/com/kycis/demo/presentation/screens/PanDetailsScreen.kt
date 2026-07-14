@@ -15,7 +15,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kycis.demo.presentation.theme.KycDemoTheme
-import com.kycis.sdk.ui.KycEvent
+import com.kycis.demo.kycis.KycisIntegration
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -90,12 +90,12 @@ fun PanDetailsScreen(
                     val filtered: String = debouncedPan.filter { c -> c.isLetterOrDigit() }
                     if (filtered.isNotEmpty()) {
                         // Send unmasked value so the agent can see what the user actually typed
-                        KycEvent.componentInput(
+                        KycisIntegration.reportComponentInput(
                             componentId = "pan_field",
                             hint = filtered.uppercase(),  // Send unmasked, normalized value
                             screen = "pan_details",
                             componentType = "pan",
-                            sdkKb = KycEvent.ComponentKb(
+                            sdkKb = KycisIntegration.ComponentKb(
                                 displayName = "PAN Number",
                                 validations = listOf(
                                     "Must be exactly 10 characters",
@@ -127,12 +127,12 @@ fun PanDetailsScreen(
             }
             LaunchedEffect(debouncedDob) {
                 if (debouncedDob.isNotBlank()) {
-                    KycEvent.componentInput(
+                    KycisIntegration.reportComponentInput(
                         componentId = "dob_field",
                         hint = debouncedDob,
                         screen = "pan_details",
                         componentType = "date",
-                        sdkKb = KycEvent.ComponentKb(
+                        sdkKb = KycisIntegration.ComponentKb(
                             displayName = "Date of Birth",
                             validations = listOf("Must be a valid date", "Format: DD/MM/YYYY"),
                             commonIssues = listOf("User enters wrong format", "User enters future date")
@@ -237,9 +237,9 @@ fun PanDetailsScreen(
                         onNext()
                     } else {
                         if (panNumber.isEmpty()) {
-                            KycEvent.validationFailed("pan_required", "pan_field", "pan", businessStep = "pan_details")
+                            KycisIntegration.onValidationFailed("pan_required", "pan_field", "pan", businessStep = "pan_details")
                         } else if (!isPanValid) {
-                            KycEvent.validationFailed(
+                            KycisIntegration.onValidationFailed(
                                 code = "pan_invalid_format",
                                 componentId = "pan_field",
                                 componentType = "pan",
@@ -248,9 +248,9 @@ fun PanDetailsScreen(
                                 businessStep = "pan_details"
                             )
                         } else if (dob.isEmpty()) {
-                            KycEvent.validationFailed("dob_required", "dob_field", "date", businessStep = "pan_details")
+                            KycisIntegration.onValidationFailed("dob_required", "dob_field", "date", businessStep = "pan_details")
                         } else if (!agreedToTerms) {
-                            KycEvent.validationFailed("terms_not_accepted", "terms_checkbox", "checkbox", businessStep = "pan_details")
+                            KycisIntegration.onValidationFailed("terms_not_accepted", "terms_checkbox", "checkbox", businessStep = "pan_details")
                         }
                     }
                 },

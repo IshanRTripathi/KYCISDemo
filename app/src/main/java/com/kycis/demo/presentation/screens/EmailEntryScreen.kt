@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kycis.demo.R
 import com.kycis.demo.presentation.theme.KycDemoTheme
-import com.kycis.sdk.ui.KycEvent
+import com.kycis.demo.kycis.KycisIntegration
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,7 +50,7 @@ fun EmailEntryScreen(
             actions = {
                 TextButton(
                     onClick = {
-                        KycEvent.analytics(
+                        KycisIntegration.trackAnalytics(
                             eventName = "otp_requested",
                             data = mapOf(
                                 "screen" to "email_entry",
@@ -105,7 +105,7 @@ fun EmailEntryScreen(
             }
             LaunchedEffect(debouncedEmail) {
                 if (debouncedEmail.isNotBlank()) {
-                    KycEvent.componentInput(
+                    KycisIntegration.reportComponentInput(
                         componentId = "email_field",
                         hint = debouncedEmail,
                         screen = "email_entry",
@@ -173,7 +173,7 @@ fun EmailEntryScreen(
             Button(
                 onClick = {
                     if (isEmailValid) {
-                        KycEvent.analytics(
+                        KycisIntegration.trackAnalytics(
                             eventName = "otp_requested",
                             data = mapOf(
                                 "screen" to "email_entry",
@@ -182,7 +182,7 @@ fun EmailEntryScreen(
                         )
                         onGetOtp(email)
                     } else {
-                        KycEvent.validationFailed(
+                        KycisIntegration.onValidationFailed(
                             code = "email_invalid",
                             componentId = "email_field",
                             componentType = "text_input",

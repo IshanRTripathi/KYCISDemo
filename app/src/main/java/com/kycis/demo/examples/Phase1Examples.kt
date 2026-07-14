@@ -7,6 +7,9 @@ import com.kycis.sdk.AI
  * - SDK Metadata (automatic)
  * - Event Ordering (best practices)
  * - Analytics Events (new API)
+ *
+ * Docs-only samples — production demo screens must use [com.kycis.demo.kycis.KycisIntegration],
+ * not raw [AI] calls.
  */
 object Phase1Examples {
 

@@ -12,8 +12,11 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -34,6 +37,7 @@ import com.kycis.demo.kycis.KycisIntegration
 import com.kycis.demo.kycis.KycisStepMap
 import com.kycis.demo.navigation.KycNavGraph
 import com.kycis.demo.presentation.theme.KycDemoTheme
+import com.kycis.sdk.core.DynamicPopup
 import com.kycis.sdk.ui.EmbedProvider
 import com.kycis.sdk.ui.KycisOptions
 import com.kycis.sdk.ui.rememberEmbedProviderState
@@ -99,6 +103,7 @@ private fun VoiceAssistantContent(
     var voiceRoom by remember { mutableStateOf<Room?>(null) }
     var isMuted by remember { mutableStateOf(false) }
     var stopNotified by remember { mutableStateOf(false) }
+    var pendingPopup by remember { mutableStateOf<DynamicPopup?>(null) }
     val scope = rememberCoroutineScope()
 
     val voiceConnector = remember {
@@ -133,6 +138,9 @@ private fun VoiceAssistantContent(
         val step = KycisStepMap.normalize(destination.route)
         providerState.updateRoute(step)
         VoiceUiSnapshotHolder.setCurrentScreen(step)
+        if (step.isNotBlank() && step != "home") {
+            KycisIntegration.trackStepStarted(step)
+        }
     }
 
     // Demo-shell SDK UI: useKycis skips AI.init when already done in Application
@@ -145,7 +153,12 @@ private fun VoiceAssistantContent(
             attachToLifecycle = true,
             autoTrackScreen = true,
             autoCheckPopup = true,
-            onPopup = { popup -> KycisHandlers.onPopup(context, popup) },
+            onPopup = { popup ->
+                if (popup.show) {
+                    KycisHandlers.logPopupShown(popup)
+                    pendingPopup = popup
+                }
+            },
         ),
         onStatusChange = { status ->
             KycisHandlers.onStatusChange(status.code.toString())
@@ -175,6 +188,7 @@ private fun VoiceAssistantContent(
             }
         }
         onDispose {
+            KycisHandlers.onSdkTeardown()
             KycisIntegration.setVoiceSessionListener(null)
             voiceConnector.release()
         }
@@ -203,6 +217,40 @@ private fun VoiceAssistantContent(
         }
     }
 
+    pendingPopup?.let { popup ->
+        AlertDialog(
+            onDismissRequest = {
+                KycisHandlers.onPopupDismissed(popup)
+                pendingPopup = null
+            },
+            title = { Text("Need a hand?") },
+            text = {
+                Text(
+                    buildString {
+                        append(popup.message)
+                        popup.popupReasonCode?.let { append("\n\n[$it]") }
+                    }
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        KycisHandlers.onPopupAccepted(popup)
+                        pendingPopup = null
+                    }
+                ) { Text("Talk to assistant") }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        KycisHandlers.onPopupDismissed(popup)
+                        pendingPopup = null
+                    }
+                ) { Text("Not now") }
+            },
+        )
+    }
+
     when {
         kycis.isLoading -> {
             Log.d("KYCIS", "MainActivity: showing loading state")
@@ -215,7 +263,7 @@ private fun VoiceAssistantContent(
         kycis.isError -> {
             Log.e("KYCIS", "MainActivity: showing error state: ${kycis.error}")
             Box(modifier = Modifier.fillMaxSize()) {
-                androidx.compose.material3.Text(
+                Text(
                     text = "Error: ${kycis.error}",
                     modifier = Modifier.align(Alignment.Center)
                 )

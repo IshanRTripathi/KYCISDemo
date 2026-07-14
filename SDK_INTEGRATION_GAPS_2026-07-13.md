@@ -1,5 +1,12 @@
 # KYCISDemo × KYCIS SDK/Backend Integration — Gap Analysis (2026-07-13)
 
+**Status update (2026-07-14):** Near-zero extract landed on `v2` (`com.kycis.demo.kycis`). Closed below:
+popup AlertDialog + accept/dismiss analytics, `setAgentEventListener`, VoiceUiSnapshot fed from all
+`reportComponentInput` calls, OTP resend analytics, step/journey analytics, unused UI wrappers deleted.
+
+Remaining intentional: OTP resend has no real SMS/API (demo), `examples/` still illustrate raw `AI.*`
+for docs only — production screens use `KycisIntegration`.
+
 **Method:** fresh read of live code (not the 2026-05-04 `archive/SDK_FEATURE_INTEGRATION_ANALYSIS.md`,
 which has stale claims — see the notice at its top). Two parallel read-only audits covered (A)
 every screen file in `KYCISDemo/app/src/main/java/com/kycis/demo/presentation/screens/` against

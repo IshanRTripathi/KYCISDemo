@@ -6,6 +6,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.kycis.demo.kycis.KycisIntegration
 import com.kycis.demo.presentation.screens.HomeScreen
 import com.kycis.demo.presentation.screens.PhoneEntryScreen
 import com.kycis.demo.presentation.screens.PhoneOtpScreen
@@ -55,6 +56,7 @@ fun KycNavGraph(
             HomeScreen(
                 onStartFlow = {
                     android.util.Log.d("KYCIS", "NavGraph: onStartFlow called, navigating to phone_entry")
+                    KycisIntegration.trackAnalytics("kyc_journey_started", mapOf("flow" to "onboarding"))
                     navController.navigate(Routes.PHONE_ENTRY)
                 },
                 onOpenSdkHarness = {
@@ -85,6 +87,7 @@ fun KycNavGraph(
             PhoneEntryScreen(
                 onBack = { navController.popBackStack() },
                 onGetOtp = { phone ->
+                    KycisIntegration.trackStepCompleted("phone_entry", nextStep = "phone_otp")
                     val encodedPhone = java.net.URLEncoder.encode(phone, "UTF-8")
                     navController.navigate(Routes.PHONE_OTP.replace("{phone}", encodedPhone))
                 }
@@ -98,9 +101,12 @@ fun KycNavGraph(
                 phoneNumber = decodedPhone,
                 onBack = { navController.popBackStack() },
                 onVerify = {
+                    KycisIntegration.trackStepCompleted("phone_otp", nextStep = "email_entry")
                     navController.navigate(Routes.EMAIL_ENTRY)
                 },
-                onResendProvider = {}
+                onResendProvider = {
+                    KycisIntegration.trackOtpResend("phone")
+                },
             )
         }
 
@@ -108,6 +114,7 @@ fun KycNavGraph(
             EmailEntryScreen(
                 onBack = { navController.popBackStack() },
                 onGetOtp = { email ->
+                    KycisIntegration.trackStepCompleted("email_entry", nextStep = "email_otp")
                     val encodedEmail = java.net.URLEncoder.encode(email, "UTF-8")
                     navController.navigate(Routes.EMAIL_OTP.replace("{email}", encodedEmail))
                 }
@@ -121,10 +128,14 @@ fun KycNavGraph(
                 email = decodedEmail,
                 onBack = { navController.popBackStack() },
                 onVerify = {
+                    KycisIntegration.trackStepCompleted("email_otp", nextStep = "pan_details")
                     navController.navigate(Routes.PAN_DETAILS)
                 },
-                onResendProvider = {},
+                onResendProvider = {
+                    KycisIntegration.trackOtpResend("email")
+                },
                 onSkip = {
+                    KycisIntegration.trackAnalytics("email_otp_skipped", emptyMap())
                     navController.navigate(Routes.PAN_DETAILS)
                 }
             )
@@ -133,30 +144,51 @@ fun KycNavGraph(
         composable(Routes.PAN_DETAILS) {
             PanDetailsScreen(
                 onBack = { navController.popBackStack() },
-                onNext = { navController.navigate(Routes.PERSONAL_DETAILS) }
+                onNext = {
+                    KycisIntegration.trackStepCompleted("pan_details", nextStep = "personal_details")
+                    navController.navigate(Routes.PERSONAL_DETAILS)
+                }
             )
         }
 
         composable(Routes.PERSONAL_DETAILS) {
             PersonalDetailsScreen(
                 onBack = { navController.popBackStack() },
-                onProceed = { navController.navigate(Routes.VERIFY_DOCUMENTS) }
+                onProceed = {
+                    KycisIntegration.trackStepCompleted("personal_details", nextStep = "verify_documents")
+                    navController.navigate(Routes.VERIFY_DOCUMENTS)
+                }
             )
         }
 
         composable(Routes.VERIFY_DOCUMENTS) {
             VerifyDocumentsScreen(
                 onBack = { navController.popBackStack() },
-                onProceedWithAadhaar = { navController.navigate(Routes.DIGILOCKER_AADHAAR) },
-                onOfflineProcess = { navController.navigate(Routes.UPLOAD_AADHAAR_FRONT) }
+                onProceedWithAadhaar = {
+                    KycisIntegration.trackStepCompleted("verify_documents", nextStep = "digilocker_aadhaar")
+                    navController.navigate(Routes.DIGILOCKER_AADHAAR)
+                },
+                onOfflineProcess = {
+                    KycisIntegration.trackStepCompleted("verify_documents", nextStep = "upload_aadhaar_front")
+                    navController.navigate(Routes.UPLOAD_AADHAAR_FRONT)
+                }
             )
         }
 
         composable(Routes.DIGILOCKER_AADHAAR) {
             DigilockerAadhaarScreen(
                 onBack = { navController.popBackStack() },
-                onNext = { navController.navigate(Routes.SELFIE_CAPTURE) },
-                onTryAnotherWay = { navController.navigate(Routes.UPLOAD_AADHAAR_FRONT) }
+                onNext = {
+                    KycisIntegration.trackStepCompleted("digilocker_aadhaar", nextStep = "selfie_capture")
+                    navController.navigate(Routes.SELFIE_CAPTURE)
+                },
+                onTryAnotherWay = {
+                    KycisIntegration.trackAnalytics(
+                        "aadhaar_method_switched",
+                        mapOf("to" to "manual_upload"),
+                    )
+                    navController.navigate(Routes.UPLOAD_AADHAAR_FRONT)
+                }
             )
         }
 
@@ -164,7 +196,10 @@ fun KycNavGraph(
             UploadAadhaarScreen(
                 isFront = true,
                 onBack = { navController.popBackStack() },
-                onNext = { navController.navigate(Routes.UPLOAD_AADHAAR_BACK) }
+                onNext = {
+                    KycisIntegration.trackStepCompleted("upload_aadhaar_front", nextStep = "upload_aadhaar_back")
+                    navController.navigate(Routes.UPLOAD_AADHAAR_BACK)
+                }
             )
         }
 
@@ -172,20 +207,29 @@ fun KycNavGraph(
             UploadAadhaarScreen(
                 isFront = false,
                 onBack = { navController.popBackStack() },
-                onNext = { navController.navigate(Routes.SELFIE_CAPTURE) }
+                onNext = {
+                    KycisIntegration.trackStepCompleted("upload_aadhaar_back", nextStep = "selfie_capture")
+                    navController.navigate(Routes.SELFIE_CAPTURE)
+                }
             )
         }
 
         composable(Routes.SELFIE_CAPTURE) {
             SelfieCaptureScreen(
-                onCaptured = { navController.navigate(Routes.SIGNATURE) }
+                onCaptured = {
+                    KycisIntegration.trackStepCompleted("selfie_capture", nextStep = "signature")
+                    navController.navigate(Routes.SIGNATURE)
+                }
             )
         }
 
         composable(Routes.SIGNATURE) {
             SignatureScreen(
                 onBack = { navController.popBackStack() },
-                onSubmit = { navController.navigate(Routes.HOME) { popUpTo(Routes.HOME) { inclusive = true } } }
+                onSubmit = {
+                    KycisIntegration.trackAnalytics("kyc_journey_completed", mapOf("flow" to "onboarding"))
+                    navController.navigate(Routes.HOME) { popUpTo(Routes.HOME) { inclusive = true } }
+                }
             )
         }
     }

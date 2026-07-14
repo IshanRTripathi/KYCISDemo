@@ -5,9 +5,11 @@ import android.app.Application
 import android.util.Log
 import com.kycis.demo.BackendUrlStore
 import com.kycis.demo.BuildConfig
+import com.kycis.demo.VoiceUiSnapshotHolder
 import com.kycis.sdk.AI
 import com.kycis.sdk.VoiceSessionResult
 import com.kycis.sdk.VoiceUiSnapshot
+import com.kycis.sdk.core.AgentEventListener
 import com.kycis.sdk.core.ConfirmUiText
 import com.kycis.sdk.core.KycStepStrategy
 import com.kycis.sdk.core.RuntimePolicy
@@ -169,6 +171,11 @@ object KycisIntegration {
         sdkKb: ComponentKb? = null,
         properties: Map<String, String> = emptyMap(),
     ) {
+        // Keep voice UI snapshot in sync for every report (all screens, not just personal_details).
+        if (!screen.isNullOrBlank()) {
+            VoiceUiSnapshotHolder.setCurrentScreen(screen)
+        }
+        VoiceUiSnapshotHolder.upsertField(componentId, hint, componentType)
         AI.reportComponentInput(
             componentId = componentId,
             hint = hint,
@@ -177,6 +184,25 @@ object KycisIntegration {
             sdkKb = sdkKb?.toMap(),
             properties = properties,
         )
+    }
+
+    fun trackStepStarted(stepId: String) {
+        trackAnalytics("kyc_step_started", mapOf("step" to stepId))
+    }
+
+    fun trackStepCompleted(stepId: String, nextStep: String? = null) {
+        trackAnalytics(
+            "kyc_step_completed",
+            mapOf("step" to stepId, "next_step" to nextStep),
+        )
+    }
+
+    fun trackOtpResend(channel: String) {
+        trackAnalytics("otp_resend_requested", mapOf("channel" to channel))
+    }
+
+    fun setAgentEventListener(listener: AgentEventListener?) {
+        AI.setAgentEventListener(listener)
     }
 
     fun trackAnalytics(eventName: String, data: Map<String, Any?> = emptyMap()) {

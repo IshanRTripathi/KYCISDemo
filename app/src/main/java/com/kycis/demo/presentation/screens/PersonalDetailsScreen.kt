@@ -19,7 +19,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kycis.demo.R
-import com.kycis.demo.VoiceUiSnapshotHolder
 import com.kycis.demo.presentation.form.DemoFormOptions
 import com.kycis.demo.presentation.theme.KycDemoTheme
 import com.kycis.demo.kycis.KycisIntegration
@@ -83,19 +82,13 @@ fun PersonalDetailsScreen(
 
             // Send ALL fields to backend so LLM knows what's filled vs empty
             LaunchedEffect(name, gender, maritalStatus, residencyStatus, fatherName) {
-                VoiceUiSnapshotHolder.setCurrentScreen("personal_details")
                 val status = if (name.isBlank()) "REQUIRED" else "FILLED"
                 val fatherStatus = if (fatherName.isBlank()) "REQUIRED" else "FILLED"
                 val genderStatus = if (gender.isBlank()) "REQUIRED" else "FILLED"
                 val maritalStatusField = if (maritalStatus.isBlank()) "REQUIRED" else "FILLED"
                 val residencyStatusField = if (residencyStatus.isBlank()) "REQUIRED" else "FILLED"
-                VoiceUiSnapshotHolder.upsertField("name_field", name)
-                VoiceUiSnapshotHolder.upsertField("father_name_field", fatherName)
-                VoiceUiSnapshotHolder.upsertField("gender_field", gender)
-                VoiceUiSnapshotHolder.upsertField("marital_status_field", maritalStatus)
-                VoiceUiSnapshotHolder.upsertField("residency_status_field", residencyStatus)
-                
-                // Send each field individually with filled status via properties map
+
+                // reportComponentInput also upserts VoiceUiSnapshotHolder automatically
                 KycisIntegration.reportComponentInput(
                     componentId = "name_field",
                     hint = name.ifBlank { "" },

@@ -29,52 +29,34 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.navigation.compose.rememberNavController
-import com.kycis.demo.BuildConfig
+import com.kycis.demo.kycis.KycisHandlers
+import com.kycis.demo.kycis.KycisIntegration
+import com.kycis.demo.kycis.KycisStepMap
 import com.kycis.demo.navigation.KycNavGraph
 import com.kycis.demo.presentation.theme.KycDemoTheme
-import com.kycis.sdk.AI
-import com.kycis.sdk.core.ConfirmUiText
-import com.kycis.sdk.core.KycStepStrategy
-import com.kycis.sdk.core.RuntimePolicy
-import com.kycis.sdk.core.TriggerSettings
-import com.kycis.sdk.core.TriggerStartMode
 import com.kycis.sdk.ui.EmbedProvider
-import com.kycis.sdk.ui.KycEvent
 import com.kycis.sdk.ui.KycisOptions
 import com.kycis.sdk.ui.rememberEmbedProviderState
 import com.kycis.sdk.ui.useKycis
+import com.kycis.sdk.voice.FabPosition
+import com.kycis.sdk.voice.TranscriptBackground
 import com.kycis.sdk.voice.VoiceFabConfig
 import com.kycis.sdk.voice.VoiceFabHost
 import com.kycis.sdk.voice.VoiceFabType
 import com.kycis.sdk.voice.VoiceRoomConnector
-import com.kycis.sdk.voice.FabPosition
-import com.kycis.sdk.voice.TranscriptBackground
 import dagger.hilt.android.AndroidEntryPoint
 import io.livekit.android.events.RoomEvent
 import io.livekit.android.events.collect
 import io.livekit.android.room.Room
 import kotlinx.coroutines.launch
 
-/**
- * Maps Navigation Compose routes to [AI.setKycStep] ids so they match [ScreenSchema.screenId]
- * (see CLIENT_APP_INTEGRATION.md). Parameterized routes must not be sent verbatim.
- */
-private fun normalizeNavRouteToKycStep(route: String?): String {
-    if (route.isNullOrBlank()) return ""
-    return when {
-        route.startsWith("phone_otp") -> "phone_otp"
-        route.startsWith("email_otp") -> "email_otp"
-        else -> route
-    }
-}
-
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Manually bind activity to SDK since lifecycle callbacks may fire before SDK init
-        AI.bindActivity(this)
+        // Bind after Application init — lifecycle may fire before Activity is ready
+        KycisIntegration.bindActivity(this)
         setContent {
             KycDemoTheme {
                 Surface(
@@ -91,7 +73,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
-        AI.refreshVoiceAudioFocus()
+        KycisIntegration.refreshVoiceAudioFocus()
     }
 
     @Deprecated("Deprecated in Java 13, kept for Hilt compatibility")
@@ -100,7 +82,7 @@ class MainActivity : ComponentActivity() {
         permissions: Array<out String>,
         grantResults: IntArray,
     ) {
-        if (AI.onRequestPermissionsResult(requestCode, permissions, grantResults)) return
+        if (KycisIntegration.onRequestPermissionsResult(requestCode, permissions, grantResults)) return
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 }
@@ -110,6 +92,7 @@ private fun VoiceAssistantContent(
     onBackendUrlSaved: () -> Unit,
 ) {
     val context = LocalContext.current
+    val application = context.applicationContext as android.app.Application
     val currentActivity = context as? FragmentActivity
     var backendBaseUrl by remember { mutableStateOf(BackendUrlStore.get(context)) }
 
@@ -125,13 +108,12 @@ private fun VoiceAssistantContent(
     val providerState = rememberEmbedProviderState()
     val navController = rememberNavController()
 
-    // Permission launcher for RECORD_AUDIO
     var hasAudioPermission by remember {
         mutableStateOf(
             ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
         )
     }
-    
+
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
@@ -141,7 +123,6 @@ private fun VoiceAssistantContent(
         }
     }
 
-    // Request permission on first launch if not granted
     LaunchedEffect(Unit) {
         if (!hasAudioPermission) {
             permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
@@ -149,74 +130,37 @@ private fun VoiceAssistantContent(
     }
 
     navController.addOnDestinationChangedListener { _, destination, _ ->
-        val step = normalizeNavRouteToKycStep(destination.route)
+        val step = KycisStepMap.normalize(destination.route)
         providerState.updateRoute(step)
         VoiceUiSnapshotHolder.setCurrentScreen(step)
     }
 
+    // Demo-shell SDK UI: useKycis skips AI.init when already done in Application
     val kycis = useKycis(
-        application = context.applicationContext as android.app.Application,
+        application = application,
         options = KycisOptions(
-            apiKey = "demo-api-key",
-            userId = "demo-user",
-            policy = RuntimePolicy(
-                backendBaseUrl = backendBaseUrl,
-                clientId = "kycis_demo",
-                mappingVersion = "v1",
-                appVersion = BuildConfig.VERSION_NAME,
-                triggerStartMode = TriggerStartMode.CONFIRM_UI,
-                kycStepStrategy = KycStepStrategy.HINT_THEN_INFER,
-                triggerSettings = TriggerSettings(
-                    autoTriggerEnabled = true,
-                    includeErrorSignals = true,
-                    includeTimeSpentSignals = true,
-                    includeIdleSignals = true,
-                    includeStepHints = true,
-                ),
-                confirmUiText = ConfirmUiText(
-                    title = "Need help completing this step?",
-                    startCta = "Start",
-                    dismissCta = "Not now",
-                ),
-                passiveEvalEnabled = true,
-                passiveEvalIntervalSeconds = 10,
-                componentInputHintsMasked = false, // demo: send unmasked hints when reporting component_input
-                autoCaptureEnabled = false, // demo app handles all component_input events manually for precision
-                debugEnabled = true, // demo app: enable detailed SDK logging in Logcat
-            ),
+            apiKey = KycisIntegration.demoApiKey(),
+            userId = KycisIntegration.demoUserId(),
+            policy = KycisIntegration.demoPolicy(application),
             attachToLifecycle = true,
             autoTrackScreen = true,
             autoCheckPopup = true,
-            onPopup = { popup ->
-                if (popup.show) {
-                    Log.d(
-                        "KYCIS",
-                        "Dynamic popup: message=${popup.message} popup_reason_code=${popup.popupReasonCode} delayMs=${popup.delayMs}",
-                    )
-                    val suffix = popup.popupReasonCode?.let { "\n[$it]" } ?: ""
-                    Toast.makeText(context, popup.message + suffix, Toast.LENGTH_LONG).show()
-                }
-            }
+            onPopup = { popup -> KycisHandlers.onPopup(context, popup) },
         ),
         onStatusChange = { status ->
-            android.util.Log.d("KYCIS", "Status changed: ${status.code}")
+            KycisHandlers.onStatusChange(status.code.toString())
         }
     )
 
     DisposableEffect(Unit) {
-        AI.setVoiceSessionListener { result ->
-            if (result.isValid) {
+        KycisIntegration.setVoiceSessionListener { result ->
+            if (KycisHandlers.isValidVoiceSession(result)) {
                 try {
                     voiceConnector.connect(
                         result = result,
                         activity = currentActivity,
                         onConnectionFailed = { msg ->
-                            Log.e("KYCIS", "Voice LiveKit connect failed: $msg")
-                            Toast.makeText(
-                                context,
-                                "Voice connection failed. $msg",
-                                Toast.LENGTH_LONG,
-                            ).show()
+                            KycisHandlers.logVoiceConnectFailed(context, msg)
                         },
                         onConnected = { room ->
                             voiceConnector.setHostWantsMicOn(true)
@@ -231,7 +175,7 @@ private fun VoiceAssistantContent(
             }
         }
         onDispose {
-            AI.setVoiceSessionListener(null)
+            KycisIntegration.setVoiceSessionListener(null)
             voiceConnector.release()
         }
     }
@@ -243,7 +187,7 @@ private fun VoiceAssistantContent(
                 voiceRoom = null
                 if (!stopNotified) {
                     stopNotified = true
-                    AI.stopAssistant()
+                    KycisIntegration.stopAssistant()
                 }
             }
         }
@@ -251,18 +195,17 @@ private fun VoiceAssistantContent(
 
     LaunchedEffect(kycis.isReady) {
         if (kycis.isReady) {
-            AI.setVoiceUiSnapshotProvider { VoiceUiSnapshotHolder.buildSnapshot() }
+            KycisIntegration.setVoiceUiSnapshotProvider { VoiceUiSnapshotHolder.buildSnapshot() }
             providerState.setOnPopupCheck {
-                AI.checkForDynamicPopup()
+                KycisIntegration.checkForDynamicPopup()
             }
-            KycEvent.identity(userId = "demo-user")
-            AI.setFlow("onboarding")
+            KycisHandlers.onSdkReady()
         }
     }
 
     when {
         kycis.isLoading -> {
-            android.util.Log.d("KYCIS", "MainActivity: showing loading state")
+            Log.d("KYCIS", "MainActivity: showing loading state")
             Box(modifier = Modifier.fillMaxSize()) {
                 androidx.compose.material3.CircularProgressIndicator(
                     modifier = Modifier.align(Alignment.Center)
@@ -270,7 +213,7 @@ private fun VoiceAssistantContent(
             }
         }
         kycis.isError -> {
-            android.util.Log.e("KYCIS", "MainActivity: showing error state: ${kycis.error}")
+            Log.e("KYCIS", "MainActivity: showing error state: ${kycis.error}")
             Box(modifier = Modifier.fillMaxSize()) {
                 androidx.compose.material3.Text(
                     text = "Error: ${kycis.error}",
@@ -279,15 +222,20 @@ private fun VoiceAssistantContent(
             }
         }
         kycis.isReady -> {
-            android.util.Log.d("KYCIS", "MainActivity: showing ready state")
+            Log.d("KYCIS", "MainActivity: showing ready state")
             Box(modifier = Modifier.fillMaxSize()) {
                 EmbedProvider(
                     state = providerState,
                     flowName = "onboarding",
-                    includeRoutes = listOf("phone_entry", "phone_otp", "email_entry", "email_otp", "pan_details", "personal_details", "verify_documents", "digilocker_aadhaar", "upload_aadhaar_front", "upload_aadhaar_back", "selfie_capture", "signature", "sdk_diagnostics"),
+                    includeRoutes = listOf(
+                        "phone_entry", "phone_otp", "email_entry", "email_otp",
+                        "pan_details", "personal_details", "verify_documents",
+                        "digilocker_aadhaar", "upload_aadhaar_front", "upload_aadhaar_back",
+                        "selfie_capture", "signature", "sdk_diagnostics",
+                    ),
                     excludeRoutes = listOf("home"),
                     autoTrackScreen = true,
-                    autoCheckPopup = true
+                    autoCheckPopup = true,
                 ) {
                     KycNavGraph(
                         navController = navController,
@@ -315,15 +263,15 @@ private fun VoiceAssistantContent(
                     onEndCall = {
                         if (!stopNotified) {
                             stopNotified = true
-                            AI.stopAssistant()
+                            KycisIntegration.stopAssistant()
                         }
                         voiceConnector.disconnect()
                         voiceRoom = null
                     },
                     onStartClick = {
-                        android.util.Log.d("KYCIS", "FAB: onStartClick called, hasAudioPermission=$hasAudioPermission")
+                        Log.d("KYCIS", "FAB: onStartClick called, hasAudioPermission=$hasAudioPermission")
                         if (hasAudioPermission) {
-                            AI.startAssistant()
+                            KycisIntegration.startAssistant()
                         } else {
                             permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
                         }

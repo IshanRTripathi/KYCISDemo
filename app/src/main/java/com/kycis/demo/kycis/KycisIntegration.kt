@@ -22,7 +22,7 @@ import com.kycis.sdk.core.TriggerStartMode
  */
 object KycisIntegration {
     private const val TAG = "KYCIS"
-    private const val API_KEY = "demo-api-key"
+    private const val FALLBACK_API_KEY = "demo-api-key"
     private const val DEFAULT_USER_ID = "demo-user"
 
     data class ComponentKb(
@@ -69,7 +69,11 @@ object KycisIntegration {
         )
     }
 
-    fun demoApiKey(): String = API_KEY
+    fun demoApiKey(): String {
+        val fromBuild = BuildConfig.KYCIS_API_KEY.trim()
+        return fromBuild.ifBlank { FALLBACK_API_KEY }
+    }
+
     fun demoUserId(): String = DEFAULT_USER_ID
 
     /**
@@ -79,9 +83,17 @@ object KycisIntegration {
         Log.d(TAG, "KycisIntegration.init: registering schemas")
         AI.registerScreenSchemas(KycisScreenSchemas.all)
 
+        val apiKey = demoApiKey()
+        if (apiKey == FALLBACK_API_KEY) {
+            Log.w(
+                TAG,
+                "Using fallback API key. Set kycis.api.key in local.properties to match backend KYCIS_API_KEY.",
+            )
+        }
+
         AI.init(
             application = application,
-            apiKey = API_KEY,
+            apiKey = apiKey,
             userId = DEFAULT_USER_ID,
             policy = demoPolicy(application),
         )

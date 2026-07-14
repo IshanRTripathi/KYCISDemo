@@ -9,6 +9,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,6 +35,14 @@ fun PhoneOtpScreen(
 ) {
     var otpValue by remember { mutableStateOf("") }
     val otpLength = 4
+    var resendCooldownSeconds by remember { mutableIntStateOf(0) }
+    val context = androidx.compose.ui.platform.LocalContext.current
+
+    LaunchedEffect(resendCooldownSeconds) {
+        if (resendCooldownSeconds <= 0) return@LaunchedEffect
+        kotlinx.coroutines.delay(1000)
+        resendCooldownSeconds -= 1
+    }
 
     Column(
         modifier = modifier
@@ -156,15 +165,33 @@ fun PhoneOtpScreen(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 TextButton(
-                    onClick = onResendProvider,
+                    onClick = {
+                        if (resendCooldownSeconds > 0) return@TextButton
+                        onResendProvider()
+                        resendCooldownSeconds = 30
+                        android.widget.Toast.makeText(
+                            context,
+                            "OTP resent (demo). Check SMS / use any 4 digits.",
+                            android.widget.Toast.LENGTH_SHORT,
+                        ).show()
+                    },
+                    enabled = resendCooldownSeconds == 0,
                     contentPadding = PaddingValues(0.dp)
                 ) {
                     Text(
-                        text = "Click to resend.",
+                        text = if (resendCooldownSeconds > 0) {
+                            "Resend in ${resendCooldownSeconds}s"
+                        } else {
+                            "Click to resend."
+                        },
                         style = MaterialTheme.typography.bodyMedium.copy(
                             fontWeight = FontWeight.SemiBold
                         ),
-                        color = MaterialTheme.colorScheme.primary
+                        color = if (resendCooldownSeconds > 0) {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        } else {
+                            MaterialTheme.colorScheme.primary
+                        },
                     )
                 }
             }

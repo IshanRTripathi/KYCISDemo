@@ -1,0 +1,3 @@
+# Copy entries you need into local.properties (gitignored).
+# Must match backend KYCIS_API_KEY when the API key middleware is enabled.
+kycis.api.key=your-shared-api-key

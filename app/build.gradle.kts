@@ -7,6 +7,15 @@ plugins {
     kotlin("kapt")
 }
 
+import java.util.Properties
+
+val localProperties = Properties().apply {
+    val f = rootProject.file("local.properties")
+    if (f.exists()) {
+        f.inputStream().use { load(it) }
+    }
+}
+
 android {
     namespace = "com.kycis.demo"
     compileSdk = 34
@@ -17,6 +26,10 @@ android {
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
+
+        // Prefer local.properties → kycis.api.key (same value as backend KYCIS_API_KEY).
+        val apiKey = (localProperties.getProperty("kycis.api.key") ?: "").replace("\"", "\\\"")
+        buildConfigField("String", "KYCIS_API_KEY", "\"$apiKey\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

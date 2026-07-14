@@ -84,8 +84,22 @@ fun BackendSettingsScreen(
                 modifier = Modifier.fillMaxWidth(),
                 label = { Text("Backend URL") },
                 singleLine = true,
-                placeholder = { Text("https://<ngrok-domain>/v1") },
+                placeholder = { Text("http://10.0.2.2:8000/v1") },
             )
+
+            Text(
+                text = "Presets",
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold,
+            )
+            BackendUrlStore.presets.forEach { (label, url) ->
+                Button(
+                    onClick = { inputUrl = BackendUrlStore.normalizeBaseUrl(url) },
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(label)
+                }
+            }
 
             Button(
                 onClick = {

@@ -25,7 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.kycis.sdk.AI
+import com.kycis.demo.kycis.KycisIntegration
 import kotlinx.coroutines.launch
 import android.util.Log
 
@@ -34,11 +34,8 @@ private const val TAG = "KYCIS"
 /**
  * QA / integrator harness for backend-assisted UX (Phase 5 roadmap).
  *
- * - **Popup path:** `validation_failed` updates session → `AI.checkForDynamicPopup()` →
- *   `POST /v1/assistant/popup/evaluate`. Response uses **`popup_reason_code`** (not voice `trigger`);
- *   optional **`decision_trace`** for analytics (see **API_CONTRACTS.md** / **CLIENT_APP_INTEGRATION.md**).
- * - **Trigger path:** passive eval + `trackError` / `trackValidationFailure` may call
- *   `POST /v1/assistant/trigger/evaluate`; with [TriggerStartMode.CONFIRM_UI] the user confirms before voice.
+ * - **Popup path:** validation_failed → checkForDynamicPopup → popup/evaluate
+ * - **Trigger path:** trackError / validation may call trigger/evaluate
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,7 +47,7 @@ fun SdkDiagnosticsScreen(
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
-        AI.setKycStep("sdk_diagnostics")
+        KycisIntegration.setStep("sdk_diagnostics")
         Log.d(TAG, "SdkDiagnosticsScreen: kyc step set to sdk_diagnostics")
     }
 
@@ -91,14 +88,13 @@ fun SdkDiagnosticsScreen(
 
             Button(
                 onClick = {
-                    AI.trackValidationFailure(
-                        failureReasonCode = "harness_invalid_field",
+                    KycisIntegration.onValidationFailed(
+                        code = "harness_invalid_field",
                         componentId = "harness_field",
                         componentType = "text_input",
-                        hintMasked = true,
                     )
                     Toast.makeText(context, "Sent validation_failed to backend", Toast.LENGTH_SHORT).show()
-                    Log.i(TAG, "Harness: trackValidationFailure(harness_invalid_field)")
+                    Log.i(TAG, "Harness: onValidationFailed(harness_invalid_field)")
                 },
                 modifier = Modifier.fillMaxWidth(),
             ) {
@@ -108,7 +104,7 @@ fun SdkDiagnosticsScreen(
             Button(
                 onClick = {
                     scope.launch {
-                        runCatching { AI.checkForDynamicPopup() }
+                        runCatching { KycisIntegration.checkForDynamicPopup() }
                             .onSuccess {
                                 Toast.makeText(context, "popup/evaluate completed (see Logcat / popup UI)", Toast.LENGTH_SHORT).show()
                                 Log.i(TAG, "Harness: checkForDynamicPopup() finished")
@@ -126,7 +122,7 @@ fun SdkDiagnosticsScreen(
 
             Button(
                 onClick = {
-                    AI.trackError(
+                    KycisIntegration.trackError(
                         "harness_demo_error",
                         mapOf("source" to "sdk_diagnostics_screen"),
                     )

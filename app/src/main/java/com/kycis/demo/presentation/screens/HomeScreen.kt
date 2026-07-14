@@ -19,6 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.kycis.demo.kycis.KycisIntegration
 import com.kycis.demo.presentation.theme.KycDemoTheme
 import com.kycis.demo.presentation.theme.ThemePrimaryLight
 import com.kycis.demo.presentation.theme.ThemePrimary
@@ -31,6 +32,15 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
 ) {
     var selectedFlow by remember { mutableStateOf("kyc") }
+
+    fun applyFlowSelection(flowKey: String) {
+        selectedFlow = flowKey
+        val sdkFlow = when (flowKey) {
+            "mfd" -> "mfd_support"
+            else -> "onboarding"
+        }
+        KycisIntegration.setFlow(sdkFlow)
+    }
 
     Column(
         modifier = modifier
@@ -72,7 +82,7 @@ fun HomeScreen(
                 )
             },
             isSelected = selectedFlow == "kyc",
-            onClick = { selectedFlow = "kyc" }
+            onClick = { applyFlowSelection("kyc") }
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -90,7 +100,7 @@ fun HomeScreen(
                 )
             },
             isSelected = selectedFlow == "mfd",
-            onClick = { selectedFlow = "mfd" }
+            onClick = { applyFlowSelection("mfd") }
         )
 
         Spacer(modifier = Modifier.weight(1f))
@@ -99,6 +109,7 @@ fun HomeScreen(
         Button(
             onClick = {
                 android.util.Log.d("KYCIS", "HomeScreen: Start button clicked")
+                applyFlowSelection(selectedFlow)
                 onStartFlow()
             },
             modifier = Modifier

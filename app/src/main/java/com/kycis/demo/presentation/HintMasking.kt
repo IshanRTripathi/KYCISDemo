@@ -1,6 +1,6 @@
 package com.kycis.demo.presentation
 
-import com.kycis.sdk.AI
+import com.kycis.demo.kycis.KycisIntegration
 
 enum class HintKind {
     PHONE,
@@ -23,7 +23,7 @@ private const val COMPONENT_INPUT_HINTS_MASKED_FEATURE = "component_input_hints_
  */
 fun componentInputHintsAreMasked(): Boolean {
     return runCatching {
-        AI.isFeatureEnabled(COMPONENT_INPUT_HINTS_MASKED_FEATURE)
+        KycisIntegration.isFeatureEnabled(COMPONENT_INPUT_HINTS_MASKED_FEATURE)
     }.getOrDefault(true) // Fail closed: prefer masking if config isn't available.
 }
 

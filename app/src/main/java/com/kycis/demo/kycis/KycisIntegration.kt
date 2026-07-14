@@ -115,15 +115,8 @@ object KycisIntegration {
         AI.setUser(id = userId, phone = phone, phoneMasked = phoneMasked)
     }
 
-    fun onValidationFailed(componentId: String, failureReasonCode: String) {
-        AI.trackValidationFailure(
-            failureReasonCode = failureReasonCode,
-            componentId = componentId,
-        )
-    }
-
     fun onValidationFailed(
-        failureReasonCode: String,
+        code: String,
         componentId: String? = null,
         componentType: String? = null,
         expectedPattern: String? = null,
@@ -132,7 +125,7 @@ object KycisIntegration {
         businessStep: String? = null,
     ) {
         AI.trackValidationFailure(
-            failureReasonCode = failureReasonCode,
+            failureReasonCode = code,
             componentId = componentId,
             componentType = componentType,
             expectedPattern = expectedPattern,

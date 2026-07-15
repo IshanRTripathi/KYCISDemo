@@ -154,7 +154,7 @@ private fun VoiceAssistantContent(
             autoTrackScreen = true,
             autoCheckPopup = true,
             onPopup = { popup ->
-                if (popup.show) {
+                if (popup.show && pendingPopup == null) {
                     KycisHandlers.logPopupShown(popup)
                     pendingPopup = popup
                 }

@@ -106,6 +106,9 @@ dependencies {
     // Kotlinx Serialization
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
 
+    // OkHttp (standalone flow-test harness client — independent of the SDK's own session)
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+
     // DataStore Preferences
     implementation("androidx.datastore:datastore-preferences:1.0.0")
 

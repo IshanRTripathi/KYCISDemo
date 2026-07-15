@@ -28,6 +28,7 @@ import com.kycis.demo.presentation.theme.ThemePrimary
 fun HomeScreen(
     onStartFlow: () -> Unit,
     onOpenSdkHarness: () -> Unit = {},
+    onOpenFlowTestHarness: () -> Unit = {},
     onOpenBackendSettings: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
@@ -141,6 +142,16 @@ fun HomeScreen(
         }
 
         TextButton(
+            onClick = onOpenFlowTestHarness,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text(
+                text = "Flow E2E test (walk every screen against backend)",
+                style = MaterialTheme.typography.labelLarge,
+            )
+        }
+
+        TextButton(
             onClick = onOpenBackendSettings,
             modifier = Modifier.fillMaxWidth(),
         ) {
@@ -227,7 +238,12 @@ private fun FlowSelectionCard(
 @Composable
 fun HomeScreenPreview() {
     KycDemoTheme {
-        HomeScreen(onStartFlow = {}, onOpenSdkHarness = {}, onOpenBackendSettings = {})
+        HomeScreen(
+            onStartFlow = {},
+            onOpenSdkHarness = {},
+            onOpenFlowTestHarness = {},
+            onOpenBackendSettings = {},
+        )
     }
 }
 

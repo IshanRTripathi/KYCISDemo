@@ -7,6 +7,7 @@ import com.kycis.demo.BackendUrlStore
 import com.kycis.demo.BuildConfig
 import com.kycis.demo.VoiceUiSnapshotHolder
 import com.kycis.sdk.AI
+import com.kycis.sdk.AsyncCheckStatus
 import com.kycis.sdk.VoiceSessionResult
 import com.kycis.sdk.VoiceUiSnapshot
 import com.kycis.sdk.core.AgentEventListener
@@ -15,6 +16,8 @@ import com.kycis.sdk.core.KycStepStrategy
 import com.kycis.sdk.core.RuntimePolicy
 import com.kycis.sdk.core.TriggerSettings
 import com.kycis.sdk.core.TriggerStartMode
+import kotlinx.coroutines.delay
+import java.util.UUID
 
 /**
  * Isolated near-zero KYCIS glue for the demo app.
@@ -38,6 +41,11 @@ object KycisIntegration {
             "faqs" to faqs.ifEmpty { null },
         ).filterValues { it != null }
     }
+
+    data class RemoteCheckResult(
+        val passed: Boolean,
+        val message: String,
+    )
 
     /** Demo RuntimePolicy shared with MainActivity [com.kycis.sdk.ui.KycisOptions]. */
     fun demoPolicy(application: Application): RuntimePolicy {
@@ -196,6 +204,43 @@ object KycisIntegration {
             sdkKb = sdkKb?.toMap(),
             properties = properties,
         )
+    }
+
+    /**
+     * Demo-only tenant API adapter for exercising Tier-3 remote validation.
+     *
+     * A real tenant would replace [delay] with its own repository/API call. Keeping this
+     * orchestration inside the isolated integration package leaves the feature screen with
+     * one call and mirrors the intended third-party integration shape.
+     *
+     * `AAAAA0000A` deterministically simulates a tenant-backend rejection; every other
+     * locally valid PAN succeeds after three seconds.
+     */
+    suspend fun simulateTenantPanVerification(pan: String): RemoteCheckResult {
+        val checkId = UUID.randomUUID().toString()
+        AI.reportAsyncCheck(
+            componentId = "pan_field",
+            status = AsyncCheckStatus.STARTED,
+            message = "Checking PAN with the tenant verification service",
+            checkId = checkId,
+        )
+
+        // Simulated tenant-owned network request. Do not block the Android main thread.
+        delay(3_000)
+
+        val passed = !pan.equals("AAAAA0000A", ignoreCase = true)
+        val message = if (passed) {
+            "PAN verified successfully by the tenant service"
+        } else {
+            "The tenant service could not verify this PAN. Please check it and try again."
+        }
+        AI.reportAsyncCheck(
+            componentId = "pan_field",
+            status = if (passed) AsyncCheckStatus.PASSED else AsyncCheckStatus.FAILED,
+            message = message,
+            checkId = checkId,
+        )
+        return RemoteCheckResult(passed = passed, message = message)
     }
 
     fun trackStepStarted(stepId: String) {

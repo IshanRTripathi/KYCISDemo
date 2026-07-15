@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kycis.demo.presentation.theme.KycDemoTheme
 import com.kycis.demo.kycis.KycisIntegration
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -27,6 +28,17 @@ fun PanDetailsScreen(
     var panNumber by remember { mutableStateOf("") }
     var dob by remember { mutableStateOf("") }
     var agreedToTerms by remember { mutableStateOf(false) }
+    var isRemoteCheckRunning by remember { mutableStateOf(false) }
+    var verifiedPan by remember { mutableStateOf<String?>(null) }
+    var remoteCheckMessage by remember { mutableStateOf<String?>(null) }
+    val coroutineScope = rememberCoroutineScope()
+
+    LaunchedEffect(panNumber) {
+        if (verifiedPan != null && verifiedPan != panNumber) {
+            verifiedPan = null
+            remoteCheckMessage = null
+        }
+    }
 
     Column(
         modifier = modifier
@@ -160,6 +172,24 @@ fun PanDetailsScreen(
                 )
             )
 
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = when {
+                    isRemoteCheckRunning -> "Tenant API: verifying PAN (3-second simulation)…"
+                    verifiedPan == panNumber && verifiedPan != null ->
+                        remoteCheckMessage ?: "PAN verified. Tap Next to continue."
+                    remoteCheckMessage != null -> remoteCheckMessage.orEmpty()
+                    else -> "Demo: AAAAA0000A simulates rejection; any other valid PAN passes."
+                },
+                style = MaterialTheme.typography.bodySmall,
+                color = when {
+                    isRemoteCheckRunning -> MaterialTheme.colorScheme.primary
+                    verifiedPan == panNumber && verifiedPan != null -> MaterialTheme.colorScheme.primary
+                    remoteCheckMessage != null -> MaterialTheme.colorScheme.error
+                    else -> MaterialTheme.colorScheme.onSurfaceVariant
+                },
+            )
+
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(
@@ -220,7 +250,15 @@ fun PanDetailsScreen(
             ) {
                 Checkbox(
                     checked = agreedToTerms,
-                    onCheckedChange = { agreedToTerms = it }
+                    onCheckedChange = { checked ->
+                        agreedToTerms = checked
+                        KycisIntegration.reportComponentInput(
+                            componentId = "terms_checkbox",
+                            hint = if (checked) "checked" else "unchecked",
+                            screen = "pan_details",
+                            componentType = "checkbox",
+                        )
+                    }
                 )
                 Text(
                     text = "I agree with Zynnex T&C and Privacy Policy",
@@ -234,7 +272,20 @@ fun PanDetailsScreen(
             Button(
                 onClick = {
                     if (canProceed) {
-                        onNext()
+                        if (verifiedPan == panNumber) {
+                            onNext()
+                        } else if (!isRemoteCheckRunning) {
+                            coroutineScope.launch {
+                                isRemoteCheckRunning = true
+                                remoteCheckMessage = null
+                                val result = KycisIntegration.simulateTenantPanVerification(panNumber)
+                                isRemoteCheckRunning = false
+                                remoteCheckMessage = result.message
+                                if (result.passed) {
+                                    verifiedPan = panNumber
+                                }
+                            }
+                        }
                     } else {
                         if (panNumber.isEmpty()) {
                             KycisIntegration.onValidationFailed("pan_required", "pan_field", "pan", businessStep = "pan_details")
@@ -254,7 +305,7 @@ fun PanDetailsScreen(
                         }
                     }
                 },
-                enabled = true,
+                enabled = !isRemoteCheckRunning,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
@@ -264,8 +315,20 @@ fun PanDetailsScreen(
                     disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
                 )
             ) {
+                if (isRemoteCheckRunning) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        strokeWidth = 2.dp,
+                        color = MaterialTheme.colorScheme.onPrimary,
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                }
                 Text(
-                    text = "Next",
+                    text = when {
+                        isRemoteCheckRunning -> "Verifying…"
+                        verifiedPan == panNumber && verifiedPan != null -> "Next"
+                        else -> "Verify & Continue"
+                    },
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Medium
                 )

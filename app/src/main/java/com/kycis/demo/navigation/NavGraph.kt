@@ -20,11 +20,13 @@ import com.kycis.demo.presentation.screens.UploadAadhaarScreen
 import com.kycis.demo.presentation.screens.SelfieCaptureScreen
 import com.kycis.demo.presentation.screens.SignatureScreen
 import com.kycis.demo.presentation.screens.SdkDiagnosticsScreen
+import com.kycis.demo.presentation.screens.FlowTestHarnessScreen
 import com.kycis.demo.presentation.screens.BackendSettingsScreen
 
 object Routes {
     const val HOME = "home"
     const val SDK_DIAGNOSTICS = "sdk_diagnostics"
+    const val FLOW_TEST_HARNESS = "flow_test_harness"
     const val BACKEND_SETTINGS = "backend_settings"
     const val PHONE_ENTRY = "phone_entry"
     const val PHONE_OTP = "phone_otp/{phone}"
@@ -62,6 +64,9 @@ fun KycNavGraph(
                 onOpenSdkHarness = {
                     navController.navigate(Routes.SDK_DIAGNOSTICS)
                 },
+                onOpenFlowTestHarness = {
+                    navController.navigate(Routes.FLOW_TEST_HARNESS)
+                },
                 onOpenBackendSettings = {
                     navController.navigate(Routes.BACKEND_SETTINGS)
                 },
@@ -70,6 +75,10 @@ fun KycNavGraph(
 
         composable(Routes.SDK_DIAGNOSTICS) {
             SdkDiagnosticsScreen(onBack = { navController.popBackStack() })
+        }
+
+        composable(Routes.FLOW_TEST_HARNESS) {
+            FlowTestHarnessScreen(onBack = { navController.popBackStack() })
         }
 
         composable(Routes.BACKEND_SETTINGS) {

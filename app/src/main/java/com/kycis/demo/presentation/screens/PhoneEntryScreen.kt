@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.sp
 import com.kycis.demo.R
 import com.kycis.demo.presentation.theme.KycDemoTheme
 import com.kycis.demo.kycis.KycisIntegration
+import com.kycis.demo.kycis.KycisTrackInput
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -31,6 +32,7 @@ fun PhoneEntryScreen(
     modifier: Modifier = Modifier
 ) {
     var phoneNumber by remember { mutableStateOf("") }
+    KycisTrackInput(phoneNumber, "phone_field", "phone_entry", "phone_number")
 
     Column(
         modifier = modifier
@@ -85,43 +87,6 @@ fun PhoneEntryScreen(
             Spacer(modifier = Modifier.height(32.dp))
 
             val isPhoneValid = phoneNumber.length == 10 && phoneNumber.all { it.isDigit() }
-
-            // Auto-capture using SDK's KycEvent with debounce (reduced for faster voice response)
-            var debouncedPhone by remember { mutableStateOf("") }
-            LaunchedEffect(phoneNumber) {
-                kotlinx.coroutines.delay(200)  // Reduced from 600ms for faster voice response
-                debouncedPhone = phoneNumber
-            }
-            LaunchedEffect(debouncedPhone) {
-                if (debouncedPhone.isNotEmpty()) {
-                    // Send unmasked value so the agent can see what the user actually typed
-                    // The masked=false flag tells the backend this is unmasked
-                    KycisIntegration.reportComponentInput(
-                        componentId = "phone_field",
-                        hint = debouncedPhone,  // Send unmasked value
-                        screen = "phone_entry",
-                        componentType = "phone_number",
-                        sdkKb = KycisIntegration.ComponentKb(
-                            displayName = "Phone Number",
-                            validations = listOf(
-                                "Must be exactly 10 digits",
-                                "Must start with 6, 7, 8, or 9",
-                                "Do not include country code (+91 or 0)"
-                            ),
-                            commonIssues = listOf(
-                                "User adds +91 or 0 prefix",
-                                "User enters 11 digits",
-                                "User enters letters or special characters"
-                            ),
-                            faqs = listOf(
-                                "Enter 10-digit mobile number without +91",
-                                "Example: 9876543210",
-                                "Do not use spaces or dashes"
-                            )
-                        )
-                    )
-                }
-            }
 
             OutlinedTextField(
                 value = phoneNumber,

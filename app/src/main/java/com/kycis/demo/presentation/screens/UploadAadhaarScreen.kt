@@ -118,11 +118,6 @@ fun UploadAadhaarScreen(
                             hint = "file_uploaded.png",
                             screen = if (isFront) "upload_aadhaar_front" else "upload_aadhaar_back",
                             componentType = "file_upload",
-                            sdkKb = KycisIntegration.ComponentKb(
-                                displayName = if (isFront) "Aadhaar Front Image" else "Aadhaar Back Image",
-                                validations = listOf("Must be a clear image", "Max file size 5MB", "Supported formats: PNG, JPG, JPEG"),
-                                commonIssues = listOf("Image is blurry", "Glare on the card", "Edges of the card are cropped")
-                            )
                         )
                     }) {
                         Icon(

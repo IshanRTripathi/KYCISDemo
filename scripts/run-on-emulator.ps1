@@ -29,7 +29,11 @@ if (-not (Test-Path $emu)) { throw "emulator not found at $emu" }
 $env:Path = "$sdk\platform-tools;$sdk\emulator;$env:Path"
 
 function Test-EmulatorReady {
-    $lines = & $adb devices 2>$null
+    # adb may print "* daemon not running..." on stderr when starting; don't treat as failure.
+    $prev = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    $lines = & $adb devices 2>&1 | ForEach-Object { "$_" }
+    $ErrorActionPreference = $prev
     return [bool]($lines | Select-String -Pattern "emulator-\d+\s+device")
 }
 
@@ -70,4 +74,4 @@ if ($LASTEXITCODE -ne 0) { throw "gradlew :app:installDebug failed ($LASTEXITCOD
 Write-Host "Launching com.kycis.demo ..."
 & $adb shell am force-stop com.kycis.demo
 & $adb shell am start -n com.kycis.demo/.SplashActivity
-Write-Host "Done. Demo backend URL on emulator should be http://10.0.2.2:8000/v1"
+Write-Host "Done. Default backend is https://api.kycis.zynnex.in; switch in Backend Settings for local (10.0.2.2:8000)."

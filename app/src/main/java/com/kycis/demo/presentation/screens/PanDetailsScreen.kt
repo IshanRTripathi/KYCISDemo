@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kycis.demo.presentation.theme.KycDemoTheme
 import com.kycis.demo.kycis.KycisIntegration
+import com.kycis.demo.kycis.KycisTrackInput
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -32,6 +33,19 @@ fun PanDetailsScreen(
     var verifiedPan by remember { mutableStateOf<String?>(null) }
     var remoteCheckMessage by remember { mutableStateOf<String?>(null) }
     val coroutineScope = rememberCoroutineScope()
+    KycisTrackInput(
+        value = panNumber.filter { it.isLetterOrDigit() }.uppercase(),
+        componentId = "pan_field",
+        screen = "pan_details",
+        componentType = "pan",
+    )
+    KycisTrackInput(dob, "dob_field", "pan_details", "date")
+    KycisTrackInput(
+        value = if (agreedToTerms) "accepted" else "",
+        componentId = "terms_checkbox",
+        screen = "pan_details",
+        componentType = "checkbox",
+    )
 
     LaunchedEffect(panNumber) {
         if (verifiedPan != null && verifiedPan != panNumber) {
@@ -91,67 +105,6 @@ fun PanDetailsScreen(
             val isPanValid = panNumber.matches(panRegex)
             val isDobValid = dob.isNotEmpty()
             val canProceed = isPanValid && isDobValid && agreedToTerms
-
-            var debouncedPan by remember { mutableStateOf("") }
-            LaunchedEffect(panNumber) {
-                kotlinx.coroutines.delay(600)
-                debouncedPan = panNumber
-            }
-            LaunchedEffect(debouncedPan) {
-                if (debouncedPan.isNotBlank()) {
-                    val filtered: String = debouncedPan.filter { c -> c.isLetterOrDigit() }
-                    if (filtered.isNotEmpty()) {
-                        // Send unmasked value so the agent can see what the user actually typed
-                        KycisIntegration.reportComponentInput(
-                            componentId = "pan_field",
-                            hint = filtered.uppercase(),  // Send unmasked, normalized value
-                            screen = "pan_details",
-                            componentType = "pan",
-                            sdkKb = KycisIntegration.ComponentKb(
-                                displayName = "PAN Number",
-                                validations = listOf(
-                                    "Must be exactly 10 characters",
-                                    "Format: 5 letters, 4 digits, 1 letter",
-                                    "Example: ABCDE1234F",
-                                    "All uppercase, no spaces"
-                                ),
-                                commonIssues = listOf(
-                                    "User enters lowercase letters",
-                                    "User adds spaces or dashes",
-                                    "Confusion between O and 0, I and 1"
-                                ),
-                                faqs = listOf(
-                                    "Find your PAN on the front of your PAN card",
-                                    "First 3 letters indicate IT department",
-                                    "4th letter is P for person",
-                                    "Last letter is a checksum"
-                                )
-                            )
-                        )
-                    }
-                }
-            }
-
-            var debouncedDob by remember { mutableStateOf("") }
-            LaunchedEffect(dob) {
-                kotlinx.coroutines.delay(600)
-                debouncedDob = dob
-            }
-            LaunchedEffect(debouncedDob) {
-                if (debouncedDob.isNotBlank()) {
-                    KycisIntegration.reportComponentInput(
-                        componentId = "dob_field",
-                        hint = debouncedDob,
-                        screen = "pan_details",
-                        componentType = "date",
-                        sdkKb = KycisIntegration.ComponentKb(
-                            displayName = "Date of Birth",
-                            validations = listOf("Must be a valid date", "Format: DD/MM/YYYY"),
-                            commonIssues = listOf("User enters wrong format", "User enters future date")
-                        )
-                    )
-                }
-            }
 
             OutlinedTextField(
                 value = panNumber,
@@ -250,15 +203,7 @@ fun PanDetailsScreen(
             ) {
                 Checkbox(
                     checked = agreedToTerms,
-                    onCheckedChange = { checked ->
-                        agreedToTerms = checked
-                        KycisIntegration.reportComponentInput(
-                            componentId = "terms_checkbox",
-                            hint = if (checked) "checked" else "unchecked",
-                            screen = "pan_details",
-                            componentType = "checkbox",
-                        )
-                    }
+                    onCheckedChange = { agreedToTerms = it },
                 )
                 Text(
                     text = "I agree with Zynnex T&C and Privacy Policy",

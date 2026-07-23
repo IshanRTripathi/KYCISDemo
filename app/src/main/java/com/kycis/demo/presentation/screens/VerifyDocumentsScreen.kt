@@ -102,10 +102,6 @@ fun VerifyDocumentsScreen(
                         hint = "proceed_with_aadhaar",
                         screen = "verify_documents",
                         componentType = "button",
-                        sdkKb = KycisIntegration.ComponentKb(
-                            displayName = "Proceed with Aadhaar Button",
-                            faqs = listOf("Choosing this will verify your Aadhaar online via DigiLocker")
-                        )
                     )
                     onProceedWithAadhaar()
                 },
@@ -134,10 +130,6 @@ fun VerifyDocumentsScreen(
                         hint = "offline_process",
                         screen = "verify_documents",
                         componentType = "button",
-                        sdkKb = KycisIntegration.ComponentKb(
-                            displayName = "Offline Process Button",
-                            faqs = listOf("Choosing this requires you to manually upload photos of your documents")
-                        )
                     )
                     onOfflineProcess()
                 },

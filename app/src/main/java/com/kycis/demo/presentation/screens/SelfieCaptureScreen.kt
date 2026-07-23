@@ -43,11 +43,6 @@ fun SelfieCaptureScreen(
             hint = "selfie_captured.jpg",
             screen = "selfie_capture",
             componentType = "camera_capture",
-            sdkKb = KycisIntegration.ComponentKb(
-                displayName = "Selfie Capture",
-                validations = listOf("Face must be clearly visible", "Sufficient lighting required", "No sunglasses or hats"),
-                commonIssues = listOf("Room is too dark", "Face is partially outside the frame", "Multiple faces detected")
-            )
         )
         
         onCaptured()

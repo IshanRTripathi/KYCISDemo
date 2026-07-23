@@ -12,14 +12,11 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
-// Import colors
-import com.kycis.demo.presentation.theme.*
-
 private val LightColorScheme = lightColorScheme(
-    primary = Color.Black,
-    onPrimary = ThemePrimary,
-    primaryContainer = Gray900,
-    onPrimaryContainer = White,
+    primary = ThemePrimary,
+    onPrimary = White,
+    primaryContainer = ThemePrimaryLight,
+    onPrimaryContainer = ThemePrimaryVariant,
     secondary = Blue500,
     onSecondary = White,
     secondaryContainer = BlueLight,
@@ -36,14 +33,15 @@ private val LightColorScheme = lightColorScheme(
     onSurface = Gray900,
     surfaceVariant = Gray100,
     onSurfaceVariant = Gray700,
-    outline = Gray500
+    outline = Gray500,
+    outlineVariant = Gray300,
 )
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Color.Black,
-    onPrimary = ThemePrimary,
-    primaryContainer = Gray900,
-    onPrimaryContainer = White,
+    primary = ThemePrimary,
+    onPrimary = White,
+    primaryContainer = Color(0xFF0A3D2A),
+    onPrimaryContainer = ThemePrimaryLight,
     secondary = Blue200,
     onSecondary = Gray900,
     secondaryContainer = Blue700,
@@ -54,19 +52,20 @@ private val DarkColorScheme = darkColorScheme(
     onError = Gray900,
     errorContainer = Red700,
     onErrorContainer = White,
-    background = Gray900,
+    background = Color(0xFF121212),
     onBackground = White,
-    surface = Gray900,
+    surface = Color(0xFF1E1E1E),
     onSurface = White,
-    surfaceVariant = Gray700,
+    surfaceVariant = Color(0xFF2C2C2C),
     onSurfaceVariant = Gray300,
-    outline = Gray500
+    outline = Gray500,
+    outlineVariant = Gray700,
 )
 
 @Composable
 fun KycDemoTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
 
@@ -74,7 +73,8 @@ fun KycDemoTheme(
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            window.statusBarColor = colorScheme.primary.toArgb()
+            // Match status bar to scaffold background; light icons in dark mode.
+            window.statusBarColor = colorScheme.background.toArgb()
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
         }
     }
@@ -82,6 +82,6 @@ fun KycDemoTheme(
     MaterialTheme(
         colorScheme = colorScheme,
         typography = Typography,
-        content = content
+        content = content,
     )
 }

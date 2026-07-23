@@ -14,22 +14,18 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kycis.demo.kycis.KycisIntegration
 import com.kycis.demo.presentation.theme.KycDemoTheme
-import com.kycis.demo.presentation.theme.ThemePrimaryLight
 import com.kycis.demo.presentation.theme.ThemePrimary
 
 @Composable
 fun HomeScreen(
     onStartFlow: () -> Unit,
-    onOpenSdkHarness: () -> Unit = {},
-    onOpenFlowTestHarness: () -> Unit = {},
-    onOpenBackendSettings: () -> Unit = {},
+    onOpenSettings: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     var selectedFlow by remember { mutableStateOf("kyc") }
@@ -130,33 +126,13 @@ fun HomeScreen(
                 fontWeight = FontWeight.Medium
             )
         }
-        
-        TextButton(
-            onClick = onOpenSdkHarness,
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Text(
-                text = "SDK ↔ backend harness (popup + trigger)",
-                style = MaterialTheme.typography.labelLarge,
-            )
-        }
 
         TextButton(
-            onClick = onOpenFlowTestHarness,
+            onClick = onOpenSettings,
             modifier = Modifier.fillMaxWidth(),
         ) {
             Text(
-                text = "Flow E2E test (walk every screen against backend)",
-                style = MaterialTheme.typography.labelLarge,
-            )
-        }
-
-        TextButton(
-            onClick = onOpenBackendSettings,
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Text(
-                text = "Backend settings (URL + health test)",
+                text = "Settings",
                 style = MaterialTheme.typography.labelLarge,
             )
         }
@@ -173,8 +149,16 @@ private fun FlowSelectionCard(
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
-    val backgroundColor = if (isSelected) ThemePrimaryLight else MaterialTheme.colorScheme.surface
-    val borderColor = if (isSelected) ThemePrimary else MaterialTheme.colorScheme.outlineVariant
+    val backgroundColor = if (isSelected) {
+        MaterialTheme.colorScheme.primaryContainer
+    } else {
+        MaterialTheme.colorScheme.surface
+    }
+    val borderColor = if (isSelected) {
+        MaterialTheme.colorScheme.primary
+    } else {
+        MaterialTheme.colorScheme.outlineVariant
+    }
 
     OutlinedCard(
         modifier = Modifier
@@ -194,7 +178,7 @@ private fun FlowSelectionCard(
             Box(
                 modifier = Modifier
                     .size(40.dp)
-                    .background(Color.White, RoundedCornerShape(8.dp)),
+                    .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp)),
                 contentAlignment = Alignment.Center
             ) {
                 icon()
@@ -240,9 +224,7 @@ fun HomeScreenPreview() {
     KycDemoTheme {
         HomeScreen(
             onStartFlow = {},
-            onOpenSdkHarness = {},
-            onOpenFlowTestHarness = {},
-            onOpenBackendSettings = {},
+            onOpenSettings = {},
         )
     }
 }

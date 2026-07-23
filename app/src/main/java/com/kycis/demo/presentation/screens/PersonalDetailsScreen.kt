@@ -22,6 +22,7 @@ import com.kycis.demo.R
 import com.kycis.demo.presentation.form.DemoFormOptions
 import com.kycis.demo.presentation.theme.KycDemoTheme
 import com.kycis.demo.kycis.KycisIntegration
+import com.kycis.demo.kycis.KycisTrackInput
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,6 +36,56 @@ fun PersonalDetailsScreen(
     var maritalStatus by remember { mutableStateOf("") }
     var residencyStatus by remember { mutableStateOf("") }
     var fatherName by remember { mutableStateOf("") }
+    KycisTrackInput(
+        value = name,
+        componentId = "name_field",
+        screen = "personal_details",
+        componentType = "text_input",
+        properties = mapOf(
+            "field_status" to if (name.isBlank()) "REQUIRED" else "FILLED",
+            "semantic_slot" to "full_name",
+        ),
+    )
+    KycisTrackInput(
+        value = fatherName,
+        componentId = "father_name_field",
+        screen = "personal_details",
+        componentType = "text_input",
+        properties = mapOf(
+            "field_status" to if (fatherName.isBlank()) "REQUIRED" else "FILLED",
+            "semantic_slot" to "father_name",
+        ),
+    )
+    KycisTrackInput(
+        value = gender,
+        componentId = "gender_field",
+        screen = "personal_details",
+        componentType = "dropdown",
+        properties = mapOf(
+            "field_status" to if (gender.isBlank()) "REQUIRED" else "FILLED",
+            "semantic_slot" to "gender",
+        ),
+    )
+    KycisTrackInput(
+        value = maritalStatus,
+        componentId = "marital_status_field",
+        screen = "personal_details",
+        componentType = "dropdown",
+        properties = mapOf(
+            "field_status" to if (maritalStatus.isBlank()) "REQUIRED" else "FILLED",
+            "semantic_slot" to "marital_status",
+        ),
+    )
+    KycisTrackInput(
+        value = residencyStatus,
+        componentId = "residency_status_field",
+        screen = "personal_details",
+        componentType = "dropdown",
+        properties = mapOf(
+            "field_status" to if (residencyStatus.isBlank()) "REQUIRED" else "FILLED",
+            "semantic_slot" to "residency_status",
+        ),
+    )
 
     Column(
         modifier = modifier
@@ -80,72 +131,6 @@ fun PersonalDetailsScreen(
 
             val isFormValid = name.isNotEmpty() && gender.isNotEmpty() && maritalStatus.isNotEmpty() && residencyStatus.isNotEmpty() && fatherName.isNotEmpty()
 
-            // Send ALL fields to backend so LLM knows what's filled vs empty
-            LaunchedEffect(name, gender, maritalStatus, residencyStatus, fatherName) {
-                val status = if (name.isBlank()) "REQUIRED" else "FILLED"
-                val fatherStatus = if (fatherName.isBlank()) "REQUIRED" else "FILLED"
-                val genderStatus = if (gender.isBlank()) "REQUIRED" else "FILLED"
-                val maritalStatusField = if (maritalStatus.isBlank()) "REQUIRED" else "FILLED"
-                val residencyStatusField = if (residencyStatus.isBlank()) "REQUIRED" else "FILLED"
-
-                // reportComponentInput also upserts VoiceUiSnapshotHolder automatically
-                KycisIntegration.reportComponentInput(
-                    componentId = "name_field",
-                    hint = name.ifBlank { "" },
-                    screen = "personal_details",
-                    componentType = "text_input",
-                    properties = mapOf("field_status" to status, "semantic_slot" to "full_name"),
-                    sdkKb = KycisIntegration.ComponentKb(
-                        displayName = "Full Name",
-                        validations = listOf("Required field", "Must contain only letters and spaces")
-                    )
-                )
-                KycisIntegration.reportComponentInput(
-                    componentId = "father_name_field",
-                    hint = fatherName.ifBlank { "" },
-                    screen = "personal_details",
-                    componentType = "text_input",
-                    properties = mapOf("field_status" to fatherStatus, "semantic_slot" to "father_name"),
-                    sdkKb = KycisIntegration.ComponentKb(
-                        displayName = "Father's Name",
-                        validations = listOf("Required field", "Must contain only letters and spaces")
-                    )
-                )
-                KycisIntegration.reportComponentInput(
-                    componentId = "gender_field",
-                    hint = gender.ifBlank { "" },
-                    screen = "personal_details",
-                    componentType = "dropdown",
-                    properties = mapOf("field_status" to genderStatus, "semantic_slot" to "gender"),
-                    sdkKb = KycisIntegration.ComponentKb(
-                        displayName = "Gender",
-                        validations = listOf("Required field", "Select from dropdown")
-                    )
-                )
-                KycisIntegration.reportComponentInput(
-                    componentId = "marital_status_field",
-                    hint = maritalStatus.ifBlank { "" },
-                    screen = "personal_details",
-                    componentType = "dropdown",
-                    properties = mapOf("field_status" to maritalStatusField, "semantic_slot" to "marital_status"),
-                    sdkKb = KycisIntegration.ComponentKb(
-                        displayName = "Marital Status",
-                        validations = listOf("Required field", "Select from dropdown")
-                    )
-                )
-                KycisIntegration.reportComponentInput(
-                    componentId = "residency_status_field",
-                    hint = residencyStatus.ifBlank { "" },
-                    screen = "personal_details",
-                    componentType = "dropdown",
-                    properties = mapOf("field_status" to residencyStatusField, "semantic_slot" to "residency_status"),
-                    sdkKb = KycisIntegration.ComponentKb(
-                        displayName = "Residency Status",
-                        validations = listOf("Required field", "Select from dropdown")
-                    )
-                )
-            }
-
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it },
@@ -168,8 +153,6 @@ fun PersonalDetailsScreen(
                 value = gender,
                 placeholder = "Select Gender",
                 options = DemoFormOptions.GENDER,
-                sdkComponentId = "gender_field",
-                semanticSlot = "gender",
                 onValueChange = { gender = it },
             )
 
@@ -180,8 +163,6 @@ fun PersonalDetailsScreen(
                 value = maritalStatus,
                 placeholder = "Select Marital Status",
                 options = DemoFormOptions.MARITAL_STATUS,
-                sdkComponentId = "marital_status_field",
-                semanticSlot = "marital_status",
                 onValueChange = { maritalStatus = it },
             )
 
@@ -192,8 +173,6 @@ fun PersonalDetailsScreen(
                 value = residencyStatus,
                 placeholder = "Select Residency Status",
                 options = DemoFormOptions.RESIDENCY_STATUS,
-                sdkComponentId = "residency_status_field",
-                semanticSlot = "residency_status",
                 onValueChange = { residencyStatus = it },
             )
 
@@ -268,8 +247,6 @@ private fun ExposedPickListField(
     value: String,
     placeholder: String,
     options: List<String>,
-    sdkComponentId: String,
-    semanticSlot: String? = null,
     onValueChange: (String) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -304,13 +281,6 @@ private fun ExposedPickListField(
                     onClick = {
                         onValueChange(option)
                         expanded = false
-                        KycisIntegration.reportComponentInput(
-                            componentId = sdkComponentId,
-                            hint = option,
-                            screen = "personal_details",
-                            componentType = "dropdown",
-                            properties = if (semanticSlot != null) mapOf("semantic_slot" to semanticSlot) else emptyMap(),
-                        )
                     },
                 )
             }

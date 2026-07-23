@@ -86,7 +86,7 @@ fun SignatureScreen(
                         color = MaterialTheme.colorScheme.outlineVariant,
                         shape = RoundedCornerShape(8.dp)
                     )
-                    .background(Color.White, RoundedCornerShape(8.dp)),
+                    .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(8.dp)),
                 contentAlignment = Alignment.BottomCenter
             ) {
                 Text(
@@ -107,11 +107,6 @@ fun SignatureScreen(
                         hint = "signature_submitted",
                         screen = "signature",
                         componentType = "button",
-                        sdkKb = KycisIntegration.ComponentKb(
-                            displayName = "Signature Field",
-                            validations = listOf("Must provide a signature"),
-                            commonIssues = listOf("Signature is too small", "Signature goes outside the box")
-                        )
                     )
                     KycisIntegration.completeKycFlow(
                         mapOf("screen" to "signature", "source" to "submit_button"),

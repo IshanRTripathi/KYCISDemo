@@ -61,13 +61,7 @@ fun KycNavGraph(
                     KycisIntegration.trackAnalytics("kyc_journey_started", mapOf("flow" to "onboarding"))
                     navController.navigate(Routes.PHONE_ENTRY)
                 },
-                onOpenSdkHarness = {
-                    navController.navigate(Routes.SDK_DIAGNOSTICS)
-                },
-                onOpenFlowTestHarness = {
-                    navController.navigate(Routes.FLOW_TEST_HARNESS)
-                },
-                onOpenBackendSettings = {
+                onOpenSettings = {
                     navController.navigate(Routes.BACKEND_SETTINGS)
                 },
             )
@@ -88,6 +82,12 @@ fun KycNavGraph(
                 onBackendUrlSaved = { saved ->
                     onBackendUrlSaved(saved)
                     navController.popBackStack()
+                },
+                onOpenSdkHarness = {
+                    navController.navigate(Routes.SDK_DIAGNOSTICS)
+                },
+                onOpenFlowTestHarness = {
+                    navController.navigate(Routes.FLOW_TEST_HARNESS)
                 },
             )
         }

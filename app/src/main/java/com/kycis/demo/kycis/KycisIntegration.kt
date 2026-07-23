@@ -5,6 +5,7 @@ import android.app.Application
 import android.util.Log
 import com.kycis.demo.BackendUrlStore
 import com.kycis.demo.BuildConfig
+import com.kycis.demo.DemoSdkSettings
 import com.kycis.demo.VoiceUiSnapshotHolder
 import com.kycis.sdk.AI
 import com.kycis.sdk.AsyncCheckStatus
@@ -15,7 +16,6 @@ import com.kycis.sdk.core.ConfirmUiText
 import com.kycis.sdk.core.KycStepStrategy
 import com.kycis.sdk.core.RuntimePolicy
 import com.kycis.sdk.core.TriggerSettings
-import com.kycis.sdk.core.TriggerStartMode
 import kotlinx.coroutines.delay
 import java.util.UUID
 
@@ -50,32 +50,66 @@ object KycisIntegration {
     /** Demo RuntimePolicy shared with MainActivity [com.kycis.sdk.ui.KycisOptions]. */
     fun demoPolicy(application: Application): RuntimePolicy {
         val backendBaseUrl = BackendUrlStore.get(application)
+        val s = DemoSdkSettings.loadSnapshot(application)
         return RuntimePolicy(
             backendBaseUrl = backendBaseUrl,
             clientId = "kycis_demo",
             mappingVersion = "v1",
             appVersion = BuildConfig.VERSION_NAME,
-            triggerStartMode = TriggerStartMode.CONFIRM_UI,
+            triggerStartMode = s.triggerStartMode,
             kycStepStrategy = KycStepStrategy.HINT_THEN_INFER,
             triggerSettings = TriggerSettings(
-                autoTriggerEnabled = true,
-                includeErrorSignals = true,
-                includeTimeSpentSignals = true,
-                includeIdleSignals = true,
-                includeStepHints = true,
+                autoTriggerEnabled = s.autoTrigger,
+                includeErrorSignals = s.includeErrors,
+                includeTimeSpentSignals = s.includeTimeSpent,
+                includeIdleSignals = s.includeIdle,
+                includeStepHints = s.includeStepHints,
             ),
             confirmUiText = ConfirmUiText(
                 title = "Need help completing this step?",
                 startCta = "Start",
                 dismissCta = "Not now",
             ),
-            passiveEvalEnabled = true,
+            passiveEvalEnabled = s.passiveEval,
             passiveEvalIntervalSeconds = 10,
-            componentInputHintsMasked = false,
-            autoCaptureEnabled = false,
-            debugEnabled = true,
+            reportComponentInputHints = s.reportHints,
+            componentInputHintsMasked = s.maskHints,
+            autoCaptureEnabled = s.autoCapture,
+            debugEnabled = s.debugLogging,
         )
     }
+
+    /** Pure mapping used by unit tests — same fields as [demoPolicy] minus Application/BuildConfig. */
+    fun policyFromSnapshot(
+        backendBaseUrl: String,
+        snapshot: DemoSdkSettings.Snapshot,
+        appVersion: String = "test",
+    ): RuntimePolicy = RuntimePolicy(
+        backendBaseUrl = backendBaseUrl,
+        clientId = "kycis_demo",
+        mappingVersion = "v1",
+        appVersion = appVersion,
+        triggerStartMode = snapshot.triggerStartMode,
+        kycStepStrategy = KycStepStrategy.HINT_THEN_INFER,
+        triggerSettings = TriggerSettings(
+            autoTriggerEnabled = snapshot.autoTrigger,
+            includeErrorSignals = snapshot.includeErrors,
+            includeTimeSpentSignals = snapshot.includeTimeSpent,
+            includeIdleSignals = snapshot.includeIdle,
+            includeStepHints = snapshot.includeStepHints,
+        ),
+        confirmUiText = ConfirmUiText(
+            title = "Need help completing this step?",
+            startCta = "Start",
+            dismissCta = "Not now",
+        ),
+        passiveEvalEnabled = snapshot.passiveEval,
+        passiveEvalIntervalSeconds = 10,
+        reportComponentInputHints = snapshot.reportHints,
+        componentInputHintsMasked = snapshot.maskHints,
+        autoCaptureEnabled = snapshot.autoCapture,
+        debugEnabled = snapshot.debugLogging,
+    )
 
     fun demoApiKey(): String {
         val fromBuild = BuildConfig.KYCIS_API_KEY.trim()
@@ -107,7 +141,21 @@ object KycisIntegration {
         )
         AI.attach(application)
         AI.registerWorkflowModel(KycisWorkflow.model)
+        applyHandholdingPreference(application)
         Log.d(TAG, "KycisIntegration.init: complete (workflow registered)")
+    }
+
+    /** Guided speaking: Off=passive, Milestones=hybrid, Active=active. */
+    fun applyHandholdingPreference(context: android.content.Context) {
+        val pref = BackendUrlStore.getHandholdingPreference(context)
+        runCatching { AI.setHandholdingPreference(pref) }
+            .onFailure { Log.w(TAG, "setHandholdingPreference failed: ${it.message}") }
+    }
+
+    fun setHandholdingPreference(context: android.content.Context, preference: String) {
+        val saved = BackendUrlStore.saveHandholdingPreference(context, preference)
+        applyHandholdingPreference(context)
+        Log.d(TAG, "Guided speaking preference=$saved")
     }
 
     fun bindActivity(activity: Activity) {
@@ -196,12 +244,13 @@ object KycisIntegration {
             VoiceUiSnapshotHolder.setCurrentScreen(screen)
         }
         VoiceUiSnapshotHolder.upsertField(componentId, hint, componentType)
+        val resolvedKb = sdkKb ?: KycisFieldKb.forComponent(componentId)
         AI.reportComponentInput(
             componentId = componentId,
             hint = hint,
             screen = screen,
             componentType = componentType,
-            sdkKb = sdkKb?.toMap(),
+            sdkKb = resolvedKb?.toMap(),
             properties = properties,
         )
     }

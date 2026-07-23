@@ -19,9 +19,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kycis.demo.presentation.theme.KycDemoTheme
-import com.kycis.sdk.ui.HintKind
 import com.kycis.demo.kycis.KycisIntegration
-import com.kycis.sdk.ui.maskHint
+import com.kycis.demo.kycis.KycisTrackInput
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -37,6 +36,13 @@ fun EmailOtpScreen(
     val otpLength = 4
     var resendCooldownSeconds by remember { mutableIntStateOf(0) }
     val context = androidx.compose.ui.platform.LocalContext.current
+    KycisTrackInput(
+        value = otpValue,
+        componentId = "email_otp_field",
+        screen = "email_otp",
+        componentType = "otp",
+        properties = mapOf("digits_filled" to otpValue.length.toString()),
+    )
 
     LaunchedEffect(resendCooldownSeconds) {
         if (resendCooldownSeconds <= 0) return@LaunchedEffect
@@ -95,22 +101,6 @@ fun EmailOtpScreen(
             )
 
             Spacer(modifier = Modifier.height(32.dp))
-
-            LaunchedEffect(otpValue) {
-                if (otpValue.length != otpLength) return@LaunchedEffect
-                KycisIntegration.reportComponentInput(
-                    componentId = "email_otp_field",
-                    hint = maskHint(HintKind.OTP, otpValue),
-                    screen = "email_otp",
-                    componentType = "otp_input",
-                    properties = mapOf("digits_filled" to otpLength.toString()),
-                    sdkKb = KycisIntegration.ComponentKb(
-                        displayName = "Email OTP",
-                        validations = listOf("Must be exactly 4 digits"),
-                        commonIssues = listOf("User enters wrong OTP", "OTP expired", "Check spam folder")
-                    )
-                )
-            }
 
             // Custom OTP digits row
             BasicTextField(

@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.sp
 import com.kycis.demo.R
 import com.kycis.demo.presentation.theme.KycDemoTheme
 import com.kycis.demo.kycis.KycisIntegration
+import com.kycis.demo.kycis.KycisTrackInput
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -30,6 +31,7 @@ fun EmailEntryScreen(
     modifier: Modifier = Modifier
 ) {
     var email by remember { mutableStateOf("") }
+    KycisTrackInput(email, "email_field", "email_entry", "email")
 
     Column(
         modifier = modifier
@@ -97,22 +99,6 @@ fun EmailEntryScreen(
 
             val emailRegex = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$".toRegex()
             val isEmailValid = email.matches(emailRegex)
-
-            var debouncedEmail by remember { mutableStateOf("") }
-            LaunchedEffect(email) {
-                kotlinx.coroutines.delay(600)
-                debouncedEmail = email
-            }
-            LaunchedEffect(debouncedEmail) {
-                if (debouncedEmail.isNotBlank()) {
-                    KycisIntegration.reportComponentInput(
-                        componentId = "email_field",
-                        hint = debouncedEmail,
-                        screen = "email_entry",
-                        componentType = "text_input",
-                    )
-                }
-            }
 
             OutlinedTextField(
                 value = email,

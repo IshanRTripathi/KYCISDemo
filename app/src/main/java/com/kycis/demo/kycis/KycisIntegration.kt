@@ -119,12 +119,10 @@ object KycisIntegration {
     fun demoUserId(): String = DEFAULT_USER_ID
 
     /**
-     * Critical order: registerScreenSchemas → AI.init → AI.attach → registerWorkflowModel.
+     * Critical order: AI.init → registerScreenSchemas → AI.attach → registerWorkflowModel.
+     * (SDK ≤1.0.4 silently dropped pre-init register; 1.0.5+ queues it, but init-first is required.)
      */
     fun init(application: Application) {
-        Log.d(TAG, "KycisIntegration.init: registering schemas")
-        AI.registerScreenSchemas(KycisScreenSchemas.all)
-
         val apiKey = demoApiKey()
         if (apiKey == FALLBACK_API_KEY) {
             Log.w(
@@ -139,6 +137,8 @@ object KycisIntegration {
             userId = DEFAULT_USER_ID,
             policy = demoPolicy(application),
         )
+        Log.d(TAG, "KycisIntegration.init: registering schemas")
+        AI.registerScreenSchemas(KycisScreenSchemas.all)
         AI.attach(application)
         AI.registerWorkflowModel(KycisWorkflow.model)
         applyHandholdingPreference(application)
